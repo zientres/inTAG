@@ -133,7 +133,7 @@ if (missingElements.length > 0) {
       auctionVisualCaption: "Победитель получает номерной знак после завершения торгов",
       marketEyebrow: "РЫНОК",
       marketTitle: "Вторичный рынок на Getgems",
-      marketIntro: "Выпущенные NFT можно будет покупать и продавать на Getgems — внешнем маркетплейсе TON. Ссылки на Getgems можно найти в каждой коллекции",
+      marketIntro: "Выпущенные NFT можно будет покупать и продавать на Getgems — внешнем маркетплейсе TON. Ссылки на Getgems можно найти в каждой коллекции.",
       marketVisualCaption: "Покупайте и продавайте номерные знаки",
       communityEyebrow: "СООБЩЕСТВО",
       communityTitle: "Следите за развитием inTAG",
