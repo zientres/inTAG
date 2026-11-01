@@ -1941,3 +1941,90 @@ button {
 .auction-steps__actions {
   margin-top: 30px;
 }
+
+
+/* Выравнивание текстовых и информационных блоков */
+.feature-layout,
+.feature-layout-reverse {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.feature-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auction-summary {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auction-summary-label {
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.auction-summary-duration {
+  display: block;
+  margin-top: 18px;
+  color: var(--text);
+  font-size: clamp(38px, 5vw, 58px);
+  font-weight: 500;
+  letter-spacing: -2px;
+  line-height: 1.1;
+}
+
+.auction-summary-duration span {
+  color: var(--muted);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.auction-summary p {
+  max-width: 360px;
+  margin-top: 17px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.community-layout {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+
+.community-copy {
+  width: 100%;
+  max-width: 720px;
+  text-align: center;
+}
+
+.community-copy .section-title,
+.community-copy .section-intro {
+  max-width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.community-join {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (max-width: 700px) {
+  .feature-layout,
+  .feature-layout-reverse {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auction-summary {
+    min-height: 210px;
+  }
+}
