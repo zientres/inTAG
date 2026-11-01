@@ -125,11 +125,11 @@ if (missingElements.length > 0) {
       languageLabel: "Язык сайта",
 
       heroTitle:
-        "inTAG — цифровая коллекция номерных знаков со всего мира.",
+        "inTAG is a digital NFT collection of license plates from around the world.",
 
-      collectionEyebrow: "ИДЕЯ КОЛЛЕКЦИИ",
+      collectionEyebrow: "THE COLLECTION",
       collectionIntro:
-        "inTAG объединяет отдельные коллекции, посвящённые разным странам. В каждой из них собраны номерные знаки, которые можно изучать, коллекционировать и получать в формате NFT.",
+        "Collections are grouped by country. Each one brings together plates with formats and designations characteristic of that country.",
 
       collectionCardOneTitle: "Особенности стран",
       collectionCardOneText:
@@ -155,11 +155,19 @@ if (missingElements.length > 0) {
       flowNftNote: "Отдельный NFT",
 
       auctionsEyebrow: "АУКЦИОНЫ",
-      auctionsTitle: "Каждый свободный номер можно получить через торги",
+      auctionsTitle: "Choose a plate and start an auction",
       auctionsIntro:
-        "Пользователь вводит желаемое сочетание символов. Система проверяет, свободен ли этот номер, и рассчитывает начальную ставку. Если номер доступен, его можно выставить на аукцион продолжительностью полтора часа.",
+        "Enter a plate number in the collection search. The system checks its history: if the NFT already exists, its details and current owner will be shown. If it does not exist yet, an auction can be created.",
       auctionsDetail:
-        "Начальная ставка будет зависеть от самого сочетания символов: чем привлекательнее номер, тем выше его стартовая стоимость. Это позволит учитывать интерес к разным экземплярам уже на этапе создания аукциона.",
+        "The starting bid depends on the character combination. Mirrored patterns, repeated digits, and sequences of letters or numbers will have higher starting bids.",
+
+      auctionSummaryLabel: "ОТКРЫТЫЕ ТОРГИ",
+      auctionSummaryHours: "часа",
+      auctionSummaryText: "После запуска аукцион становится доступен всем участникам. Победитель получает номерной знак.",
+
+      auctionSummaryLabel: "OPEN AUCTION",
+      auctionSummaryHours: "hours",
+      auctionSummaryText: "Once launched, the auction is open to all participants. The winner receives the license plate NFT.",
 
       auctionStepOneTitle: "Ввод номера",
       auctionStepOneText:
@@ -172,16 +180,16 @@ if (missingElements.length > 0) {
         "Участники делают ставки. Победивший забирает номер.",
 
       marketEyebrow: "РЫНОК",
-      marketTitle: "Торговля между коллекционерами",
+      marketTitle: "The secondary market on Getgems",
       marketIntro:
-        "После получения NFT его владелец сможет предложить номер другим участникам. Покупатели смогут находить интересующие их экземпляры и приобретать их у текущих владельцев.",
+        "An acquired license plate can be listed for sale on Getgems. Other users will be able to buy it directly from its current owner.",
 
-      marketplaceLabel: "ВТОРИЧНЫЙ РЫНОК",
-      marketplaceTitle: "Getgems — площадка для торговли NFT",
+      marketplaceLabel: "TON MARKETPLACE",
+      marketplaceTitle: "inTAG collections on Getgems",
       marketplaceDescription:
-        "Уже выпущенные номерные знаки можно будет покупать у их текущих владельцев на внешнем NFT-маркетплейсе.",
+        "The project's collections will be available on Getgems. Links will appear here later.",
       marketplaceCardText:
-        "Здесь размещаются NFT, выставленные владельцами на продажу.",
+        "Buy and sell license plates directly between owners.",
       marketplaceStepOneTitle: "Владелец выставляет номер",
       marketplaceStepOneText:
         "Текущий владелец предлагает свой NFT на Getgems.",
@@ -194,10 +202,10 @@ if (missingElements.length > 0) {
       marketplacePaymentLabel: "Валюта покупки",
 
       communityEyebrow: "СООБЩЕСТВО",
-      communityTitle: "Проект развивается вместе с участниками",
+      communityTitle: "Follow the progress of inTAG",
       communityIntro:
-        "Сообщество — место, где можно следить за развитием inTAG, узнавать о новых сериях, обсуждать идеи и получать новости о важных изменениях проекта.",
-      communityJoin: "Присоединиться к сообществу ↗",
+        "The Telegram channel will feature project updates, important announcements, and news about new collections.",
+      communityJoin: "Telegram channel coming soon",
 
       communityDiscussionTitle: "Обсуждения",
       communityDiscussionText: "Идеи и предложения участников",
