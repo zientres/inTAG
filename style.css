@@ -105,7 +105,7 @@ button {
   border-radius: 2px;
   background: var(--blue);
   transform: scaleX(0);
-  transform-origin: right;
+  transform-origin: left;
   transition: transform 0.28s ease;
 }
 
@@ -373,9 +373,6 @@ button {
   margin-left: auto;
 }
 
-.collection-button {
-  margin-top: 22px;
-}
 
 .section-note {
   margin-top: 18px;
