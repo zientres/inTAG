@@ -163,35 +163,39 @@
       opacity: 0.65;
     }
 
-    .market-note {
+    .feature-visual {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      align-self: stretch;
-      min-height: 100%;
-      padding: 30px;
+      align-items: center;
+      gap: 20px;
+      min-height: 300px;
+      padding: 26px;
+      text-align: center;
     }
 
-    .market-note-label {
-      margin-bottom: 12px;
+    .feature-illustration {
+      width: 100%;
+      max-width: 280px;
       color: #78baff;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .market-note h3 {
-      color: #f3f6fb;
-      font-size: 21px;
-      font-weight: 550;
-      line-height: 1.4;
+    .feature-icon {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 205px;
+      overflow: visible;
     }
 
-    .market-note p {
-      margin-top: 12px;
+    .feature-visual-caption {
+      max-width: 330px;
       color: #a8b8cc;
       font-size: 13px;
-      line-height: 1.75;
+      line-height: 1.7;
     }
 
     /* Карточки сообщества занимают всю высоту правой колонки */
@@ -398,11 +402,21 @@
             Начальная ставка будет зависеть от самого сочетания символов: чем привлекательнее номер, тем выше его стартовая стоимость.
           </p>
         </div>
-        <div class="feature-panel auction-summary">
-          <span class="auction-summary-label" data-i18n="auctionSummaryLabel">ОТКРЫТЫЕ ТОРГИ</span>
-          <strong class="auction-summary-duration">1,5 <span data-i18n="auctionSummaryHours">часа</span></strong>
-          <p data-i18n="auctionSummaryText">
-            После запуска аукцион становится доступен всем участникам. Победитель получает номерной знак.
+        <div class="feature-panel feature-visual auction-visual">
+          <div class="feature-illustration auction-illustration" aria-hidden="true">
+            <svg class="feature-icon" viewBox="0 0 220 180" fill="none">
+              <ellipse cx="110" cy="151" rx="72" ry="12" fill="currentColor" opacity=".08"/>
+              <path d="M67 127h86l12 19H55l12-19Z" fill="#16345A" stroke="#78BAFF" stroke-width="2"/>
+              <path d="M83 119 143 59" stroke="#78BAFF" stroke-width="13" stroke-linecap="round"/>
+              <path d="m129 45 26 26M117 57l26 26" stroke="#A9D2FF" stroke-width="8" stroke-linecap="round"/>
+              <rect x="108" y="29" width="53" height="28" rx="7" transform="rotate(45 108 29)" fill="#183B68" stroke="#78BAFF" stroke-width="2"/>
+              <rect x="57" y="92" width="104" height="37" rx="6" fill="#E7EDF5" stroke="#78BAFF" stroke-width="2"/>
+              <text x="109" y="116" text-anchor="middle" font-size="19" font-weight="700" fill="#10243B">А777АА</text>
+              <path d="M166 39 183 22M170 22h13v13" stroke="#78BAFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p class="feature-visual-caption" data-i18n="auctionVisualCaption">
+            Победитель получает номерной знак после завершения торгов
           </p>
         </div>
       </div>
@@ -424,11 +438,20 @@
             Выпущенные NFT можно будет покупать и продавать на Getgems — внешнем маркетплейсе TON. Ссылки на коллекции inTAG появятся здесь позже.
           </p>
         </div>
-        <div class="feature-panel market-note">
-          <span class="market-note-label" data-i18n="marketNoteLabel">ВЛАДЕНИЕ NFT</span>
-          <h3 data-i18n="marketNoteTitle">Решение остаётся за владельцем</h3>
-          <p data-i18n="marketNoteText">
-            Владелец сам решает, выставлять ли номер на продажу и какую цену установить.
+        <div class="feature-panel feature-visual market-visual">
+          <div class="feature-illustration market-illustration" aria-hidden="true">
+            <svg class="feature-icon" viewBox="0 0 220 180" fill="none">
+              <rect x="47" y="35" width="126" height="112" rx="14" fill="#0D2745" stroke="#254B78" stroke-width="2"/>
+              <path d="M83 66v-8a27 27 0 0 1 54 0v8" stroke="#78BAFF" stroke-width="8" stroke-linecap="round"/>
+              <rect x="66" y="65" width="88" height="67" rx="10" fill="#17385F" stroke="#78BAFF" stroke-width="2"/>
+              <path d="M82 83h56M82 96h38" stroke="#A9D2FF" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="146" cy="124" r="25" fill="#0A1D33" stroke="#78BAFF" stroke-width="2"/>
+              <path d="M146 110v28M136 118h20M136 130h20" stroke="#A9D2FF" stroke-width="3" stroke-linecap="round"/>
+              <path d="m40 51-12-12m0 0v12m0-12h12M180 143l12 12m0 0v-12m0 12h-12" stroke="#78BAFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p class="feature-visual-caption" data-i18n="marketVisualCaption">
+            Выставляйте NFT на продажу и выбирайте цену
           </p>
         </div>
       </div>
