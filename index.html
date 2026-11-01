@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#061426">
+  <title>inTAG</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .settings-button {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid rgba(120, 186, 255, 0.35);
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .settings-button:hover {
+      background: rgba(120, 186, 255, 0.1);
+      border-color: #78baff;
+    }
+
+    .settings-button span {
+      width: 19px;
+      height: 2px;
+      border-radius: 2px;
+      background: #f3f6fb;
+    }
+
+    .settings-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.48);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s, visibility 0.25s;
+    }
+
+    .settings-overlay.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .settings-drawer {
+      position: fixed;
+      z-index: 101;
+      top: 0;
+      right: 0;
+      width: min(360px, 88vw);
+      height: 100vh;
+      height: 100dvh;
+      padding: 30px 26px;
+      overflow-y: auto;
+      background: #091a2e;
+      border-left: 1px solid rgba(120, 186, 255, 0.18);
+      box-shadow: -15px 0 45px rgba(0, 0, 0, 0.25);
+      transform: translateX(102%);
+      transition: transform 0.28s ease;
+    }
+
+    .settings-drawer.is-open {
+      transform: translateX(0);
+    }
+
+    .settings-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 38px;
+    }
+
+    .settings-drawer-title {
+      color: #f3f6fb;
+      font-size: 23px;
+      font-weight: 650;
+    }
+
+    .settings-close {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(120, 186, 255, 0.25);
+      border-radius: 8px;
+      color: #f3f6fb;
+      background: transparent;
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    .settings-close:hover {
+      background: rgba(120, 186, 255, 0.1);
+    }
+
+    .settings-label {
+      display: block;
+      margin-bottom: 14px;
+      color: #a8b8cc;
+      font-size: 13px;
+    }
+
+    .language-options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .language-option {
+      width: 100%;
+      min-height: 52px;
+      padding: 0 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(120, 186, 255, 0.18);
+      border-radius: 9px;
+      color: #dce7f5;
+      background: rgba(255, 255, 255, 0.025);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .language-option:hover {
+      background: rgba(120, 186, 255, 0.08);
+    }
+
+    .language-option.is-active {
+      border-color: #78baff;
+      background: rgba(120, 186, 255, 0.1);
+      color: #fff;
+    }
+
+    .language-check {
+      color: #78baff;
+      opacity: 0;
+    }
+
+    .language-option.is-active .language-check {
+      opacity: 1;
+    }
+
+    body.settings-open {
+      overflow: hidden;
+    }
+
+    .community-join {
+      margin-top: 22px;
+      border: none;
+      font: inherit;
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    /* Обновлённая схема вторичного рынка */
+
+    .market-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-self: stretch;
+      min-height: 100%;
+    }
+
+    .marketplace-heading {
+      margin-bottom: 20px;
+    }
+
+    .marketplace-label {
+      display: inline-block;
+      margin-bottom: 9px;
+      color: #78baff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    .marketplace-heading h3 {
+      color: #f3f6fb;
+      font-size: 21px;
+      font-weight: 550;
+      line-height: 1.4;
+    }
+
+    .marketplace-heading p {
+      margin-top: 9px;
+      color: #a8b8cc;
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    .marketplace-card {
+      padding: 19px;
+      border: 1px solid rgba(120, 186, 255, 0.2);
+      border-radius: 9px;
+      background: rgba(6, 20, 38, 0.42);
+    }
+
+    .marketplace-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(168, 184, 204, 0.13);
+    }
+
+    .marketplace-name {
+      color: #f3f6fb;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .marketplace-network {
+      padding: 5px 8px;
+      border: 1px solid rgba(120, 186, 255, 0.25);
+      border-radius: 6px;
+      color: #78baff;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .marketplace-card-description {
+      margin-top: 15px;
+      color: #a8b8cc;
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    .marketplace-steps {
+      margin-top: 17px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .marketplace-step {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      align-items: center;
+      gap: 11px;
+    }
+
+    .marketplace-step-number {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(120, 186, 255, 0.3);
+      border-radius: 7px;
+      color: #78baff;
+      font-size: 10px;
+    }
+
+    .marketplace-step strong {
+      display: block;
+      color: #f3f6fb;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .marketplace-step p {
+      margin-top: 4px;
+      color: #8298b2;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .marketplace-payment {
+      margin-top: 17px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid rgba(120, 186, 255, 0.14);
+      border-radius: 8px;
+      background: rgba(120, 186, 255, 0.045);
+    }
+
+    .marketplace-payment span:first-child {
+      color: #a8b8cc;
+      font-size: 11px;
+    }
+
+    .marketplace-payment strong {
+      color: #f3f6fb;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    /* Карточки сообщества занимают всю высоту правой колонки */
+
+    .community-layout {
+      align-items: stretch;
+    }
+
+    .community-links {
+      align-self: stretch;
+    }
+
+    .community-link-card {
+      flex: 1;
+    }
+
+    @media (max-width: 700px) {
+      .settings-button {
+        width: 38px;
+        height: 38px;
+      }
+
+      .settings-drawer {
+        padding: 25px 21px;
+      }
+
+      .marketplace-card {
+        padding: 16px;
+      }
+
+      .marketplace-heading h3 {
+        font-size: 19px;
+      }
+
+      .community-link-card {
+        flex: initial;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <a class="brand" href="#home" aria-label="inTAG — главная">
+      <img
+        src="logo.png"
+        alt="Логотип inTAG"
+        class="brand-logo"
+        draggable="false"
+      >
+      <span>inTAG</span>
+    </a>
+
+    <nav class="navigation" aria-label="Основная навигация">
+      <a href="#collection" data-i18n="navCollection">Коллекции</a>
+      <a href="#auctions" data-i18n="navAuctions">Аукционы</a>
+      <a href="#market" data-i18n="navMarket">Рынок</a>
+      <a href="#community" data-i18n="navCommunity">Сообщество</a>
+    </nav>
+
+    <div class="header-actions">
+      <button
+        class="header-button"
+        id="connect-wallet"
+        type="button"
+        data-i18n="connectWallet"
+      >Подключить кошелёк</button>
+
+      <button
+        class="settings-button"
+        id="settings-open"
+        type="button"
+        aria-label="Открыть настройки"
+        aria-controls="settings-drawer"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <div
+    class="settings-overlay"
+    id="settings-overlay"
+    aria-hidden="true"
+  ></div>
+
+  <aside
+    class="settings-drawer"
+    id="settings-drawer"
+    aria-label="Настройки"
+    aria-hidden="true"
+    inert
+  >
+    <div class="settings-drawer-header">
+      <h2 class="settings-drawer-title" data-i18n="settingsTitle">
+        Настройки
+      </h2>
+
+      <button
+        class="settings-close"
+        id="settings-close"
+        type="button"
+        aria-label="Закрыть настройки"
+      >×</button>
+    </div>
+
+    <div class="settings-section">
+      <span class="settings-label" data-i18n="languageLabel">
+        Язык сайта
+      </span>
+
+      <div class="language-options">
+        <button
+          class="language-option is-active"
+          type="button"
+          data-language="ru"
+          aria-pressed="true"
+        >
+          <span>Русский</span>
+          <span class="language-check" aria-hidden="true">✓</span>
+        </button>
+
+        <button
+          class="language-option"
+          type="button"
+          data-language="en"
+          aria-pressed="false"
+        >
+          <span>English</span>
+          <span class="language-check" aria-hidden="true">✓</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-content">
+        <h1 data-i18n="heroTitle">
+          inTAG — цифровая коллекция номерных знаков со всего мира.
+        </h1>
+      </div>
+
+      <div class="hero-visual">
+        <div class="plate-stage">
+          <div class="plate-shadow" aria-hidden="true"></div>
+
+          <div
+            class="license-plate plate--ru"
+            id="license-plate"
+            aria-label="Номерной знак"
+          >
+            <div class="plate-prefix" id="plate-prefix" hidden>KZ</div>
+            <div class="plate-main" id="plate-main">А777АА</div>
+            <div class="plate-divider" aria-hidden="true"></div>
+
+            <div class="plate-region-block">
+              <div class="plate-region" id="plate-region">77</div>
+              <div class="plate-region-country" id="plate-region-country">RUS</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="plate-progress" aria-label="Смена номерного знака">
+          <div class="plate-progress-bar" id="plate-progress-bar"></div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="content-section collection-overview"
+      id="collection"
+      aria-labelledby="collection-overview-label"
+    >
+      <div class="section-heading">
+        <span
+          class="section-kicker"
+          id="collection-overview-label"
+          data-i18n="collectionEyebrow"
+        >
+          ИДЕЯ КОЛЛЕКЦИИ
+        </span>
+
+        <p class="section-intro" data-i18n="collectionIntro">
+          inTAG объединяет отдельные коллекции, посвящённые разным странам.
+          В каждой из них собраны номерные знаки, которые можно изучать,
+          коллекционировать и получать в формате NFT.
+        </p>
+      </div>
+
+      <div class="principles-grid">
+        <article class="principle-card">
+          <span class="principle-index">01</span>
+          <div>
+            <h3 data-i18n="collectionCardOneTitle">Особенности стран</h3>
+            <p data-i18n="collectionCardOneText">
+              Номерные знаки отражают особенности каждой страны:
+              собственные форматы, символы и обозначения регионов.
+            </p>
+          </div>
+        </article>
+
+        <article class="principle-card">
+          <span class="principle-index">02</span>
+          <div>
+            <h3 data-i18n="collectionCardTwoTitle">Разнообразие сочетаний</h3>
+            <p data-i18n="collectionCardTwoText">
+              Каждое сочетание букв и цифр имеет свой вид и характер,
+              благодаря чему номера отличаются друг от друга.
+            </p>
+          </div>
+        </article>
+
+        <article class="principle-card">
+          <span class="principle-index">03</span>
+          <div>
+            <h3 data-i18n="collectionCardThreeTitle">Коллекция без границ</h3>
+            <p data-i18n="collectionCardThreeText">
+              Коллекция объединяет номерные знаки разных стран,
+              позволяя увидеть их сходства и отличия.
+            </p>
+          </div>
+        </article>
+      </div>
+
+      <div class="collection-system">
+        <div class="system-copy">
+          <h3 data-i18n="systemTitle">Как устроена коллекция</h3>
+          <p data-i18n="systemText">
+            Сначала пользователь выбирает нужную коллекцию,
+            затем открывает её и знакомится с доступными номерами.
+            Для получения свободного номера предусмотрен отдельный процесс минтинга.
+          </p>
+        </div>
+
+        <div class="collection-flow" aria-label="Структура коллекции">
+          <div class="flow-step">
+            <span class="flow-step-number">01</span>
+            <strong data-i18n="flowAllTitle">Все коллекции</strong>
+            <span data-i18n="flowAllNote">Общее пространство inTAG</span>
+          </div>
+
+          <span class="flow-arrow" aria-hidden="true">→</span>
+
+          <div class="flow-step">
+            <span class="flow-step-number">02</span>
+            <strong data-i18n="flowCountryTitle">Коллекция страны</strong>
+            <span data-i18n="flowCountryNote">Отдельный раздел</span>
+          </div>
+
+          <span class="flow-arrow" aria-hidden="true">→</span>
+
+          <div class="flow-step">
+            <span class="flow-step-number">03</span>
+            <strong data-i18n="flowNftTitle">Номерной знак</strong>
+            <span data-i18n="flowNftNote">Отдельный NFT</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="content-section feature-section"
+      id="auctions"
+      aria-labelledby="auctions-title"
+    >
+      <div class="feature-layout">
+        <div class="feature-copy">
+          <span class="section-kicker" data-i18n="auctionsEyebrow">
+            АУКЦИОНЫ
+          </span>
+
+          <h2
+            class="section-title"
+            id="auctions-title"
+            data-i18n="auctionsTitle"
+          >
+            Каждый свободный номер можно получить через торги
+          </h2>
+
+          <p class="section-intro" data-i18n="auctionsIntro">
+            Пользователь вводит желаемое сочетание символов.
+            Система проверяет, свободен ли этот номер, и рассчитывает
+            начальную ставку. Если номер доступен, его можно выставить
+            на аукцион продолжительностью полтора часа.
+          </p>
+
+          <p class="feature-detail" data-i18n="auctionsDetail">
+            Начальная ставка будет зависеть от самого сочетания символов:
+            чем привлекательнее номер, тем выше его стартовая стоимость.
+            Это позволит учитывать интерес к разным экземплярам
+            уже на этапе создания аукциона.
+          </p>
+        </div>
+
+        <div class="feature-panel">
+          <div class="auction-flow">
+            <div class="auction-flow-step">
+              <span class="flow-node">01</span>
+              <div>
+                <strong data-i18n="auctionStepOneTitle">Ввод номера</strong>
+                <p data-i18n="auctionStepOneText">
+                  Пользователь вводит сочетание символов для выбранной коллекции.
+                </p>
+              </div>
+            </div>
+
+            <div class="auction-flow-line" aria-hidden="true"></div>
+
+            <div class="auction-flow-step">
+              <span class="flow-node">02</span>
+              <div>
+                <strong data-i18n="auctionStepTwoTitle">Проверка и ставка</strong>
+                <p data-i18n="auctionStepTwoText">
+                  Система проверяет наличие NFT и определяет начальную стоимость.
+                </p>
+              </div>
+            </div>
+
+            <div class="auction-flow-line" aria-hidden="true"></div>
+
+            <div class="auction-flow-step">
+              <span class="flow-node">03</span>
+              <div>
+                <strong data-i18n="auctionStepThreeTitle">Торги — 1,5 часа</strong>
+                <p data-i18n="auctionStepThreeText">
+                  Участники делают ставки. Победивший забирает номер.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="content-section feature-section"
+      id="market"
+      aria-labelledby="market-title"
+    >
+      <div class="feature-layout feature-layout-reverse">
+        <div class="feature-copy">
+          <span class="section-kicker" data-i18n="marketEyebrow">
+            РЫНОК
+          </span>
+
+          <h2
+            class="section-title"
+            id="market-title"
+            data-i18n="marketTitle"
+          >
+            Торговля между коллекционерами
+          </h2>
+
+          <p class="section-intro" data-i18n="marketIntro">
+            После получения NFT его владелец сможет предложить номер
+            другим участникам. Покупатели смогут находить интересующие
+            их экземпляры и приобретать их у текущих владельцев.
+          </p>
+        </div>
+
+        <div class="feature-panel market-panel">
+          <div class="marketplace-heading">
+            <span class="marketplace-label" data-i18n="marketplaceLabel">
+              ВТОРИЧНЫЙ РЫНОК
+            </span>
+            <h3 data-i18n="marketplaceTitle">
+              Getgems — площадка для торговли NFT
+            </h3>
+            <p data-i18n="marketplaceDescription">
+              Уже выпущенные номерные знаки можно будет покупать
+              у их текущих владельцев на внешнем NFT-маркетплейсе.
+            </p>
+          </div>
+
+          <div class="marketplace-card">
+            <div class="marketplace-card-top">
+              <strong class="marketplace-name">Getgems</strong>
+              <span class="marketplace-network">TON Network</span>
+            </div>
+
+            <p class="marketplace-card-description" data-i18n="marketplaceCardText">
+              Здесь размещаются NFT, выставленные владельцами на продажу.
+            </p>
+
+            <div class="marketplace-steps">
+              <div class="marketplace-step">
+                <span class="marketplace-step-number">01</span>
+                <div>
+                  <strong data-i18n="marketplaceStepOneTitle">Владелец выставляет номер</strong>
+                  <p data-i18n="marketplaceStepOneText">
+                    Текущий владелец предлагает свой NFT на Getgems.
+                  </p>
+                </div>
+              </div>
+
+              <div class="marketplace-step">
+                <span class="marketplace-step-number">02</span>
+                <div>
+                  <strong data-i18n="marketplaceStepTwoTitle">Покупатель выбирает NFT</strong>
+                  <p data-i18n="marketplaceStepTwoText">
+                    Другой пользователь находит подходящий номер.
+                  </p>
+                </div>
+              </div>
+
+              <div class="marketplace-step">
+                <span class="marketplace-step-number">03</span>
+                <div>
+                  <strong data-i18n="marketplaceStepThreeTitle">Покупка за TON</strong>
+                  <p data-i18n="marketplaceStepThreeText">
+                    Покупатель приобретает выставленный NFT за TON.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="marketplace-payment">
+              <span data-i18n="marketplacePaymentLabel">Валюта покупки</span>
+              <strong>TON</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="content-section community-section"
+      id="community"
+      aria-labelledby="community-title"
+    >
+      <div class="community-layout">
+        <div class="community-copy">
+          <span class="section-kicker" data-i18n="communityEyebrow">
+            СООБЩЕСТВО
+          </span>
+
+          <h2
+            class="section-title"
+            id="community-title"
+            data-i18n="communityTitle"
+          >
+            Проект развивается вместе с участниками
+          </h2>
+
+          <p class="section-intro" data-i18n="communityIntro">
+            Сообщество — место, где можно следить за развитием inTAG,
+            узнавать о новых сериях, обсуждать идеи и получать новости
+            о важных изменениях проекта.
+          </p>
+
+          <button
+            class="primary-button community-join"
+            type="button"
+            disabled
+            data-i18n="communityJoin"
+          >
+            Присоединиться к сообществу ↗
+          </button>
+        </div>
+
+        <div class="community-links">
+          <div class="community-link-card">
+            <span class="community-link-icon" aria-hidden="true">⌘</span>
+            <div>
+              <strong data-i18n="communityDiscussionTitle">Обсуждения</strong>
+              <p data-i18n="communityDiscussionText">
+                Идеи и предложения участников
+              </p>
+            </div>
+          </div>
+
+          <div class="community-link-card">
+            <span class="community-link-icon" aria-hidden="true">◈</span>
+            <div>
+              <strong data-i18n="communityCountriesTitle">Новые страны</strong>
+              <p data-i18n="communityCountriesText">
+                Предложения для будущей коллекции
+              </p>
+            </div>
+          </div>
+
+          <div class="community-link-card">
+            <span class="community-link-icon" aria-hidden="true">↗</span>
+            <div>
+              <strong data-i18n="communityNewsTitle">Новости проекта</strong>
+              <p data-i18n="communityNewsText">
+                Анонсы, обновления и новые серии
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
