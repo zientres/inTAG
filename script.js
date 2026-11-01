@@ -123,97 +123,27 @@ if (missingElements.length > 0) {
       connectWallet: "Подключить кошелёк",
       settingsTitle: "Настройки",
       languageLabel: "Язык сайта",
-
-      heroTitle:
-        "inTAG is a digital NFT collection of license plates from around the world.",
-
-      collectionEyebrow: "THE COLLECTION",
-      collectionIntro:
-        "Collections are grouped by country. Each one brings together plates with formats and designations characteristic of that country.",
-
-      collectionCardOneTitle: "Особенности стран",
-      collectionCardOneText:
-        "Номерные знаки отражают особенности каждой страны: собственные форматы, символы и обозначения регионов.",
-
-      collectionCardTwoTitle: "Разнообразие сочетаний",
-      collectionCardTwoText:
-        "Каждое сочетание букв и цифр имеет свой вид и характер, благодаря чему номера отличаются друг от друга.",
-
-      collectionCardThreeTitle: "Коллекция без границ",
-      collectionCardThreeText:
-        "Коллекция объединяет номерные знаки разных стран, позволяя увидеть их сходства и отличия.",
-
-      systemTitle: "Как устроена коллекция",
-      systemText:
-        "Сначала пользователь выбирает нужную коллекцию, затем открывает её и знакомится с доступными номерами. Для получения свободного номера предусмотрен отдельный процесс минтинга.",
-
-      flowAllTitle: "Все коллекции",
-      flowAllNote: "Общее пространство inTAG",
-      flowCountryTitle: "Коллекция страны",
-      flowCountryNote: "Отдельный раздел",
-      flowNftTitle: "Номерной знак",
-      flowNftNote: "Отдельный NFT",
-
+      heroTitle: "inTAG — цифровая NFT-коллекция номерных знаков со всего мира.",
+      collectionEyebrow: "КОЛЛЕКЦИЯ",
+      collectionIntro: "Коллекции сгруппированы по странам. В каждой собраны номерные знаки с характерными для неё форматами и обозначениями.",
       auctionsEyebrow: "АУКЦИОНЫ",
-      auctionsTitle: "Choose a plate and start an auction",
-      auctionsIntro:
-        "Enter a plate number in the collection search. The system checks its history: if the NFT already exists, its details and current owner will be shown. If it does not exist yet, an auction can be created.",
-      auctionsDetail:
-        "The starting bid depends on the character combination. Mirrored patterns, repeated digits, and sequences of letters or numbers will have higher starting bids.",
-
+      auctionsTitle: "Выберите номер и запустите аукцион",
+      auctionsIntro: "Введите номер в поиске коллекции. Система проверит его историю: если NFT уже существует, покажет сведения о нём и текущем владельце. Если такого NFT ещё нет, можно будет создать аукцион.",
+      auctionsDetail: "Начальная ставка зависит от сочетания символов. Зеркальные комбинации, повторяющиеся цифры и последовательности букв или цифр будут оцениваться выше.",
       auctionSummaryLabel: "ОТКРЫТЫЕ ТОРГИ",
       auctionSummaryHours: "часа",
       auctionSummaryText: "После запуска аукцион становится доступен всем участникам. Победитель получает номерной знак.",
-
-      auctionSummaryLabel: "OPEN AUCTION",
-      auctionSummaryHours: "hours",
-      auctionSummaryText: "Once launched, the auction is open to all participants. The winner receives the license plate NFT.",
-
-      auctionStepOneTitle: "Ввод номера",
-      auctionStepOneText:
-        "Пользователь вводит сочетание символов для выбранной коллекции.",
-      auctionStepTwoTitle: "Проверка и ставка",
-      auctionStepTwoText:
-        "Система проверяет наличие NFT и определяет начальную стоимость.",
-      auctionStepThreeTitle: "Торги — 1,5 часа",
-      auctionStepThreeText:
-        "Участники делают ставки. Победивший забирает номер.",
-
       marketEyebrow: "РЫНОК",
-      marketTitle: "The secondary market on Getgems",
-      marketIntro:
-        "An acquired license plate can be listed for sale on Getgems. Other users will be able to buy it directly from its current owner.",
-
-      marketplaceLabel: "TON MARKETPLACE",
-      marketplaceTitle: "inTAG collections on Getgems",
-      marketplaceDescription:
-        "The project's collections will be available on Getgems. Links will appear here later.",
-      marketplaceCardText:
-        "Buy and sell license plates directly between owners.",
-      marketplaceStepOneTitle: "Владелец выставляет номер",
-      marketplaceStepOneText:
-        "Текущий владелец предлагает свой NFT на Getgems.",
-      marketplaceStepTwoTitle: "Покупатель выбирает NFT",
-      marketplaceStepTwoText:
-        "Другой пользователь находит подходящий номер.",
-      marketplaceStepThreeTitle: "Покупка за TON",
-      marketplaceStepThreeText:
-        "Покупатель приобретает выставленный NFT за TON.",
-      marketplacePaymentLabel: "Валюта покупки",
-
+      marketTitle: "Вторичный рынок на Getgems",
+      marketIntro: "Полученный номерной знак можно будет выставить на продажу на Getgems. Другие пользователи смогут приобрести его напрямую у текущего владельца.",
+      marketplaceLabel: "МАРКЕТПЛЕЙС TON",
+      marketplaceTitle: "Коллекции inTAG на Getgems",
+      marketplaceDescription: "На Getgems будут размещены коллекции проекта. Ссылки на них появятся здесь позже.",
+      marketplaceCardText: "Покупка и продажа номерных знаков между владельцами.",
       communityEyebrow: "СООБЩЕСТВО",
-      communityTitle: "Follow the progress of inTAG",
-      communityIntro:
-        "The Telegram channel will feature project updates, important announcements, and news about new collections.",
-      communityJoin: "Telegram channel coming soon",
-
-      communityDiscussionTitle: "Обсуждения",
-      communityDiscussionText: "Идеи и предложения участников",
-      communityCountriesTitle: "Новые страны",
-      communityCountriesText: "Предложения для будущей коллекции",
-      communityNewsTitle: "Новости проекта",
-      communityNewsText: "Анонсы, обновления и новые серии",
-
+      communityTitle: "Следите за развитием inTAG",
+      communityIntro: "В Telegram-канале будут выходить новости о ходе проекта, важных обновлениях и новых коллекциях.",
+      communityJoin: "Telegram-канал скоро откроется",
       openSettings: "Открыть настройки",
       closeSettings: "Закрыть настройки",
       homeAria: "inTAG — главная",
@@ -231,89 +161,27 @@ if (missingElements.length > 0) {
       connectWallet: "Connect wallet",
       settingsTitle: "Settings",
       languageLabel: "Website language",
-
-      heroTitle:
-        "inTAG is a digital collection of license plates from around the world.",
-
-      collectionEyebrow: "THE COLLECTION IDEA",
-      collectionIntro:
-        "inTAG brings together individual collections dedicated to different countries. Each one contains license plates that can be explored, collected, and obtained as NFTs.",
-
-      collectionCardOneTitle: "Country characteristics",
-      collectionCardOneText:
-        "License plates reflect the characteristics of each country: its own formats, symbols, and regional designations.",
-
-      collectionCardTwoTitle: "Variety of combinations",
-      collectionCardTwoText:
-        "Every combination of letters and numbers has its own appearance and character, making each plate different.",
-
-      collectionCardThreeTitle: "A collection without borders",
-      collectionCardThreeText:
-        "The collection brings together license plates from different countries, making it possible to explore their similarities and differences.",
-
-      systemTitle: "How the collection is organized",
-      systemText:
-        "First, a user chooses a collection and opens it to explore the available plates. A separate minting process is provided for obtaining an available plate.",
-
-      flowAllTitle: "All collections",
-      flowAllNote: "The inTAG collection space",
-      flowCountryTitle: "Country collection",
-      flowCountryNote: "An individual section",
-      flowNftTitle: "License plate",
-      flowNftNote: "An individual NFT",
-
+      heroTitle: "inTAG is a digital NFT collection of license plates from around the world.",
+      collectionEyebrow: "THE COLLECTION",
+      collectionIntro: "Collections are grouped by country. Each one brings together plates with formats and designations characteristic of that country.",
       auctionsEyebrow: "AUCTIONS",
-      auctionsTitle: "Every available plate can be obtained through bidding",
-      auctionsIntro:
-        "A user enters the desired character combination. The system checks whether the plate is available and calculates its starting bid. If the plate is available, it can be listed in an auction lasting one and a half hours.",
-      auctionsDetail:
-        "The starting bid will depend on the character combination itself: the more desirable the plate, the higher its starting price. This makes it possible to account for interest in different items from the moment an auction is created.",
-
-      auctionStepOneTitle: "Enter a plate",
-      auctionStepOneText:
-        "The user enters a character combination for the selected collection.",
-      auctionStepTwoTitle: "Check and starting bid",
-      auctionStepTwoText:
-        "The system checks whether the NFT exists and determines the starting price.",
-      auctionStepThreeTitle: "Bidding — 1.5 hours",
-      auctionStepThreeText:
-        "Participants place bids. The winner takes the plate.",
-
+      auctionsTitle: "Choose a plate and start an auction",
+      auctionsIntro: "Enter a plate number in the collection search. The system checks its history: if the NFT already exists, its details and current owner will be shown. If it does not exist yet, an auction can be created.",
+      auctionsDetail: "The starting bid depends on the character combination. Mirrored patterns, repeated digits, and sequences of letters or numbers will have higher starting bids.",
+      auctionSummaryLabel: "OPEN AUCTION",
+      auctionSummaryHours: "hours",
+      auctionSummaryText: "Once launched, the auction is open to all participants. The winner receives the license plate NFT.",
       marketEyebrow: "MARKET",
-      marketTitle: "Trading between collectors",
-      marketIntro:
-        "After obtaining an NFT, its owner will be able to offer the plate to other participants. Buyers will be able to find items they are interested in and purchase them from their current owners.",
-
-      marketplaceLabel: "SECONDARY MARKET",
-      marketplaceTitle: "Getgems — an NFT marketplace",
-      marketplaceDescription:
-        "Already issued license plates can be purchased from their current owners on an external NFT marketplace.",
-      marketplaceCardText:
-        "NFTs listed for sale by their owners are available here.",
-      marketplaceStepOneTitle: "The owner lists a plate",
-      marketplaceStepOneText:
-        "The current owner offers their NFT on Getgems.",
-      marketplaceStepTwoTitle: "The buyer chooses an NFT",
-      marketplaceStepTwoText:
-        "Another user finds a plate they want.",
-      marketplaceStepThreeTitle: "Purchase with TON",
-      marketplaceStepThreeText:
-        "The buyer purchases the listed NFT using TON.",
-      marketplacePaymentLabel: "Payment currency",
-
+      marketTitle: "The secondary market on Getgems",
+      marketIntro: "An acquired license plate can be listed for sale on Getgems. Other users will be able to buy it directly from its current owner.",
+      marketplaceLabel: "TON MARKETPLACE",
+      marketplaceTitle: "inTAG collections on Getgems",
+      marketplaceDescription: "The project's collections will be available on Getgems. Links will appear here later.",
+      marketplaceCardText: "Buy and sell license plates directly between owners.",
       communityEyebrow: "COMMUNITY",
-      communityTitle: "The project grows with its participants",
-      communityIntro:
-        "The community is where people can follow inTAG's progress, learn about new series, discuss ideas, and get updates about important changes to the project.",
-      communityJoin: "Join the community ↗",
-
-      communityDiscussionTitle: "Discussions",
-      communityDiscussionText: "Ideas and suggestions from participants",
-      communityCountriesTitle: "New countries",
-      communityCountriesText: "Suggestions for future collections",
-      communityNewsTitle: "Project news",
-      communityNewsText: "Announcements, updates, and new releases",
-
+      communityTitle: "Follow the progress of inTAG",
+      communityIntro: "The Telegram channel will feature project updates, important announcements, and news about new collections.",
+      communityJoin: "Telegram channel coming soon",
       openSettings: "Open settings",
       closeSettings: "Close settings",
       homeAria: "inTAG — Home",
