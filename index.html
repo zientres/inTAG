@@ -163,141 +163,35 @@
       opacity: 0.65;
     }
 
-    /* Обновлённая схема вторичного рынка */
-
-    .market-panel {
+    .market-note {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-self: stretch;
       min-height: 100%;
+      padding: 30px;
     }
 
-    .marketplace-heading {
-      margin-bottom: 20px;
-    }
-
-    .marketplace-label {
-      display: inline-block;
-      margin-bottom: 9px;
+    .market-note-label {
+      margin-bottom: 12px;
       color: #78baff;
       font-size: 10px;
       font-weight: 700;
       letter-spacing: 1.5px;
     }
 
-    .marketplace-heading h3 {
+    .market-note h3 {
       color: #f3f6fb;
       font-size: 21px;
       font-weight: 550;
       line-height: 1.4;
     }
 
-    .marketplace-heading p {
-      margin-top: 9px;
+    .market-note p {
+      margin-top: 12px;
       color: #a8b8cc;
-      font-size: 12px;
-      line-height: 1.75;
-    }
-
-    .marketplace-card {
-      padding: 19px;
-      border: 1px solid rgba(120, 186, 255, 0.2);
-      border-radius: 9px;
-      background: rgba(6, 20, 38, 0.42);
-    }
-
-    .marketplace-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid rgba(168, 184, 204, 0.13);
-    }
-
-    .marketplace-name {
-      color: #f3f6fb;
-      font-size: 19px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .marketplace-network {
-      padding: 5px 8px;
-      border: 1px solid rgba(120, 186, 255, 0.25);
-      border-radius: 6px;
-      color: #78baff;
-      font-size: 10px;
-      white-space: nowrap;
-    }
-
-    .marketplace-card-description {
-      margin-top: 15px;
-      color: #a8b8cc;
-      font-size: 12px;
-      line-height: 1.75;
-    }
-
-    .marketplace-steps {
-      margin-top: 17px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .marketplace-step {
-      display: grid;
-      grid-template-columns: 30px minmax(0, 1fr);
-      align-items: center;
-      gap: 11px;
-    }
-
-    .marketplace-step-number {
-      width: 28px;
-      height: 28px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(120, 186, 255, 0.3);
-      border-radius: 7px;
-      color: #78baff;
-      font-size: 10px;
-    }
-
-    .marketplace-step strong {
-      display: block;
-      color: #f3f6fb;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .marketplace-step p {
-      margin-top: 4px;
-      color: #8298b2;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
-    .marketplace-payment {
-      margin-top: 17px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      border: 1px solid rgba(120, 186, 255, 0.14);
-      border-radius: 8px;
-      background: rgba(120, 186, 255, 0.045);
-    }
-
-    .marketplace-payment span:first-child {
-      color: #a8b8cc;
-      font-size: 11px;
-    }
-
-    .marketplace-payment strong {
-      color: #f3f6fb;
       font-size: 13px;
-      font-weight: 650;
+      line-height: 1.75;
     }
 
     /* Карточки сообщества занимают всю высоту правой колонки */
@@ -440,7 +334,7 @@
     <section class="hero" id="home">
       <div class="hero-content">
         <h1 data-i18n="heroTitle">
-          inTAG — NFT-коллекция номерных знаков разных стран.
+          inTAG — цифровая коллекция номерных знаков со всего мира
         </h1>
       </div>
 
@@ -498,10 +392,10 @@
             Выберите номер и запустите аукцион
           </h2>
           <p class="section-intro" data-i18n="auctionsIntro">
-            Введите номер в поиске коллекции. Система проверит его историю: если NFT уже существует, покажет сведения о нём и текущем владельце. Если такого NFT ещё нет, можно будет создать аукцион.
+            Пользователь вводит желаемое сочетание символов. Система проверяет, свободен ли этот номер, и рассчитывает начальную ставку. Если номер доступен, его можно выставить на аукцион продолжительностью полтора часа.
           </p>
           <p class="feature-detail" data-i18n="auctionsDetail">
-            Начальная ставка зависит от сочетания символов: зеркальные комбинации, повторы и последовательности букв или цифр получают более высокую оценку.
+            Начальная ставка будет зависеть от самого сочетания символов: чем привлекательнее номер, тем выше его стартовая стоимость.
           </p>
         </div>
         <div class="feature-panel auction-summary">
@@ -530,23 +424,12 @@
             Выпущенные NFT можно будет покупать и продавать на Getgems — внешнем маркетплейсе TON. Ссылки на коллекции inTAG появятся здесь позже.
           </p>
         </div>
-        <div class="feature-panel market-panel">
-          <div class="marketplace-heading">
-            <span class="marketplace-label" data-i18n="marketplaceLabel">МАРКЕТПЛЕЙС TON</span>
-            <h3 data-i18n="marketplaceTitle">Коллекции inTAG на Getgems</h3>
-            <p data-i18n="marketplaceDescription">
-              Коллекции inTAG будут доступны на внешней площадке.
-            </p>
-          </div>
-          <div class="marketplace-card">
-            <div class="marketplace-card-top">
-              <strong class="marketplace-name">Getgems</strong>
-              <span class="marketplace-network">TON</span>
-            </div>
-            <p class="marketplace-card-description" data-i18n="marketplaceCardText">
-              Маркетплейс для вторичной торговли NFT.
-            </p>
-          </div>
+        <div class="feature-panel market-note">
+          <span class="market-note-label" data-i18n="marketNoteLabel">ВЛАДЕНИЕ NFT</span>
+          <h3 data-i18n="marketNoteTitle">Решение остаётся за владельцем</h3>
+          <p data-i18n="marketNoteText">
+            Владелец сам решает, выставлять ли номер на продажу и какую цену установить.
+          </p>
         </div>
       </div>
     
