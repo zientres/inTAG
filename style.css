@@ -87,14 +87,34 @@ button {
 }
 
 .navigation a {
+  position: relative;
+  padding: 8px 0;
   color: #b8c5d9;
   font-size: 13px;
   transition: color 0.25s ease;
   white-space: nowrap;
 }
 
+.navigation a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--blue);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.28s ease;
+}
+
 .navigation a:hover {
   color: var(--blue);
+}
+
+.navigation a:hover::after {
+  transform: scaleX(1);
 }
 
 .header-actions {
@@ -351,6 +371,10 @@ button {
 .section-heading:not(.section-heading-left) .section-intro {
   margin-right: auto;
   margin-left: auto;
+}
+
+.collection-button {
+  margin-top: 22px;
 }
 
 .section-note {
