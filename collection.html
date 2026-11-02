@@ -60,5 +60,60 @@
       </div>
     </section>
   </main>
+    <div
+    class="settings-overlay"
+    id="settings-overlay"
+    aria-hidden="true"
+  ></div>
+
+    <aside
+    class="settings-drawer"
+    id="settings-drawer"
+    aria-label="Настройки"
+    aria-hidden="true"
+    inert
+  >
+    <div class="settings-drawer-header">
+      <h2 class="settings-drawer-title" data-i18n="settingsTitle">
+        Настройки
+      </h2>
+
+      <button
+        class="settings-close"
+        id="settings-close"
+        type="button"
+        aria-label="Закрыть настройки"
+      >×</button>
+    </div>
+
+    <div class="settings-section">
+      <span class="settings-label" data-i18n="languageLabel">
+        Язык сайта
+      </span>
+
+      <div class="language-options">
+        <button
+          class="language-option is-active"
+          type="button"
+          data-language="ru"
+          aria-pressed="true"
+        >
+          <span>Русский</span>
+          <span class="language-check" aria-hidden="true">✓</span>
+        </button>
+
+        <button
+          class="language-option"
+          type="button"
+          data-language="en"
+          aria-pressed="false"
+        >
+          <span>English</span>
+          <span class="language-check" aria-hidden="true">✓</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+  <script src="script.js"></script>
 </body>
 </html>
