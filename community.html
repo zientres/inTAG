@@ -8,5 +8,102 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <header class="header">
+    <a class="brand" href="index.html" aria-label="inTAG — главная">
+      <img
+        src="logo.png"
+        alt="Логотип inTAG"
+        class="brand-logo"
+        draggable="false"
+      >
+      <span>inTAG</span>
+    </a>
+
+    <nav class="navigation" aria-label="Основная навигация">
+      <a href="collection.html" data-i18n="navCollection">Коллекции</a>
+      <a href="auctions.html" data-i18n="navAuctions">Аукционы</a>
+      <a href="community.html" data-i18n="navCommunity">Сообщество</a>
+    </nav>
+
+    <div class="header-actions">
+      <button
+        class="header-button"
+        id="connect-wallet"
+        type="button"
+        data-i18n="connectWallet"
+      >Подключить кошелёк</button>
+
+      <button
+        class="settings-button"
+        id="settings-open"
+        type="button"
+        aria-label="Открыть настройки"
+        aria-controls="settings-drawer"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <div
+    class="settings-overlay"
+    id="settings-overlay"
+    aria-hidden="true"
+  ></div>
+
+  <aside
+    class="settings-drawer"
+    id="settings-drawer"
+    aria-label="Настройки"
+    aria-hidden="true"
+    inert
+  >
+    <div class="settings-drawer-header">
+      <h2 class="settings-drawer-title" data-i18n="settingsTitle">
+        Настройки
+      </h2>
+
+      <button
+        class="settings-close"
+        id="settings-close"
+        type="button"
+        aria-label="Закрыть настройки"
+      >×</button>
+    </div>
+
+    <div class="settings-section">
+      <span class="settings-label" data-i18n="languageLabel">
+        Язык сайта
+      </span>
+
+      <div class="language-options">
+        <button
+          class="language-option is-active"
+          type="button"
+          data-language="ru"
+          aria-pressed="true"
+        >
+          <span>Русский</span>
+          <span class="language-check" aria-hidden="true">✓</span>
+        </button>
+
+        <button
+          class="language-option"
+          type="button"
+          data-language="en"
+          aria-pressed="false"
+        >
+          <span>English</span>
+          <span class="language-check" aria-hidden="true">✓</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main></main>
+  <script src="script.js"></script>
 </body>
 </html>
