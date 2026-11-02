@@ -8,5 +8,52 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <header class="header">
+    <a class="brand" href="index.html" aria-label="inTAG — главная">
+      <img src="logo.png" alt="Логотип inTAG" class="brand-logo" draggable="false">
+      <span>inTAG</span>
+    </a>
+    <nav class="navigation" aria-label="Основная навигация">
+      <a href="collection.html" aria-current="page">Коллекции</a>
+      <a href="auctions.html">Аукционы</a>
+      <a href="community.html">Сообщество</a>
+    </nav>
+    <div class="header-actions">
+      <button class="header-button" type="button">Подключить кошелёк</button>
+    </div>
+  </header>
+
+  <main class="collections-page">
+    <section class="collections-intro" aria-labelledby="collections-title">
+      <span class="section-kicker">КОЛЛЕКЦИИ</span>
+      <h1 class="section-title" id="collections-title">Номерные знаки разных стран</h1>
+      <p class="section-intro">Каждая коллекция посвящена автомобильным номерам отдельной страны — с её символами, форматом и характерными деталями.</p>
+    </section>
+
+    <section class="collections-catalog" aria-label="Каталог коллекций">
+      <div class="collections-grid">
+        <article class="country-collection-card" aria-label="Коллекция российских номерных знаков">
+          <div class="collection-preview collection-preview-ru" aria-hidden="true">
+            <div class="preview-country">РОССИЯ</div>
+            <div class="preview-plate">
+              <div class="preview-plate-main">А777АА</div>
+              <div class="preview-plate-divider"></div>
+              <div class="preview-plate-region">
+                <span>77</span>
+                <small>RUS</small>
+                <i class="preview-flag"><b></b><b></b><b></b></i>
+              </div>
+            </div>
+            <div class="preview-caption">ГОСТ Р 50577</div>
+          </div>
+          <div class="collection-card-info">
+            <h2>Россия</h2>
+            <p>Коллекция российских автомобильных номерных знаков</p>
+            <span class="collection-card-status">Скоро</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
