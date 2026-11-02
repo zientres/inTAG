@@ -2049,3 +2049,164 @@ button {
     min-height: 210px;
   }
 }
+
+
+/* Страница коллекций */
+.collections-page {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 66px 13% 90px;
+}
+.collections-intro {
+  max-width: 760px;
+  margin-bottom: 58px;
+}
+.collections-intro .section-title {
+  margin-top: 2px;
+}
+.collections-intro .section-intro {
+  max-width: 680px;
+}
+.collections-catalog {
+  min-height: 440px;
+}
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+  align-items: start;
+  gap: 22px;
+}
+.country-collection-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.018);
+}
+.collection-preview {
+  min-height: 265px;
+  padding: 21px 17px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  background: linear-gradient(155deg, rgba(120, 186, 255, 0.07), rgba(6, 20, 38, 0.12));
+  border-bottom: 1px solid rgba(120, 186, 255, 0.12);
+}
+.preview-country {
+  color: #9fb4ce;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+.preview-plate {
+  width: 100%;
+  aspect-ratio: 1.82 / 1;
+  padding: 8px 7px 8px 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2px 35px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #f8f8f8;
+  border-radius: 5px;
+  color: #101820;
+  background: linear-gradient(145deg, #fff, #e4e7e8);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22), inset 0 0 0 2px rgba(20, 35, 48, 0.05);
+}
+.preview-plate-main {
+  min-width: 0;
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  text-align: center;
+  white-space: nowrap;
+}
+.preview-plate-divider {
+  align-self: stretch;
+  width: 2px;
+  background: #1a222b;
+}
+.preview-plate-region {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.preview-plate-region span {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+}
+.preview-plate-region small {
+  font-size: 6px;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+.preview-flag {
+  width: 15px;
+  height: 9px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, .12);
+}
+.preview-flag b {
+  flex: 1;
+  display: block;
+}
+.preview-flag b:nth-child(1) { background: #fff; }
+.preview-flag b:nth-child(2) { background: #244b9b; }
+.preview-flag b:nth-child(3) { background: #d83c45; }
+.preview-caption {
+  color: #7188a4;
+  font-size: 8px;
+  letter-spacing: 1.1px;
+}
+.collection-card-info {
+  padding: 18px 18px 20px;
+}
+.collection-card-info h2 {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 600;
+}
+.collection-card-info p {
+  min-height: 42px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.collection-card-status {
+  display: inline-block;
+  margin-top: 15px;
+  color: var(--muted-dark);
+  font-size: 10px;
+  letter-spacing: .3px;
+}
+@media (max-width: 1050px) {
+  .collections-page { padding-right: 7%; padding-left: 7%; }
+  .collections-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+}
+@media (max-width: 700px) {
+  .collections-page { padding: 42px 6% 65px; }
+  .collections-intro { margin-bottom: 38px; }
+  .collections-catalog { min-height: 360px; }
+  .collections-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .collection-preview { min-height: 205px; padding: 17px 10px 13px; gap: 17px; }
+  .preview-plate { grid-template-columns: minmax(0, 1fr) 1px 27px; gap: 5px; padding: 6px 5px 6px 6px; }
+  .preview-plate-main { font-size: clamp(15px, 4.2vw, 22px); letter-spacing: -.7px; }
+  .preview-plate-region span { font-size: 15px; }
+  .preview-plate-region small { font-size: 5px; }
+  .collection-card-info { padding: 14px 12px 16px; }
+  .collection-card-info h2 { font-size: 15px; }
+  .collection-card-info p { font-size: 11px; min-height: 55px; }
+}
+@media (max-width: 380px) {
+  .collections-grid { grid-template-columns: minmax(0, 1fr); }
+  .collection-preview { min-height: 240px; }
+  .preview-plate-main { font-size: 27px; }
+}
