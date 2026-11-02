@@ -10,16 +10,41 @@
 <body>
   <header class="header">
     <a class="brand" href="index.html" aria-label="inTAG — главная">
-      <img src="logo.png" alt="Логотип inTAG" class="brand-logo" draggable="false">
+      <img
+        src="logo.png"
+        alt="Логотип inTAG"
+        class="brand-logo"
+        draggable="false"
+      >
       <span>inTAG</span>
     </a>
+
     <nav class="navigation" aria-label="Основная навигация">
-      <a href="collection.html" aria-current="page">Коллекции</a>
-      <a href="auctions.html">Аукционы</a>
-      <a href="community.html">Сообщество</a>
+      <a href="collection.html" data-i18n="navCollection">Коллекции</a>
+      <a href="auctions.html" data-i18n="navAuctions">Аукционы</a>
+      <a href="community.html" data-i18n="navCommunity">Сообщество</a>
     </nav>
+
     <div class="header-actions">
-      <button class="header-button" type="button">Подключить кошелёк</button>
+      <button
+        class="header-button"
+        id="connect-wallet"
+        type="button"
+        data-i18n="connectWallet"
+      >Подключить кошелёк</button>
+
+      <button
+        class="settings-button"
+        id="settings-open"
+        type="button"
+        aria-label="Открыть настройки"
+        aria-controls="settings-drawer"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
   </header>
 
