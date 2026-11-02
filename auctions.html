@@ -6,6 +6,177 @@
   <meta name="theme-color" content="#061426">
   <title>inTAG — Аукционы</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .settings-button {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid rgba(120, 186, 255, 0.35);
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .settings-button:hover {
+      background: rgba(120, 186, 255, 0.1);
+      border-color: #78baff;
+    }
+
+    .settings-button span {
+      width: 19px;
+      height: 2px;
+      border-radius: 2px;
+      background: #f3f6fb;
+    }
+
+    .settings-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.48);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s, visibility 0.25s;
+    }
+
+    .settings-overlay.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .settings-drawer {
+      position: fixed;
+      z-index: 101;
+      top: 0;
+      right: 0;
+      width: min(360px, 88vw);
+      height: 100vh;
+      height: 100dvh;
+      padding: 30px 26px;
+      overflow-y: auto;
+      background: #091a2e;
+      border-left: 1px solid rgba(120, 186, 255, 0.18);
+      box-shadow: -15px 0 45px rgba(0, 0, 0, 0.25);
+      transform: translateX(102%);
+      transition: transform 0.28s ease;
+    }
+
+    .settings-drawer.is-open {
+      transform: translateX(0);
+    }
+
+    .settings-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 38px;
+    }
+
+    .settings-drawer-title {
+      color: #f3f6fb;
+      font-size: 23px;
+      font-weight: 650;
+    }
+
+    .settings-close {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(120, 186, 255, 0.25);
+      border-radius: 8px;
+      color: #f3f6fb;
+      background: transparent;
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    .settings-close:hover {
+      background: rgba(120, 186, 255, 0.1);
+    }
+
+    .settings-label {
+      display: block;
+      margin-bottom: 14px;
+      color: #a8b8cc;
+      font-size: 13px;
+    }
+
+    .language-options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .language-option {
+      width: 100%;
+      min-height: 52px;
+      padding: 0 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(120, 186, 255, 0.18);
+      border-radius: 9px;
+      color: #dce7f5;
+      background: rgba(255, 255, 255, 0.025);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .language-option:hover {
+      background: rgba(120, 186, 255, 0.08);
+    }
+
+    .language-option.is-active {
+      border-color: #78baff;
+      background: rgba(120, 186, 255, 0.1);
+      color: #fff;
+    }
+
+    .language-check {
+      color: #78baff;
+      opacity: 0;
+    }
+
+    .language-option.is-active .language-check {
+      opacity: 1;
+    }
+
+    body.settings-open {
+      overflow: hidden;
+    }
+
+    @media (max-width: 700px) {
+      .settings-button {
+        width: 38px;
+        height: 38px;
+      }
+
+      .settings-drawer {
+        padding: 25px 21px;
+      }
+
+      .marketplace-card {
+        padding: 16px;
+      }
+
+      .marketplace-heading h3 {
+        font-size: 19px;
+      }
+
+      .community-link-card {
+        flex: initial;
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="header">
@@ -25,30 +196,7 @@
       <a href="community.html" data-i18n="navCommunity">Сообщество</a>
     </nav>
 
-    <div class="header-actions">
-      <button
-        class="header-button"
-        id="connect-wallet"
-        type="button"
-        data-i18n="connectWallet"
-      >Подключить кошелёк</button>
-
-      <button
-        class="settings-button"
-        id="settings-open"
-        type="button"
-        aria-label="Открыть настройки"
-        aria-controls="settings-drawer"
-        aria-expanded="false"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </header>
-
-  <div
+    <div
     class="settings-overlay"
     id="settings-overlay"
     aria-hidden="true"
