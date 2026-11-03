@@ -2129,3 +2129,228 @@ button {
   .collections-grid { grid-template-columns: minmax(0, 1fr); }
   .collection-preview { aspect-ratio: 1.58; }
 }
+
+
+/* Регистрация российского номерного знака */
+.country-collection-card {
+  padding: 0;
+  display: block;
+  border: 1px solid rgba(120, 186, 255, 0.18);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.country-collection-card:hover {
+  border-color: rgba(120, 186, 255, 0.55);
+  transform: translateY(-2px);
+}
+.collection-card-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.collection-card-name {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+}
+.russia-collection {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+  padding: 42px 7% 80px;
+  position: relative;
+}
+.russia-collection[hidden] { display: none; }
+.collection-back {
+  position: absolute;
+  top: 34px;
+  left: 7%;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.collection-back:hover {
+  background: rgba(120, 186, 255, 0.08);
+  border-color: var(--blue);
+}
+.russia-collection-content {
+  width: 100%;
+  max-width: 540px;
+  margin: 48px auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.russia-collection-content h1 {
+  color: #fff;
+  font-size: clamp(23px, 3vw, 31px);
+  line-height: 1.35;
+  font-weight: 500;
+}
+.russia-collection-subtitle {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.registration-plate {
+  width: 100%;
+  max-width: 520px;
+  margin-top: 28px;
+  min-height: 125px;
+}
+.registration-main {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: center;
+  gap: 2px;
+}
+.plate-character {
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  outline: 0;
+  color: #111820;
+  background: transparent;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 750;
+  text-align: center;
+  text-transform: uppercase;
+  caret-color: #111820;
+}
+.plate-character::placeholder {
+  color: #111820;
+  opacity: 0.65;
+}
+.plate-character:focus {
+  background: rgba(30, 105, 190, 0.12);
+  box-shadow: inset 0 -2px 0 rgba(20, 75, 150, 0.65);
+}
+.registration-main .plate-character {
+  font-size: clamp(27px, 4vw, 43px);
+  line-height: 1.2;
+}
+.registration-region {
+  width: 52px;
+  min-width: 52px;
+  gap: 5px;
+}
+.registration-region-inputs {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+}
+.plate-region-character {
+  font-size: 24px;
+  line-height: 1.1;
+}
+.auction-timer {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.timer-digit {
+  width: 34px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(120, 186, 255, 0.12);
+  border-radius: 5px;
+  color: #eaf1fa;
+  background: #091a2e;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.28);
+  font-size: 21px;
+  font-weight: 600;
+  transform-origin: center;
+}
+.timer-digit.is-changing {
+  animation: timer-digit-flip 0.32s ease;
+}
+.timer-separator {
+  margin: 0 2px;
+  color: #a8b8cc;
+  font-size: 21px;
+  line-height: 1;
+}
+@keyframes timer-digit-flip {
+  0% { transform: rotateX(0); opacity: 1; }
+  45% { transform: rotateX(90deg); opacity: 0.25; }
+  55% { transform: rotateX(-90deg); opacity: 0.25; }
+  100% { transform: rotateX(0); opacity: 1; }
+}
+.auction-test-controls {
+  width: 100%;
+  margin-top: 23px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.auction-start-button,
+.auction-stop-button {
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+.auction-start-button {
+  border: 1px solid rgba(120, 186, 255, 0.7);
+  color: #f3f6fb;
+  background: rgba(120, 186, 255, 0.12);
+}
+.auction-start-button:hover { background: rgba(120, 186, 255, 0.2); }
+.auction-stop-button {
+  border: 1px solid rgba(168, 184, 204, 0.25);
+  color: #c3cfdd;
+  background: transparent;
+}
+.auction-stop-button:hover:not(:disabled) {
+  border-color: rgba(220, 230, 245, 0.55);
+  background: rgba(255, 255, 255, 0.05);
+}
+.auction-stop-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+@media (max-width: 600px) {
+  .russia-collection {
+    min-height: calc(100vh - 70px);
+    padding: 34px 6% 60px;
+  }
+  .collection-back { left: 6%; top: 24px; }
+  .russia-collection-content { margin-top: 62px; }
+  .registration-plate {
+    min-height: 105px;
+    padding: 9px 10px;
+    grid-template-columns: minmax(0, 1fr) 2px 45px;
+    gap: 7px;
+  }
+  .registration-main .plate-character { font-size: clamp(22px, 6vw, 34px); }
+  .registration-region { width: 45px; min-width: 45px; }
+  .plate-region-character { font-size: 21px; }
+  .plate-divider { min-height: 72px; }
+  .timer-digit { width: 30px; height: 38px; font-size: 19px; }
+  .auction-test-controls { flex-direction: column; }
+  .auction-start-button, .auction-stop-button { width: 100%; }
+}
