@@ -336,11 +336,36 @@ if (missingElements.length > 0) {
       const minutes = Math.floor((remainingSeconds % 3600) / 60);
       const seconds = remainingSeconds % 60;
       const value = String(hours).padStart(2, "0") + String(minutes).padStart(2, "0") + String(seconds).padStart(2, "0");
+
       digitElements.forEach((element, index) => {
-        if (element.textContent !== value[index]) {
-          element.textContent = value[index];
-          if (animate) { element.classList.remove("is-changing"); void element.offsetWidth; element.classList.add("is-changing"); }
+        const nextDigit = value[index];
+        const currentDigit = element.querySelector(".timer-digit-current");
+        if (!currentDigit) {
+          element.textContent = nextDigit;
+          return;
         }
+        if (currentDigit.textContent === nextDigit) return;
+
+        if (!animate) {
+          element.classList.remove("is-rolling");
+          element.innerHTML = '<span class="timer-digit-current"></span>';
+          element.firstElementChild.textContent = nextDigit;
+          return;
+        }
+
+        element.classList.remove("is-rolling");
+        const oldDigit = element.querySelector(".timer-digit-current");
+        const newDigit = document.createElement("span");
+        newDigit.className = "timer-digit-next";
+        newDigit.textContent = nextDigit;
+        element.appendChild(newDigit);
+        void element.offsetWidth;
+        element.classList.add("is-rolling");
+        window.setTimeout(() => {
+          element.classList.remove("is-rolling");
+          element.innerHTML = '<span class="timer-digit-current"></span>';
+          element.firstElementChild.textContent = nextDigit;
+        }, 260);
       });
     }
     function stopAuction() {
