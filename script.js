@@ -339,9 +339,11 @@ if (missingElements.length > 0) {
 
       digitElements.forEach((element, index) => {
         const nextDigit = value[index];
-        const currentDigit = element.querySelector(".timer-digit-current");
+        let currentDigit = element.querySelector(".timer-digit-current");
         if (!currentDigit) {
-          element.textContent = nextDigit;
+          element.innerHTML = '<span class="timer-digit-current"></span>';
+          currentDigit = element.firstElementChild;
+          currentDigit.textContent = nextDigit;
           return;
         }
         if (currentDigit.textContent === nextDigit) return;
