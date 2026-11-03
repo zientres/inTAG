@@ -2211,11 +2211,14 @@ button {
   min-height: 125px;
 }
 .registration-main {
+  width: 100%;
+  max-width: 380px;
   min-width: 0;
+  justify-self: center;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: center;
-  gap: 2px;
+  gap: 0;
 }
 .plate-character {
   min-width: 0;
@@ -2255,11 +2258,11 @@ button {
 .registration-region-inputs {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
 }
 .plate-region-character {
-  font-size: 24px;
+  font-size: 18px;
   line-height: 1.1;
 }
 .auction-timer {
