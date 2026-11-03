@@ -274,20 +274,61 @@
     </div>
   </aside>
   <main class="collections-page">
-    <section class="collections-catalog" aria-label="Коллекции стран">
+    <section class="collections-catalog" id="collections-catalog" aria-label="Коллекции стран">
       <div class="collections-grid">
-        <article class="country-collection-card">
-          <div class="collection-preview collection-preview-ru" aria-hidden="true">
-            <div class="flag-diagonal">
+        <button class="country-collection-card" id="open-russia-collection" type="button" aria-label="Открыть коллекцию России">
+          <span class="collection-preview collection-preview-ru" aria-hidden="true">
+            <span class="flag-diagonal">
               <span class="flag-band flag-band-white"></span>
               <span class="flag-band flag-band-blue"></span>
               <span class="flag-band flag-band-red"></span>
+            </span>
+          </span>
+          <span class="collection-card-info"><span class="collection-card-name">Россия</span></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="russia-collection" id="russia-collection" hidden>
+      <button class="collection-back" id="back-to-collections" type="button" aria-label="Вернуться к коллекциям">←</button>
+      <div class="russia-collection-content">
+        <h1>Зарегистрировать номерной знак России</h1>
+        <p class="russia-collection-subtitle">введите нужную комбинацию в поле снизу:</p>
+
+        <div class="license-plate plate--ru registration-plate" aria-label="Введите российский номерной знак">
+          <div class="registration-main" aria-label="Основная часть номера">
+            <input class="plate-character plate-letter" type="text" maxlength="1" inputmode="text" aria-label="Первая буква" placeholder="_" autocomplete="off">
+            <input class="plate-character plate-digit" type="text" maxlength="1" inputmode="numeric" aria-label="Первая цифра" placeholder="_" autocomplete="off">
+            <input class="plate-character plate-digit" type="text" maxlength="1" inputmode="numeric" aria-label="Вторая цифра" placeholder="_" autocomplete="off">
+            <input class="plate-character plate-digit" type="text" maxlength="1" inputmode="numeric" aria-label="Третья цифра" placeholder="_" autocomplete="off">
+            <input class="plate-character plate-letter" type="text" maxlength="1" inputmode="text" aria-label="Вторая буква" placeholder="_" autocomplete="off">
+            <input class="plate-character plate-letter" type="text" maxlength="1" inputmode="text" aria-label="Третья буква" placeholder="_" autocomplete="off">
+          </div>
+          <div class="plate-divider" aria-hidden="true"></div>
+          <div class="plate-region-block registration-region">
+            <div class="registration-region-inputs">
+              <input class="plate-character plate-region-character" type="text" maxlength="1" inputmode="numeric" aria-label="Первая цифра региона" placeholder="_" autocomplete="off">
+              <input class="plate-character plate-region-character" type="text" maxlength="1" inputmode="numeric" aria-label="Вторая цифра региона" placeholder="_" autocomplete="off">
             </div>
+            <div class="plate-region-country">RUS</div>
           </div>
-          <div class="collection-card-info">
-            <h2>Россия</h2>
-          </div>
-        </article>
+        </div>
+
+        <div class="auction-timer" id="auction-timer" role="timer" aria-label="Осталось времени на аукцион">
+          <span class="timer-digit" data-digit="0">0</span>
+          <span class="timer-digit" data-digit="1">1</span>
+          <span class="timer-separator">:</span>
+          <span class="timer-digit" data-digit="2">3</span>
+          <span class="timer-digit" data-digit="3">0</span>
+          <span class="timer-separator">:</span>
+          <span class="timer-digit" data-digit="4">0</span>
+          <span class="timer-digit" data-digit="5">0</span>
+        </div>
+
+        <div class="auction-test-controls">
+          <button class="primary-button auction-start-button" id="start-test-auction" type="button">Сделать ставку и начать аукцион</button>
+          <button class="auction-stop-button" id="stop-test-auction" type="button" disabled>Остановить аукцион</button>
+        </div>
       </div>
     </section>
   </main>
