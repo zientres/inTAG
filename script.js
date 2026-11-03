@@ -294,7 +294,57 @@ if (missingElements.length > 0) {
     const startButton = document.getElementById("start-test-auction");
     const stopButton = document.getElementById("stop-test-auction");
     const digitElements = Array.from(document.querySelectorAll(".timer-digit"));
+    const registrationInput = document.getElementById("registration-number");
+    const registrationCells = Array.from(document.querySelectorAll(".registration-cell"));
     if (!catalog || !collection) return;
+
+    if (registrationInput && registrationCells.length === 9) {
+      const allowedLetters = "АВЕКМНОРСТУХ";
+      const allowedDigits = "0123456789";
+
+      function formatRegistration(value) {
+        let result = "";
+        for (const char of value.toLocaleUpperCase("ru-RU")) {
+          const position = result.length;
+          if (position >= 9) break;
+          const allowed = [0, 4, 5].includes(position) ? allowedLetters : allowedDigits;
+          if (allowed.includes(char)) result += char;
+        }
+        return result;
+      }
+
+      function renderRegistration() {
+        const value = registrationInput.value;
+        registrationCells.forEach((cell, index) => {
+          const char = value[index] || "";
+          cell.textContent = char;
+          cell.classList.toggle("is-filled", Boolean(char));
+          cell.classList.toggle("is-active", index === value.length && value.length < 9);
+        });
+      }
+
+      registrationInput.addEventListener("input", () => {
+        const formatted = formatRegistration(registrationInput.value);
+        if (registrationInput.value !== formatted) registrationInput.value = formatted;
+        renderRegistration();
+      });
+
+      registrationInput.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight" ||
+            event.key === "Home" || event.key === "End" ||
+            event.key === "Backspace" || event.key === "Delete" ||
+            event.key === "Tab") return;
+        if (event.key.length === 1 && !/[А-Яа-я0-9]/.test(event.key)) {
+          event.preventDefault();
+        }
+      });
+
+      registrationInput.addEventListener("focus", renderRegistration);
+      registrationInput.addEventListener("blur", () => {
+        registrationCells.forEach((cell) => cell.classList.remove("is-active"));
+      });
+      renderRegistration();
+    }
 
     document.addEventListener("click", (event) => {
       const card = event.target.closest("#open-russia-collection");
