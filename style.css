@@ -2211,14 +2211,14 @@ button {
   min-height: 125px;
 }
 .registration-main {
-  width: max-content;
+  width: 100%;
   max-width: 100%;
   min-width: 0;
   justify-self: center;
   display: grid;
-  grid-template-columns: repeat(6, 1.12em);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: center;
-  gap: 180px;
+  gap: 8px;
 }
 .plate-character {
   min-width: 0;
