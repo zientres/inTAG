@@ -176,6 +176,16 @@
         flex: initial;
       }
     }
+
+    .registration-search-field .registration-cells { grid-template-columns: repeat(6, minmax(0, 1fr)) minmax(58px, 1.45fr); }
+    .registration-search-field .registration-cell.registration-region-cell { margin-left: 10px; min-width: 58px; }
+    .registration-search-field .registration-cell.registration-region-cell::after { left: -8px; }
+    .registration-search-field .registration-cell.is-invalid { border-bottom-color: #e47777; }
+    @media (max-width: 480px) {
+      .registration-search-field .registration-cells { grid-template-columns: repeat(6, minmax(0, 1fr)) minmax(46px, 1.35fr); gap: 3px; }
+      .registration-search-field .registration-cell.registration-region-cell { min-width: 46px; margin-left: 8px; }
+      .registration-search-field .registration-cell.registration-region-cell::after { left: -6px; }
+    }
   </style>
 </head>
 <body>
@@ -311,8 +321,6 @@
               <span class="registration-cell"></span>
               <span class="registration-cell"></span>
               <span class="registration-cell registration-region-cell"></span>
-              <span class="registration-cell"></span>
-              <span class="registration-cell"></span>
             </div>
             <input class="registration-input" id="registration-number" type="text" maxlength="9"
               aria-label="Введите номер в формате А777АА 777" autocomplete="off"
@@ -327,6 +335,102 @@
   </main>
 
   <script src="script.js?v=equal-cells-clean-start"></script>
+  <script>
+    (() => {
+      const form = document.getElementById("registration-search");
+      const input = document.getElementById("registration-number");
+      const cells = Array.from(document.querySelectorAll("#registration-field .registration-cell"));
+      const regionCell = cells[6];
+      const hint = document.getElementById("registration-hint");
+      const searchButton = document.getElementById("registration-search-button");
+      const allowedLetters = "АВЕКМНОРСТУХ";
+      const allowedRegions = new Set((
+        "01 101 02 102 702 03 103 04 104 05 105 06 106 07 107 08 108 09 109 " +
+        "10 110 11 111 12 112 13 113 14 114 15 115 16 116 716 17 117 18 118 19 119 " +
+        "20 95 195 21 121 22 122 23 93 123 193 24 84 88 124 25 125 725 26 126 27 127 28 128 29 129 30 130 " +
+        "31 131 32 132 33 133 34 134 35 135 36 136 37 137 38 138 39 91 139 40 140 41 141 42 142 43 143 44 144 " +
+        "45 145 46 146 47 147 48 148 49 149 50 90 150 190 250 550 750 790 51 151 52 152 252 53 153 54 154 754 " +
+        "55 155 56 156 57 157 58 158 59 159 60 61 161 761 62 162 63 163 763 64 164 65 165 66 96 166 196 " +
+        "67 167 68 168 69 169 70 170 71 171 72 172 73 173 74 174 774 75 180 76 176 " +
+        "77 97 99 177 197 199 277 299 777 797 799 977 78 98 178 198 798 778 79 179 " +
+        "80 180 81 181 82 182 83 183 84 184 85 185 86 186 87 187 89 189 92 192 94 194"
+      ).split(/\s+/));
+      let plate = "";
+      let invalidLetter = false;
+
+      function parseInput(raw) {
+        const chars = Array.from(raw.toUpperCase().replace(/Ё/g, "Е"));
+        let result = "";
+        let badLetter = false;
+        const pattern = ["letter", "digit", "digit", "digit", "letter", "letter"];
+        for (const char of chars) {
+          if (result.length < 6) {
+            const expected = pattern[result.length];
+            if (expected === "letter") {
+              if (allowedLetters.includes(char)) result += char;
+              else if (/\p{L}/u.test(char)) badLetter = true;
+            } else if (/\d/.test(char)) result += char;
+          } else if (/\d/.test(char) && result.length < 9) {
+            result += char;
+          }
+        }
+        return { value: result, badLetter };
+      }
+
+      function render() {
+        for (let i = 0; i < 6; i++) {
+          const char = plate[i] || "";
+          cells[i].textContent = char;
+          cells[i].classList.toggle("is-filled", Boolean(char));
+          cells[i].classList.toggle("is-active", i === plate.length && plate.length < 6);
+        }
+        const region = plate.slice(6);
+        regionCell.textContent = region;
+        regionCell.classList.toggle("is-filled", Boolean(region));
+        regionCell.classList.toggle("is-active", plate.length >= 6 && region.length < 3);
+        searchButton.hidden = plate.length < 7;
+        hint.hidden = !invalidLetter;
+        input.value = plate;
+      }
+
+      input.addEventListener("input", () => {
+        const parsed = parseInput(input.value);
+        plate = parsed.value;
+        invalidLetter = parsed.badLetter;
+        render();
+      });
+
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Backspace" && plate.length) {
+          event.preventDefault();
+          plate = plate.slice(0, -1);
+          invalidLetter = false;
+          render();
+        }
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (plate.length < 7 || plate.length > 9) return;
+        let region = plate.slice(6);
+        if (region.length === 1) region = "0" + region;
+        if (!allowedRegions.has(region)) {
+          invalidLetter = false;
+          hint.hidden = true;
+          regionCell.classList.add("is-invalid");
+          regionCell.setAttribute("title", "Такого кода региона нет в списке");
+          return;
+        }
+        regionCell.classList.remove("is-invalid");
+        regionCell.removeAttribute("title");
+        plate = plate.slice(0, 6) + region;
+        render();
+      });
+
+      document.getElementById("registration-field").addEventListener("click", () => input.focus());
+      render();
+    })();
+  </script>
   <script>
     (() => {
       const form = document.getElementById("registration-search");
