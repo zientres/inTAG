@@ -2269,10 +2269,10 @@ button {
   font-variant-numeric: tabular-nums;
 }
 .timer-digit {
+  position: relative;
   width: 34px;
   height: 42px;
-  display: grid;
-  place-items: center;
+  display: block;
   overflow: hidden;
   border: 1px solid rgba(120, 186, 255, 0.12);
   border-radius: 5px;
@@ -2281,22 +2281,37 @@ button {
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.28);
   font-size: 21px;
   font-weight: 600;
-  transform-origin: center;
+  line-height: 40px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
-.timer-digit.is-changing {
-  animation: timer-digit-flip 0.32s ease;
+.timer-digit-current,
+.timer-digit-next {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  line-height: 40px;
+  text-align: center;
+  will-change: transform;
+}
+.timer-digit-next {
+  transform: translateY(-100%);
+}
+.timer-digit.is-rolling .timer-digit-current {
+  transform: translateY(100%);
+  transition: transform 0.24s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.timer-digit.is-rolling .timer-digit-next {
+  transform: translateY(0);
+  transition: transform 0.24s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 .timer-separator {
   margin: 0 2px;
   color: #a8b8cc;
   font-size: 21px;
   line-height: 1;
-}
-@keyframes timer-digit-flip {
-  0% { transform: rotateX(0); opacity: 1; }
-  45% { transform: rotateX(90deg); opacity: 0.25; }
-  55% { transform: rotateX(-90deg); opacity: 0.25; }
-  100% { transform: rotateX(0); opacity: 1; }
 }
 .auction-test-controls {
   width: 100%;
