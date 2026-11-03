@@ -294,7 +294,6 @@ if (missingElements.length > 0) {
     const startButton = document.getElementById("start-test-auction");
     const stopButton = document.getElementById("stop-test-auction");
     const digitElements = Array.from(document.querySelectorAll(".timer-digit"));
-    const plateInputs = Array.from(document.querySelectorAll(".registration-plate .plate-character"));
     if (!catalog || !collection) return;
 
     document.addEventListener("click", (event) => {
@@ -304,29 +303,12 @@ if (missingElements.length > 0) {
       catalog.hidden = true;
       collection.hidden = false;
       collection.scrollIntoView({ behavior: "smooth", block: "start" });
-      plateInputs[0]?.focus({ preventScroll: true });
     });
 
     backButton?.addEventListener("click", () => {
       collection.hidden = true;
       catalog.hidden = false;
       window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-
-    const allowedRussianLetters = "АВЕКМНОРСТУХ";
-    plateInputs.forEach((input, index) => {
-      input.addEventListener("input", () => {
-        const raw = input.value.toLocaleUpperCase("ru-RU").replace(/Ё/g, "Е");
-        const isDigit = input.classList.contains("plate-digit") || input.classList.contains("plate-region-character");
-        const filtered = Array.from(raw).find((character) => isDigit ? /[0-9]/.test(character) : allowedRussianLetters.includes(character));
-        input.value = filtered || "";
-        if (input.value && plateInputs[index + 1]) plateInputs[index + 1].focus();
-      });
-      input.addEventListener("keydown", (event) => {
-        if (event.key === "Backspace" && !input.value && plateInputs[index - 1]) plateInputs[index - 1].focus();
-        if (event.key === "ArrowLeft" && plateInputs[index - 1]) { event.preventDefault(); plateInputs[index - 1].focus(); }
-        if (event.key === "ArrowRight" && plateInputs[index + 1]) { event.preventDefault(); plateInputs[index + 1].focus(); }
-      });
     });
 
     let remainingSeconds = 90 * 60;
