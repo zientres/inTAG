@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#061426">
   <title>TagitalSpace — Коллекции</title>
-  <link rel="stylesheet" href="style.css?v=registration-input-field">
+  <link rel="stylesheet" href="style.css?v=registration-search-redesign">
   <style>
     .settings-button {
       width: 42px;
@@ -293,10 +293,16 @@
       <button class="collection-back" id="back-to-collections" type="button" aria-label="Вернуться к коллекциям">←</button>
       <div class="russia-collection-content">
         <h1>Зарегистрировать номерной знак России</h1>
-        <p class="russia-collection-subtitle">введите нужную комбинацию в поле снизу:</p>
+        <p class="russia-collection-subtitle">Вводите комбинацию вашего номера в поле снизу</p>
 
-        <div class="registration-plate">
-          <div class="registration-field" id="registration-field">
+        <form class="registration-search" id="registration-search" novalidate>
+          <div class="registration-search-field" id="registration-field">
+            <span class="registration-search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                <path d="m16 16 4.2 4.2"></path>
+              </svg>
+            </span>
             <div class="registration-cells" aria-hidden="true">
               <span class="registration-cell"></span>
               <span class="registration-cell"></span>
@@ -308,19 +314,13 @@
               <span class="registration-cell"></span>
               <span class="registration-cell"></span>
             </div>
-            <input
-              class="registration-input"
-              id="registration-number"
-              type="text"
-              maxlength="9"
-              aria-label="Введите номер: буква, три цифры, две буквы и три цифры региона"
-              autocomplete="off"
-              autocapitalize="characters"
-              spellcheck="false"
-            >
+            <input class="registration-input" id="registration-number" type="text" maxlength="9"
+              aria-label="Введите номер в формате А777АА 777" autocomplete="off"
+              autocapitalize="characters" spellcheck="false">
           </div>
-        </div>
-
+          <p class="registration-hint" id="registration-hint" role="status" aria-live="polite" hidden>Используйте русские буквы<br>A B E K M H O P C T У X</p>
+          <button class="primary-button registration-search-button" id="registration-search-button" type="submit" hidden>Поиск</button>
+        </form>
         <div class="auction-timer" hidden id="auction-timer" role="timer" aria-label="Осталось времени на аукцион">
           <span class="timer-digit" data-digit="0">0</span>
           <span class="timer-digit" data-digit="1">1</span>
@@ -340,6 +340,6 @@
     </section>
   </main>
 
-  <script src="script.js?v=registration-format-validation"></script>
+  <script src="script.js?v=registration-search-redesign"></script>
 </body>
 </html>
