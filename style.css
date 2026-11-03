@@ -2387,3 +2387,22 @@ button {
   .auction-start-button, .auction-stop-button { width: 100%; }
 }
 
+
+/* Поле поиска номера */
+.registration-search { width:100%; max-width:560px; margin-top:28px; }
+.registration-search-field { position:relative; width:100%; min-height:76px; padding:0 24px; display:flex; align-items:center; gap:17px; border:1px solid rgba(120,186,255,.13); border-radius:999px; background:#091a2e; box-shadow:inset 0 2px 8px rgba(0,0,0,.18),0 8px 24px rgba(0,0,0,.08); transition:border-color .2s,box-shadow .2s; }
+.registration-search-field:focus-within { border-color:rgba(120,186,255,.45); box-shadow:0 0 0 3px rgba(120,186,255,.055),inset 0 2px 8px rgba(0,0,0,.18); }
+.registration-search-icon { width:22px;height:22px;flex:0 0 22px;color:#8fa5bd; }
+.registration-search-icon svg { display:block;width:100%;height:100%;stroke:currentColor;stroke-width:1.7;stroke-linecap:round; }
+.registration-search-field .registration-cells { flex:1;min-width:0;grid-template-columns:repeat(6,minmax(0,1fr)) 13px repeat(3,minmax(0,1fr));gap:5px; }
+.registration-search-field .registration-cell { height:39px;font-size:clamp(18px,3vw,25px);font-weight:500;border-bottom-color:rgba(168,184,204,.48); }
+.registration-search-field .registration-cell::before { content:"_";font-size:.92em; }
+.registration-search-field .registration-cell.is-filled::before { content:none; }
+.registration-search-field .registration-cell.registration-region-cell { margin-left:0; }
+.registration-search-field .registration-cell.is-active { border-bottom-color:var(--blue); }
+.registration-input { position:absolute;inset:0;z-index:2;width:100%;height:100%;opacity:0;border:0;cursor:text; }
+.registration-hint { width:fit-content;max-width:100%;margin:12px auto 0;padding:10px 16px;border:1px solid rgba(120,186,255,.14);border-radius:12px;color:#aebfd2;background:rgba(9,26,46,.92);font-size:12px;line-height:1.65;animation:registration-hint-in .2s ease both; }
+.registration-hint[hidden],.registration-search-button[hidden] { display:none; }
+@keyframes registration-hint-in { from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)} }
+.registration-search-button { margin:22px auto 0;min-width:132px;border:0;cursor:pointer; }
+@media(max-width:480px){.registration-search-field{min-height:66px;padding:0 16px;gap:12px}.registration-search-icon{width:19px;height:19px;flex-basis:19px}.registration-search-field .registration-cells{gap:3px;grid-template-columns:repeat(6,minmax(0,1fr)) 8px repeat(3,minmax(0,1fr))}.registration-search-field .registration-cell{height:34px;font-size:clamp(15px,4vw,20px)}}
