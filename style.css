@@ -2206,12 +2206,8 @@ button {
 }
 .registration-plate {
   width: 100%;
-  max-width: 700px;
-  height: 125px;
+  max-width: 520px;
   margin-top: 28px;
-  border: 2px solid #111820;
-  border-radius: 7px;
-  background: #ffffff;
 }
 .auction-timer {
   margin-top: 24px;
@@ -2311,9 +2307,6 @@ button {
   }
   .collection-back { left: 6%; top: 24px; }
   .russia-collection-content { margin-top: 62px; }
-  .registration-plate {
-    height: 105px;
-  }
   .timer-digit { width: 30px; height: 38px; font-size: 19px; }
   .auction-test-controls { flex-direction: column; }
   .auction-start-button, .auction-stop-button { width: 100%; }
