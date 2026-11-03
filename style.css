@@ -2211,33 +2211,78 @@ button {
   box-sizing: border-box;
 }
 
-.registration-input {
-  display: block;
+.registration-field {
+  position: relative;
   width: 100%;
-  height: 82px;
-  padding: 8px 12px 12px;
-  border: 0;
+  padding: 8px 0 12px;
+  cursor: text;
+}
+
+.registration-cells {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) 14px repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  align-items: end;
+}
+
+.registration-cell {
+  min-width: 0;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-bottom: 1px solid rgba(168, 184, 204, 0.55);
-  border-radius: 0;
-  outline: none;
   color: var(--text);
-  background: transparent;
-  font: 500 clamp(25px, 4vw, 38px) Arial, Helvetica, sans-serif;
-  letter-spacing: 9px;
-  text-align: center;
+  font-size: clamp(25px, 4vw, 38px);
+  font-weight: 500;
+  line-height: 1;
   text-transform: uppercase;
-  caret-color: var(--blue);
   transition: border-color 0.2s ease;
 }
 
-.registration-input::placeholder {
+.registration-cell::before {
+  content: "_";
   color: #a8b8cc;
   opacity: 0.8;
-  letter-spacing: 9px;
 }
 
-.registration-input:focus {
+.registration-cell.is-filled::before {
+  content: none;
+}
+
+.registration-cell.is-active {
   border-bottom-color: var(--blue);
+}
+
+.registration-cell.registration-region-cell {
+  margin-left: 5px;
+}
+
+.registration-input {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  cursor: text;
+}
+
+.registration-field:focus-within .registration-cell.is-active {
+  border-bottom-color: var(--blue);
+}
+
+@media (max-width: 480px) {
+  .registration-cells {
+    gap: 5px;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) 8px repeat(3, minmax(0, 1fr));
+  }
+
+  .registration-cell {
+    height: 48px;
+    font-size: 25px;
+  }
 }
 .auction-timer {
   margin-top: 24px;
