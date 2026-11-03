@@ -2228,6 +2228,9 @@ button {
   font-weight: 750;
   text-align: center;
   text-transform: uppercase;
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
   caret-color: #111820;
 }
 .plate-character::placeholder {
