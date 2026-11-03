@@ -327,5 +327,72 @@
   </main>
 
   <script src="script.js?v=equal-cells-clean-start"></script>
+  <script>
+    (() => {
+      const form = document.getElementById("registration-search");
+      const input = document.getElementById("registration-number");
+      const cells = Array.from(document.querySelectorAll("#registration-field .registration-cell"));
+      const hint = document.getElementById("registration-hint");
+      const searchButton = document.getElementById("registration-search-button");
+      const allowedLetters = "АВЕКМНОРСТУХ";
+      const slots = ["letter", "digit", "digit", "digit", "letter", "letter", "digit", "digit", "digit"];
+      let value = "";
+
+      function normalize(raw) {
+        let result = "";
+        let index = 0;
+        for (const char of raw.toUpperCase().replace(/Ё/g, "Е")) {
+          if (index >= 9) break;
+          if (slots[index] === "letter") {
+            if (allowedLetters.includes(char)) { result += char; index++; }
+          } else if (/\d/.test(char)) {
+            result += char;
+            index++;
+          }
+        }
+        return result;
+      }
+
+      function render() {
+        cells.forEach((cell, index) => {
+          const char = value[index] || "";
+          cell.textContent = char;
+          cell.classList.toggle("is-filled", Boolean(char));
+          cell.classList.toggle("is-active", index === value.length && value.length < 9);
+        });
+        searchButton.hidden = value.length !== 9;
+        hint.hidden = value.length === 0 || value.length === 9;
+        input.value = value;
+      }
+
+      input.addEventListener("input", () => {
+        value = normalize(input.value);
+        render();
+      });
+
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Backspace" && value.length) {
+          event.preventDefault();
+          value = value.slice(0, -1);
+          render();
+        }
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (value.length !== 9) {
+          input.focus();
+          return;
+        }
+        const region = value.slice(6, 9);
+        if (/^[1-9]$/.test(region)) value = value.slice(0, 6) + "0" + region;
+        render();
+        input.blur();
+      });
+
+      document.getElementById("registration-field").addEventListener("click", () => input.focus());
+      render();
+    })();
+  </script>
 </body>
 </html>
