@@ -37,7 +37,7 @@ const missingElements = Object.entries(elements)
 
 if (missingElements.length > 0) {
   console.error(
-    "inTAG: не найдены элементы HTML:",
+    "TagitalSpace: не найдены элементы HTML:",
     missingElements.join(", ")
   );
 } else {
@@ -115,7 +115,7 @@ if (missingElements.length > 0) {
 (() => {
   const translations = {
     ru: {
-      pageTitle: "inTAG",
+      pageTitle: "TagitalSpace",
       navCollection: "Коллекции",
       navAuctions: "Аукционы",
       navMarket: "Рынок",
@@ -123,7 +123,7 @@ if (missingElements.length > 0) {
       connectWallet: "Подключить кошелёк",
       settingsTitle: "Настройки",
       languageLabel: "Язык сайта",
-      heroTitle: "inTAG — цифровое пространство коллекций номерных знаков со всего мира",
+      heroTitle: "TagitalSpace — цифровое пространство коллекций номерных знаков со всего мира",
       collectionEyebrow: "КОЛЛЕКЦИИ",
       collectionIntro: "Каждая страна представлена отдельной коллекцией со своим форматом номерных знаков",
       auctionsEyebrow: "АУКЦИОНЫ",
@@ -136,19 +136,19 @@ if (missingElements.length > 0) {
       marketIntro: "Выпущенные NFT можно будет покупать и продавать на Getgems — внешнем маркетплейсе TON. Ссылки на Getgems можно найти в каждой коллекции.",
       marketVisualCaption: "Покупайте и продавайте номерные знаки",
       communityEyebrow: "СООБЩЕСТВО",
-      communityTitle: "Следите за развитием inTAG",
+      communityTitle: "Следите за развитием TagitalSpace",
       communityIntro: "В Telegram-канале будут выходить новости о ходе проекта, важных обновлениях и новых коллекциях.",
       communityJoin: "Telegram-канал",
       openSettings: "Открыть настройки",
       closeSettings: "Закрыть настройки",
-      homeAria: "inTAG — главная",
-      logoAlt: "Логотип inTAG",
+      homeAria: "TagitalSpace — главная",
+      logoAlt: "Логотип TagitalSpace",
       plateAria: "Номерной знак",
       progressAria: "Смена номерного знака"
     },
 
     en: {
-      pageTitle: "inTAG",
+      pageTitle: "TagitalSpace",
       navCollection: "Collections",
       navAuctions: "Auctions",
       navMarket: "Market",
@@ -156,7 +156,7 @@ if (missingElements.length > 0) {
       connectWallet: "Connect wallet",
       settingsTitle: "Settings",
       languageLabel: "Website language",
-      heroTitle: "inTAG — a digital space for license plate collections from around the world",
+      heroTitle: "TagitalSpace — a digital space for license plate collections from around the world",
       collectionEyebrow: "COLLECTIONS",
       collectionIntro: "Each country is represented by a separate collection with its own license plate format",
       auctionsEyebrow: "AUCTIONS",
@@ -169,13 +169,13 @@ if (missingElements.length > 0) {
       marketIntro: "Issued NFTs will be available to buy and sell on Getgems — an external TON marketplace. You can find Getgems links in each collection.",
       marketVisualCaption: "Buy and sell license plates",
       communityEyebrow: "COMMUNITY",
-      communityTitle: "Follow the progress of inTAG",
+      communityTitle: "Follow the progress of TagitalSpace",
       communityIntro: "The Telegram channel will feature project updates, important announcements, and news about new collections.",
       communityJoin: "Telegram channel",
       openSettings: "Open settings",
       closeSettings: "Close settings",
-      homeAria: "inTAG — Home",
-      logoAlt: "inTAG logo",
+      homeAria: "TagitalSpace — Home",
+      logoAlt: "TagitalSpace logo",
       plateAria: "License plate",
       progressAria: "License plate rotation"
     }
@@ -188,7 +188,7 @@ if (missingElements.length > 0) {
   const languageButtons = document.querySelectorAll("[data-language]");
 
   if (!drawer || !overlay || !openButton || !closeButton) {
-    console.error("inTAG: не найдены элементы меню настроек.");
+    console.error("TagitalSpace: не найдены элементы меню настроек.");
     return;
   }
 
