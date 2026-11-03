@@ -2209,6 +2209,7 @@ button {
   max-width: 700px;
   margin-top: 28px;
   min-height: 125px;
+  grid-template-columns: minmax(0, 1fr) 2px 130px;
 }
 .registration-main {
   width: 100%;
@@ -2252,8 +2253,8 @@ button {
 }
 .registration-region {
   position: relative;
-  width: 100px;
-  min-width: 100px;
+  width: 130px;
+  min-width: 130px;
   height: 100%;
   justify-content: center;
   gap: 0;
@@ -2271,7 +2272,7 @@ button {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
 }
-.plate-region-character {
+.registration-region-inputs .plate-region-character {
   font-size: clamp(27px, 4vw, 43px);
   line-height: 1.2;
 }
@@ -2376,13 +2377,13 @@ button {
   .registration-plate {
     min-height: 105px;
     padding: 9px 10px;
-    grid-template-columns: minmax(0, 1fr) 2px 80px;
+    grid-template-columns: minmax(0, 1fr) 2px 100px;
     gap: 7px;
   }
   .registration-main .plate-character { font-size: clamp(22px, 6vw, 34px); }
-  .registration-region { width: 80px; min-width: 80px; }
+  .registration-region { width: 100px; min-width: 100px; }
   .registration-region-inputs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .plate-region-character { font-size: clamp(22px, 6vw, 34px); }
+  .registration-region-inputs .plate-region-character { font-size: clamp(22px, 6vw, 34px); }
   .plate-divider { min-height: 72px; }
   .timer-digit { width: 30px; height: 38px; font-size: 19px; }
   .auction-test-controls { flex-direction: column; }
