@@ -2218,7 +2218,7 @@ button {
   display: grid;
   grid-template-columns: repeat(6, 1.12em);
   align-items: center;
-  gap: 6px;
+  gap: 18px;
 }
 .plate-character {
   min-width: 0;
