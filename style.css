@@ -2208,6 +2208,13 @@ button {
   width: 100%;
   max-width: 520px;
   margin-top: 28px;
+  box-sizing: border-box;
+}
+
+.registration-plate .license-plate {
+  width: 100%;
+  min-height: 125px;
+  box-sizing: border-box;
 }
 .auction-timer {
   margin-top: 24px;
