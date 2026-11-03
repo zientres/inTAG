@@ -2211,10 +2211,33 @@ button {
   box-sizing: border-box;
 }
 
-.registration-plate .license-plate {
+.registration-input {
+  display: block;
   width: 100%;
-  min-height: 125px;
-  box-sizing: border-box;
+  height: 82px;
+  padding: 8px 12px 12px;
+  border: 0;
+  border-bottom: 1px solid rgba(168, 184, 204, 0.55);
+  border-radius: 0;
+  outline: none;
+  color: var(--text);
+  background: transparent;
+  font: 500 clamp(25px, 4vw, 38px) Arial, Helvetica, sans-serif;
+  letter-spacing: 9px;
+  text-align: center;
+  text-transform: uppercase;
+  caret-color: var(--blue);
+  transition: border-color 0.2s ease;
+}
+
+.registration-input::placeholder {
+  color: #a8b8cc;
+  opacity: 0.8;
+  letter-spacing: 9px;
+}
+
+.registration-input:focus {
+  border-bottom-color: var(--blue);
 }
 .auction-timer {
   margin-top: 24px;
