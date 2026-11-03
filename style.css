@@ -2076,6 +2076,8 @@ button {
 }
 .collection-preview {
   position: relative;
+  display: block;
+  width: 100%;
   height: 132px;
   overflow: hidden;
   background-color: #07172b;
