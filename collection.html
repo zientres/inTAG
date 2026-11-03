@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#061426">
   <title>TagitalSpace — Коллекции</title>
-  <link rel="stylesheet" href="style.css?v=match-homepage-plate-size">
+  <link rel="stylesheet" href="style.css?v=editable-plate-fields-1">
   <style>
     .settings-button {
       width: 42px;
@@ -297,10 +297,21 @@
 
         <div class="registration-plate">
           <div class="license-plate plate--ru" aria-label="Номерной знак России">
-            <div class="plate-main">А777АА</div>
+            <div class="plate-main" aria-label="Основная комбинация номера">
+              <input class="plate-character" type="text" maxlength="1" aria-label="Первый символ номера" autocomplete="off">
+              <input class="plate-character" type="text" maxlength="1" aria-label="Второй символ номера" autocomplete="off">
+              <input class="plate-character" type="text" maxlength="1" aria-label="Третий символ номера" autocomplete="off">
+              <input class="plate-character" type="text" maxlength="1" aria-label="Четвёртый символ номера" autocomplete="off">
+              <input class="plate-character" type="text" maxlength="1" aria-label="Пятый символ номера" autocomplete="off">
+              <input class="plate-character" type="text" maxlength="1" aria-label="Шестой символ номера" autocomplete="off">
+            </div>
             <div class="plate-divider" aria-hidden="true"></div>
             <div class="plate-region-block">
-              <div class="plate-region">77</div>
+              <div class="plate-region" aria-label="Код региона">
+                <input class="plate-character plate-region-character" type="text" maxlength="1" aria-label="Первая цифра региона" inputmode="numeric" autocomplete="off">
+                <input class="plate-character plate-region-character" type="text" maxlength="1" aria-label="Вторая цифра региона" inputmode="numeric" autocomplete="off">
+                <input class="plate-character plate-region-character" type="text" maxlength="1" aria-label="Третья цифра региона" inputmode="numeric" autocomplete="off">
+              </div>
               <div class="plate-region-country">RUS</div>
             </div>
           </div>
