@@ -296,19 +296,32 @@
         <p class="russia-collection-subtitle">введите нужную комбинацию в поле снизу:</p>
 
         <div class="registration-plate">
-          <input
-            class="registration-input"
-            id="registration-number"
-            type="text"
-            maxlength="9"
-            placeholder="_________"
-            aria-label="Введите комбинацию номерного знака"
-            autocomplete="off"
-            spellcheck="false"
-          >
+          <div class="registration-field" id="registration-field">
+            <div class="registration-cells" aria-hidden="true">
+              <span class="registration-cell"></span>
+              <span class="registration-cell"></span>
+              <span class="registration-cell"></span>
+              <span class="registration-cell"></span>
+              <span class="registration-cell"></span>
+              <span class="registration-cell"></span>
+              <span class="registration-cell registration-region-cell"></span>
+              <span class="registration-cell"></span>
+              <span class="registration-cell"></span>
+            </div>
+            <input
+              class="registration-input"
+              id="registration-number"
+              type="text"
+              maxlength="9"
+              aria-label="Введите номер: буква, три цифры, две буквы и три цифры региона"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+            >
+          </div>
         </div>
 
-        <div class="auction-timer" id="auction-timer" role="timer" aria-label="Осталось времени на аукцион">
+        <div class="auction-timer" hidden id="auction-timer" role="timer" aria-label="Осталось времени на аукцион">
           <span class="timer-digit" data-digit="0">0</span>
           <span class="timer-digit" data-digit="1">1</span>
           <span class="timer-separator">:</span>
@@ -319,7 +332,7 @@
           <span class="timer-digit" data-digit="5">0</span>
         </div>
 
-        <div class="auction-test-controls">
+        <div class="auction-test-controls" hidden>
           <button class="primary-button auction-start-button" id="start-test-auction" type="button">Сделать ставку и начать аукцион</button>
           <button class="auction-stop-button" id="stop-test-auction" type="button" disabled>Остановить аукцион</button>
         </div>
@@ -327,6 +340,6 @@
     </section>
   </main>
 
-  <script src="script.js?v=timer-roll-down-2"></script>
+  <script src="script.js?v=registration-format-validation"></script>
 </body>
 </html>
