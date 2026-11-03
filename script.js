@@ -284,3 +284,107 @@ if (missingElements.length > 0) {
 
   setLanguage("ru");
 })();
+
+/* Интерактивная коллекция России и тестовый аукцион */
+(() => {
+  const openCollection = document.getElementById("open-russia-collection");
+  const catalog = document.getElementById("collections-catalog");
+  const collection = document.getElementById("russia-collection");
+  const backButton = document.getElementById("back-to-collections");
+  const startButton = document.getElementById("start-test-auction");
+  const stopButton = document.getElementById("stop-test-auction");
+  const digitElements = Array.from(document.querySelectorAll(".timer-digit"));
+  const plateInputs = Array.from(document.querySelectorAll(".registration-plate .plate-character"));
+
+  if (!openCollection || !catalog || !collection) return;
+
+  openCollection.addEventListener("click", () => {
+    catalog.hidden = true;
+    collection.hidden = false;
+    collection.scrollIntoView({ behavior: "smooth", block: "start" });
+    plateInputs[0]?.focus({ preventScroll: true });
+  });
+
+  backButton?.addEventListener("click", () => {
+    collection.hidden = true;
+    catalog.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  const allowedRussianLetters = "АВЕКМНОРСТУХ";
+  plateInputs.forEach((input, index) => {
+    input.addEventListener("input", () => {
+      const raw = input.value.toLocaleUpperCase("ru-RU").replace(/Ё/g, "Е");
+      const isDigit = input.classList.contains("plate-digit") ||
+        input.classList.contains("plate-region-character");
+      const filtered = Array.from(raw).find((character) =>
+        isDigit ? /[0-9]/.test(character) : allowedRussianLetters.includes(character)
+      );
+      input.value = filtered || "";
+      if (input.value && plateInputs[index + 1]) {
+        plateInputs[index + 1].focus();
+      }
+    });
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Backspace" && !input.value && plateInputs[index - 1]) {
+        plateInputs[index - 1].focus();
+      }
+      if (event.key === "ArrowLeft" && plateInputs[index - 1]) {
+        event.preventDefault();
+        plateInputs[index - 1].focus();
+      }
+      if (event.key === "ArrowRight" && plateInputs[index + 1]) {
+        event.preventDefault();
+        plateInputs[index + 1].focus();
+      }
+    });
+  });
+
+  let remainingSeconds = 90 * 60;
+  let auctionInterval = null;
+
+  function renderTimer(animate = false) {
+    const hours = Math.floor(remainingSeconds / 3600);
+    const minutes = Math.floor((remainingSeconds % 3600) / 60);
+    const seconds = remainingSeconds % 60;
+    const value = String(hours).padStart(2, "0") +
+      String(minutes).padStart(2, "0") +
+      String(seconds).padStart(2, "0");
+
+    digitElements.forEach((element, index) => {
+      if (element.textContent !== value[index]) {
+        element.textContent = value[index];
+        if (animate) {
+          element.classList.remove("is-changing");
+          void element.offsetWidth;
+          element.classList.add("is-changing");
+        }
+      }
+    });
+  }
+
+  function stopAuction() {
+    if (auctionInterval !== null) {
+      clearInterval(auctionInterval);
+      auctionInterval = null;
+    }
+    if (stopButton) stopButton.disabled = true;
+  }
+
+  startButton?.addEventListener("click", () => {
+    if (auctionInterval !== null) return;
+    if (remainingSeconds <= 0) remainingSeconds = 90 * 60;
+
+    stopButton.disabled = false;
+    renderTimer();
+    auctionInterval = setInterval(() => {
+      remainingSeconds = Math.max(0, remainingSeconds - 1);
+      renderTimer(true);
+      if (remainingSeconds === 0) stopAuction();
+    }, 1000);
+  });
+
+  stopButton?.addEventListener("click", stopAuction);
+  renderTimer();
+})();
