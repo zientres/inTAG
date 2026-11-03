@@ -2216,7 +2216,7 @@ button {
   min-width: 0;
   justify-self: center;
   display: grid;
-  grid-template-columns: repeat(6, 0.72em);
+  grid-template-columns: repeat(6, 0.88em);
   align-items: center;
   gap: 0;
 }
