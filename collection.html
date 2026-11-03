@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#061426">
   <title>TagitalSpace — Коллекции</title>
-  <link rel="stylesheet" href="style.css?v=undo-editable-plate-fields">
+  <link rel="stylesheet" href="style.css?v=registration-input-field">
   <style>
     .settings-button {
       width: 42px;
@@ -296,14 +296,16 @@
         <p class="russia-collection-subtitle">введите нужную комбинацию в поле снизу:</p>
 
         <div class="registration-plate">
-          <div class="license-plate plate--ru" aria-label="Номерной знак России">
-            <div class="plate-main">А777АА</div>
-            <div class="plate-divider" aria-hidden="true"></div>
-            <div class="plate-region-block">
-              <div class="plate-region">77</div>
-              <div class="plate-region-country">RUS</div>
-            </div>
-          </div>
+          <input
+            class="registration-input"
+            id="registration-number"
+            type="text"
+            maxlength="9"
+            placeholder="_________"
+            aria-label="Введите комбинацию номерного знака"
+            autocomplete="off"
+            spellcheck="false"
+          >
         </div>
 
         <div class="auction-timer" id="auction-timer" role="timer" aria-label="Осталось времени на аукцион">
