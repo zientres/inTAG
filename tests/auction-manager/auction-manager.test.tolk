@@ -18,6 +18,7 @@ fun setupAuctionManagerTest(): (AuctionManager, Treasury, Treasury, Treasury, Tr
         collectionAddress: collection.address,
         treasuryAddress: treasury.address,
         securityFundAddress: securityFund.address,
+        payoutConfigLocked: false,
         nextAuctionId: 0,
         nextItemIndex: 0,
         nextMintItemIndex: 0,
@@ -27,6 +28,7 @@ fun setupAuctionManagerTest(): (AuctionManager, Treasury, Treasury, Treasury, Tr
         refundCredits: [],
         payoutCredits: [],
         processedBounces: [],
+        processedQueries: [],
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
