@@ -75,13 +75,7 @@ fun NftCollectionV12.sendDeployNftV12(
         bounce: config.bounce,
         value: config.value,
         dest: self.address,
-        body: DeployNftV12 {
-            queryId,
-            itemIndex,
-            attachTonAmount,
-            ownerAddress,
-            content,
-        },
+        body: DeployNftV12 { queryId, itemIndex, attachTonAmount, ownerAddress, content },
     });
     return net.send(from, genericMsg);
 }
