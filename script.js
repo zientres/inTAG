@@ -116,7 +116,6 @@ if (missingElements.length > 0) {
   const translations = {
     ru: {
       pageTitle: "TagitalSpace",
-      collectionPageTitle: "TagitalSpace — Collections", communityPageTitle: "TagitalSpace — Community", auctionsPageTitle: "TagitalSpace — Auctions",
       collectionPageTitle: "TagitalSpace — Коллекции", communityPageTitle: "TagitalSpace — Сообщество", auctionsPageTitle: "TagitalSpace — Аукционы",
       navCollection: "Коллекции",
       navAuctions: "Аукционы",
@@ -152,7 +151,6 @@ if (missingElements.length > 0) {
     en: {
       pageTitle: "TagitalSpace",
       collectionPageTitle: "TagitalSpace — Collections", communityPageTitle: "TagitalSpace — Community", auctionsPageTitle: "TagitalSpace — Auctions",
-      collectionPageTitle: "TagitalSpace — Коллекции", communityPageTitle: "TagitalSpace — Сообщество", auctionsPageTitle: "TagitalSpace — Аукционы",
       navCollection: "Collections",
       navAuctions: "Auctions",
       navMarket: "Market",
