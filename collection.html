@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#061426">
-  <title>TagitalSpace — Коллекции</title>
+  <title data-i18n="collectionPageTitle">TagitalSpace — Коллекции</title>
   <link rel="stylesheet" href="style.css?v=region-cell-sizing-divider">
   <style>
     .settings-button {
@@ -297,9 +297,9 @@
     </div>
   </aside>
   <main class="collections-page">
-    <section class="collections-catalog" id="collections-catalog" aria-label="Коллекции стран">
+    <section class="collections-catalog" id="collections-catalog" aria-label="Коллекции стран" data-i18n-aria-label="collectionSections">
       <div class="collections-grid">
-        <button class="country-collection-card" id="open-russia-collection" type="button" aria-label="Открыть коллекцию России">
+        <button class="country-collection-card" id="open-russia-collection" type="button" aria-label="Открыть коллекцию России" data-i18n-aria-label="openRussiaCollection">
           <span class="collection-preview collection-preview-ru" aria-hidden="true">
             <span class="flag-diagonal">
               <span class="flag-band flag-band-white"></span>
@@ -307,22 +307,22 @@
               <span class="flag-band flag-band-red"></span>
             </span>
           </span>
-          <span class="collection-card-info"><span class="collection-card-name">Россия</span></span>
+          <span class="collection-card-info"><span class="collection-card-name" data-i18n="countryRussia">Россия</span></span>
         </button>
       </div>
     </section>
 
     <section class="russia-collection" id="russia-collection" hidden>
-      <button class="collection-back" id="back-to-collections" type="button" aria-label="Вернуться к коллекциям">←</button>
-      <nav class="collection-sections" aria-label="Разделы коллекции">
-        <button class="collection-section-tab is-active" type="button" data-collection-tab="mint" aria-pressed="true">Минт</button>
-        <button class="collection-section-tab" type="button" data-collection-tab="auctions" aria-pressed="false">Аукционы</button>
-        <button class="collection-section-tab" type="button" data-collection-tab="market" aria-pressed="false">Рынок</button>
+      <button class="collection-back" id="back-to-collections" type="button" aria-label="Вернуться к коллекциям" data-i18n-aria-label="backToCollections">←</button>
+      <nav class="collection-sections" aria-label="Разделы коллекции" data-i18n-aria-label="collectionSections">
+        <button class="collection-section-tab is-active" type="button" data-collection-tab="mint" aria-pressed="true" data-i18n="tabMint">Минт</button>
+        <button class="collection-section-tab" type="button" data-collection-tab="auctions" aria-pressed="false" data-i18n="tabAuctions">Аукционы</button>
+        <button class="collection-section-tab" type="button" data-collection-tab="market" aria-pressed="false" data-i18n="tabMarket">Рынок</button>
       </nav>
       <div class="collection-tab-panel" id="collection-panel-mint">
       <div class="russia-collection-content">
-        <h1>Зарегистрировать номерной знак России</h1>
-        <p class="russia-collection-subtitle">Вводите комбинацию вашего номера в поле снизу</p>
+        <h1 data-i18n="registerRussiaPlate">Зарегистрировать номерной знак России</h1>
+        <p class="russia-collection-subtitle" data-i18n="registrationSubtitle">Вводите комбинацию вашего номера в поле снизу</p>
 
         <form class="registration-search" id="registration-search" novalidate>
           <div class="registration-search-row">
@@ -343,21 +343,21 @@
               <span class="registration-cell registration-region-cell"></span>
             </div>
             <input class="registration-input" id="registration-number" type="text" maxlength="9"
-              aria-label="Введите номер в формате А777АА 777" autocomplete="off"
+              aria-label="Введите номер в формате А777АА 777" data-i18n-aria-label="plateInputLabel" autocomplete="off"
               autocapitalize="characters" spellcheck="false">
           </div>
           <div class="registration-region-help" id="registration-region-help" hidden>
-            <a href="#" id="registration-regions-open">Посмотреть регионы России</a>
+            <a href="#" id="registration-regions-open" data-i18n="viewRegions">Посмотреть регионы России</a>
           </div>
           </div>
-          <p class="registration-hint" id="registration-hint" role="status" aria-live="polite" hidden>Используйте русские буквы<br>A B E K M H O P C T У X</p>
-          <button class="primary-button registration-search-button" id="registration-search-button" type="submit" hidden>Поиск</button>
+          <p class="registration-hint" id="registration-hint" role="status" aria-live="polite" hidden>Используйте русские буквы: А В Е К М Н О Р С Т У Х</p>
+          <button class="primary-button registration-search-button" id="registration-search-button" type="submit" hidden data-i18n="search">Поиск</button>
         </form>
         <div class="registration-regions-modal" id="registration-regions-modal" aria-hidden="true">
           <div class="registration-regions-backdrop" data-regions-close></div>
-          <div class="registration-regions-dialog" role="dialog" aria-modal="true" aria-label="Коды регионов России">
-            <button class="registration-regions-close" type="button" aria-label="Закрыть" data-regions-close>×</button>
-            <img src="regRussia.jpg" alt="Таблица разрешённых автомобильных кодов регионов России">
+          <div class="registration-regions-dialog" role="dialog" aria-modal="true" aria-label="Коды регионов России" data-i18n-aria-label="regionCodesDialog">
+            <button class="registration-regions-close" type="button" aria-label="Закрыть" data-i18n-aria-label="close" data-regions-close>×</button>
+            <img src="regRussia.jpg" alt="Таблица разрешённых автомобильных кодов регионов России" data-i18n-alt="regionCodesImageAlt">
           </div>
         </div>
 
