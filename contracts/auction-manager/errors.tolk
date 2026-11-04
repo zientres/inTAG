@@ -1,0 +1,21 @@
+enum AuctionManagerErrors {
+    NotFromOwner = 501
+    InvalidQueryId = 502
+    InvalidAuctionId = 503
+    AuctionAlreadyExists = 504
+    InvalidAuctionState = 505
+    AuctionNotEnded = 506
+    AuctionAlreadyEnded = 507
+    BidTooLow = 508
+    BidAfterDeadline = 509
+    InsufficientAttachedValue = 510
+    InvalidPayoutConfiguration = 511
+    ItemIndexOutOfSequence = 512
+    ItemIndexAlreadyReserved = 513
+    NotFromCollection = 514
+    InvalidMintConfirmation = 515
+    NoRefundAvailable = 516
+    NoPayoutAvailable = 517
+    InvalidAddress = 518
+    InvalidAuctionParameters = 519
+}
