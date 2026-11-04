@@ -8,6 +8,8 @@ import "@wrappers/NftCollection.gen"
 import "@contracts/nft-v1.1/types"
 
 const ONCHAIN_CONTENT_PREFIX = 0x00
+const COLLECTION_IMAGE_URL = "https://zientres.github.io/inTAG/logo.png"
+const NFT_METADATA_BASE_URL = "https://zientres.github.io/inTAG/metadata/"
 
 struct NftCollectionInfo {
     name: string
@@ -39,8 +41,12 @@ fun promptNftCollectionInfo(): NftCollectionInfo {
             "",
             "Digital license plate collectibles from around the world",
         ),
-        image: prompt("Collection image URL", "", ""),
-        commonContent: prompt("Base URL for NFT item JSON metadata (must end with /)", "", ""),
+        image: prompt("Collection image URL", "", COLLECTION_IMAGE_URL),
+        commonContent: prompt(
+            "Base URL for NFT item JSON metadata (must end with /)",
+            "",
+            NFT_METADATA_BASE_URL,
+        ),
     };
 }
 
