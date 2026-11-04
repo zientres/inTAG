@@ -29,7 +29,7 @@ fun onInternalMessage(in: InMessage) {
         val initParams = NftItemInitAtDeploymentV12.fromSlice(in.body);
         assert (initParams.itemIndex == loadingStorage.itemIndex) throw Errors.InvalidItemIndex;
 
-        val storage: NftItemStorage = {
+        val storage: NftItemV12Storage = {
             itemIndex: loadingStorage.itemIndex,
             collectionAddress: loadingStorage.collectionAddress,
             ownerAddress: initParams.ownerAddress,
@@ -148,7 +148,7 @@ fun onInternalMessage(in: InMessage) {
 }
 
 get fun get_nft_data(): NftDataReply {
-    var loadingStorage = NftItemStorage.startLoading();
+    var loadingStorage = NftItemV12Storage.startLoading();
     if (loadingStorage.isNotInitialized()) {
         return {
             isInitialized: false,
