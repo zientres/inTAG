@@ -24,7 +24,11 @@ fun main() {
     }
 
     val itemIndex = collectionData.nextItemIndex;
-    val itemContent = StringBuilder.create().append(itemIndex.toDecimalString()).append(".json").build();
+    val itemContent = StringBuilder
+        .create()
+        .append(itemIndex.toDecimalString())
+        .append(".json")
+        .build();
     val ownerAddress = promptAddress("NFT recipient wallet address");
 
     println("Collection: {}", collectionAddress);
@@ -33,11 +37,13 @@ fun main() {
     println("Recipient: {}", ownerAddress);
     println("Attached value: {:grams}", NFT_ITEM_DEPLOY_AMOUNT);
 
-    if (!confirm(
-        "Have you published this NFT's JSON metadata and unique plate image? Continue with Testnet mint?",
-        false,
-        "This sends a real transaction on TON Testnet. The recipient will receive the NFT.",
-    )) {
+    if (
+        !confirm(
+            "Have you published this NFT's JSON metadata and unique plate image? Continue with Testnet mint?",
+            false,
+            "This sends a real transaction on TON Testnet. The recipient will receive the NFT.",
+        )
+    ) {
         println("Mint cancelled. No transaction was sent.");
         return;
     }
