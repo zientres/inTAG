@@ -66,14 +66,20 @@ fun sendMintAck(collectionAddress: address, queryId: uint64, itemIndex: uint64) 
 
 fun addRefundCredit(mutate storage: AuctionManagerStorage, beneficiary: address, amount: coins) {
     val lookup = storage.refundCredits.get(beneficiary);
-    val previous = if (lookup.isFound) lookup.loadValue() else 0;
-    storage.refundCredits.set(beneficiary, previous + amount);
+    var previous: coins = 0;
+    if (lookup.isFound) {
+        previous = lookup.loadValue();
+    }
+    storage.refundCredits.set(beneficiary, (previous + amount) as coins);
 }
 
 fun addPayoutCredit(mutate storage: AuctionManagerStorage, beneficiary: address, amount: coins) {
     val lookup = storage.payoutCredits.get(beneficiary);
-    val previous = if (lookup.isFound) lookup.loadValue() else 0;
-    storage.payoutCredits.set(beneficiary, previous + amount);
+    var previous: coins = 0;
+    if (lookup.isFound) {
+        previous = lookup.loadValue();
+    }
+    storage.payoutCredits.set(beneficiary, (previous + amount) as coins);
 }
 
 fun onInternalMessage(in: InMessage) {
@@ -147,11 +153,10 @@ fun onInternalMessage(in: InMessage) {
                 in.valueCoins >= msg.bidAmount + AUCTION_V1_MIN_BID_OVERHEAD
             ) throw AuctionManagerErrors.InsufficientAttachedValue;
 
-            val minimum = if (auction.highestBidder == null) {
-                auction.startingBid
-            } else {
-                auction.highestBid + auction.minimumBidStep
-            };
+            var minimum: coins = auction.startingBid;
+            if (auction.highestBidder != null) {
+                minimum = (auction.highestBid + auction.minimumBidStep) as coins;
+            }
             assert (msg.bidAmount >= minimum) throw AuctionManagerErrors.BidTooLow;
 
             val previousBidder = auction.highestBidder;
@@ -384,7 +389,10 @@ get fun get_auction(auctionId: uint64): AuctionV1? {
 get fun get_refund_credit(beneficiary: address): coins {
     val storage = lazy AuctionManagerStorage.load();
     val lookup = storage.refundCredits.get(beneficiary);
-    return if (lookup.isFound) lookup.loadValue() else 0;
+    if (!lookup.isFound) {
+        return 0;
+    }
+    return lookup.loadValue();
 }
 
 get fun get_payout_credit(beneficiary: address): coins {
