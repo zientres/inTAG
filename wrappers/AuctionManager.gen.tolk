@@ -3,6 +3,7 @@
 import "@acton/build"
 import "@acton/emulation/network"
 import "@acton/testing/assert"
+import "@contracts/auction-manager/messages"
 import "@contracts/auction-manager/types"
 
 struct AuctionManager {
@@ -67,4 +68,25 @@ fun AuctionManager.getRefundCredit(self, beneficiary: address): coins {
 
 fun AuctionManager.getPayoutCredit(self, beneficiary: address): coins {
     return net.runGetMethod(self.address, "get_payout_credit", [beneficiary]);
+}
+
+fun AuctionManager.sendSetPayoutAddressesV1(
+    self,
+    from: address,
+    queryId: uint64,
+    treasuryAddress: address,
+    securityFundAddress: address,
+    config: SendParams = {},
+): SendResultList {
+    val genericMsg = createMessage({
+        bounce: config.bounce,
+        value: config.value,
+        dest: self.address,
+        body: SetPayoutAddressesV1 {
+            queryId,
+            treasuryAddress,
+            securityFundAddress,
+        },
+    });
+    return net.send(from, genericMsg);
 }
