@@ -1,6 +1,7 @@
 import "@stdlib/strings"
 import "@acton/build"
 import "@acton/io"
+import "@acton/emulation/network"
 import "@acton/prompts"
 import "@acton/emulation/scripts"
 import "@acton/testing/assert"
