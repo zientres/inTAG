@@ -56,3 +56,5 @@ contracts = "contracts"
 gen = "gen"
 wrappers = "wrappers"
 
+
+transfer-collection-admin = "acton script scripts/transferCollectionAdminToAuctionManager.tolk --net testnet --tonconnect"
