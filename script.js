@@ -183,6 +183,9 @@ if (missingElements.length > 0) {
     }
   };
 
+  const walletButton = document.getElementById("connect-wallet");
+  let connectedWalletAddress = null;
+
   const drawer = document.getElementById("settings-drawer");
   const overlay = document.getElementById("settings-overlay");
   const openButton = document.getElementById("settings-open");
@@ -272,6 +275,17 @@ if (missingElements.length > 0) {
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-pressed", String(active));
     });
+
+    if (walletButton) {
+      walletButton.textContent = connectedWalletAddress || dictionary.connectWallet;
+    }
+
+    if (window.tagitalSpaceTonConnect) {
+      window.tagitalSpaceTonConnect.uiOptions = {
+        language,
+        uiPreferences: { theme: "DARK" }
+      };
+    }
   }
 
   openButton.addEventListener("click", openSettings);
@@ -294,6 +308,50 @@ if (missingElements.length > 0) {
   });
 
   setLanguage("ru");
+
+  /* TON Connect — только тестовая сеть TON Testnet */
+  if (walletButton && window.TON_CONNECT_UI?.TonConnectUI) {
+    try {
+      const manifestUrl = new URL("tonconnect-manifest.json", document.baseURI).href;
+      const tonConnectUI = new window.TON_CONNECT_UI.TonConnectUI({ manifestUrl });
+
+      // Сеть фиксируется до открытия окна выбора кошелька.
+      tonConnectUI.setConnectionNetwork("-3");
+      tonConnectUI.uiOptions = {
+        language: document.documentElement.lang || "ru",
+        uiPreferences: { theme: "DARK" }
+      };
+
+      walletButton.addEventListener("click", () => tonConnectUI.openModal());
+
+      tonConnectUI.onStatusChange((wallet) => {
+        if (!wallet) {
+          connectedWalletAddress = null;
+          walletButton.removeAttribute("title");
+        } else if (wallet.account.chain !== "-3") {
+          console.error("TagitalSpace: подключён не TON Testnet. Соединение будет закрыто.");
+          tonConnectUI.disconnect();
+          return;
+        } else {
+          const address = wallet.account.address;
+          connectedWalletAddress = address.length > 13
+            ? address.slice(0, 6) + "..." + address.slice(-4)
+            : address;
+          walletButton.title = address;
+        }
+
+        const language = document.documentElement.lang || "ru";
+        walletButton.textContent =
+          connectedWalletAddress || translations[language]?.connectWallet || translations.ru.connectWallet;
+      });
+
+      window.tagitalSpaceTonConnect = tonConnectUI;
+    } catch (error) {
+      console.error("TagitalSpace: не удалось запустить TON Connect для Testnet.", error);
+    }
+  } else if (walletButton) {
+    console.error("TagitalSpace: библиотека TON Connect UI не загрузилась.");
+  }
 })();
 
 /* Интерактивная коллекция России и тестовый аукцион */
