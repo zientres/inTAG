@@ -1,7 +1,7 @@
-import "errors"
-import "fees-management"
-import "messages"
-import "types"
+import "@contracts/nft-v1.1/errors"
+import "@contracts/nft-v1.1/fees-management"
+import "@contracts/nft-v1.1/messages"
+import "@contracts/nft-v1.1/types"
 
 contract NftItem {
     author: "The Tolk Team"
