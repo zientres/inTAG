@@ -55,3 +55,8 @@ struct (0x54474109) MintFailureRefundV1 {
     beneficiary: address
     amount: coins
 }
+
+struct (0x5447410A) RetryMintNoticeV1 {
+    queryId: uint64
+    auctionId: uint64
+}
