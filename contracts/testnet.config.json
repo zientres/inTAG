@@ -1,0 +1,20 @@
+{
+  "network": "testnet",
+  "creator": "0QAlaQjrvRz8GCm2IJ1QXA6rNGSyyYfH6uNPT0RzKja6VsLi",
+  "treasury": null,
+  "development_security_fund": null,
+  "primary_auction_distribution": {
+    "creator_percent": 50,
+    "treasury_percent": 30,
+    "development_security_fund_percent": 20
+  },
+  "secondary_sale_royalty": {
+    "numerator": 2,
+    "denominator": 100,
+    "recipient": "creator"
+  },
+  "deployment": {
+    "enabled": false,
+    "reason": "Auction Manager is not implemented and contracts have not yet been compiled and tested."
+  }
+}
