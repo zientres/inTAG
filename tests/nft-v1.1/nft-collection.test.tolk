@@ -4,11 +4,11 @@ import "@acton/emulation/testing"
 import "@acton/testing/expect"
 import "@acton/types/array"
 
-import "../contracts/errors"
-import "../contracts/messages"
-import "../contracts/types"
-import "../wrappers/NftCollection.gen"
-import "../wrappers/NftItem.gen"
+import "../../contracts/nft-v1.1/errors"
+import "../../contracts/nft-v1.1/messages"
+import "../../contracts/nft-v1.1/types"
+import "../../wrappers/NftCollection.gen"
+import "../../wrappers/NftItem.gen"
 
 get fun `test nft: report royalty params`() {
     val (nftCollection, _, royaltyParams) = setupTest();
