@@ -124,13 +124,17 @@ fun onInternalMessage(in: InMessage) {
                 contract.getAddress(),
                 storage.nftItemCode,
             ).calculateAddress();
-            assert (in.senderAddress == expectedItemAddress) throw NftV12Errors.NotFromExpectedNftItem;
+            assert (
+                in.senderAddress == expectedItemAddress
+            ) throw NftV12Errors.NotFromExpectedNftItem;
 
             val lookup = storage.pendingDeployments.get(msg.itemIndex);
             assert (lookup.isFound) throw NftV12Errors.PendingDeploymentNotFound;
             var pending = lookup.loadValue();
             assert (pending.queryId == msg.queryId) throw NftV12Errors.InvalidDeploymentState;
-            assert (pending.itemAddress == in.senderAddress) throw NftV12Errors.NotFromExpectedNftItem;
+            assert (
+                pending.itemAddress == in.senderAddress
+            ) throw NftV12Errors.NotFromExpectedNftItem;
             assert (
                 pending.status == NFT_V12_DEPLOYMENT_WAITING_FOR_ITEM
             ) throw NftV12Errors.InvalidDeploymentState;
