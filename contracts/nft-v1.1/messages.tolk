@@ -1,4 +1,4 @@
-import "types"
+import "@contracts/nft-v1.1/types"
 
 struct NftItemInitAtDeployment {
     ownerAddress: address
