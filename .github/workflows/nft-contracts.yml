@@ -34,6 +34,9 @@ jobs:
       - name: Show Acton version
         run: acton --version
 
+      - name: Validate NFT metadata generator
+        run: node --check scripts/generate-nft-metadata.mjs
+
       - name: Build contracts
         run: acton build
 
