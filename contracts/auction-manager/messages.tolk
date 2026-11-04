@@ -1,5 +1,3 @@
-import "@contracts/nft-v1.2/messages"
-
 struct (0x54474101) CreateAuctionV1 {
     queryId: uint64
     itemIndex: uint64
