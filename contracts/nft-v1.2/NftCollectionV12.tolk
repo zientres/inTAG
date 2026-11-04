@@ -46,11 +46,7 @@ fun notifyManagerOfSuccessfulDeployment(
         bounce: BounceMode.RichBounce,
         dest: managerAddress,
         value: 0,
-        body: NftItemDeploymentConfirmedV12 {
-            queryId,
-            itemIndex,
-            nftAddress,
-        },
+        body: NftItemDeploymentConfirmedV12 { queryId, itemIndex, nftAddress },
     });
     notification.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
 }
@@ -65,11 +61,7 @@ fun notifyManagerOfFailedDeployment(
         bounce: BounceMode.RichBounce,
         dest: managerAddress,
         value: 0,
-        body: NftItemDeploymentFailedV12 {
-            queryId,
-            itemIndex,
-            exitCode,
-        },
+        body: NftItemDeploymentFailedV12 { queryId, itemIndex, exitCode },
     });
     notification.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
 }
@@ -250,9 +242,8 @@ fun onBouncedMessage(in: InMessageBounced) {
 
     var pending = lookup.loadValue();
     if (
-        in.senderAddress != pending.itemAddress
-        || pending.queryId != initParams.queryId
-        || pending.status != NFT_V12_DEPLOYMENT_WAITING_FOR_ITEM
+        in.senderAddress != pending.itemAddress || pending.queryId != initParams.queryId ||
+        pending.status != NFT_V12_DEPLOYMENT_WAITING_FOR_ITEM
     ) {
         return;
     }
