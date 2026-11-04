@@ -68,44 +68,44 @@ fun notifyManagerOfFailedDeployment(
 }
 
 fun onInternalMessage(in: InMessage) {
-    val msg = lazy AllowedMessageToNftCollectionV12.fromSlice(in.body);
+    val message = lazy AllowedMessageToNftCollectionV12.fromSlice(in.body);
 
-    match (msg) {
+    match (message) {
         DeployNftV12 => {
             var storage = lazy NftCollectionV12Storage.load();
             assert (in.senderAddress == storage.adminAddress) throw NftV12Errors.NotFromAdmin;
-            assert (msg.queryId != 0) throw NftV12Errors.InvalidDeploymentState;
-            assert (msg.itemIndex == storage.nextItemIndex) throw NftV12Errors.InvalidItemIndex;
+            assert (message.queryId != 0) throw NftV12Errors.InvalidDeploymentState;
+            assert (message.itemIndex == storage.nextItemIndex) throw NftV12Errors.InvalidItemIndex;
             assert (
-                !storage.pendingDeployments.exists(msg.itemIndex)
+                !storage.pendingDeployments.exists(message.itemIndex)
             ) throw NftV12Errors.PendingDeploymentAlreadyExists;
 
             val itemAddress = calcDeployedNftItemV12(
-                msg.itemIndex,
+                message.itemIndex,
                 contract.getAddress(),
                 storage.nftItemCode,
             ).calculateAddress();
 
             val pending: PendingNftDeploymentV12 = {
-                queryId: msg.queryId,
+                queryId: message.queryId,
                 managerAddress: in.senderAddress,
                 itemAddress,
                 status: NFT_V12_DEPLOYMENT_WAITING_FOR_ITEM,
                 exitCode: 0,
             };
-            storage.pendingDeployments.set(msg.itemIndex, pending);
+            storage.pendingDeployments.set(message.itemIndex, pending);
             storage.nextItemIndex += 1;
             storage.save();
 
             deployNftItemV12(
-                msg.itemIndex,
+                message.itemIndex,
                 storage.nftItemCode,
-                msg.attachTonAmount,
+                message.attachTonAmount,
                 NftItemInitAtDeploymentV12 {
-                    queryId: msg.queryId,
-                    itemIndex: msg.itemIndex,
-                    ownerAddress: msg.ownerAddress,
-                    content: msg.content,
+                    queryId: message.queryId,
+                    itemIndex: message.itemIndex,
+                    ownerAddress: message.ownerAddress,
+                    content: message.content,
                 },
             );
         }
@@ -113,10 +113,10 @@ fun onInternalMessage(in: InMessage) {
         SkipNftItemIndexV12 => {
             var storage = lazy NftCollectionV12Storage.load();
             assert (in.senderAddress == storage.adminAddress) throw NftV12Errors.NotFromAdmin;
-            assert (msg.queryId != 0) throw NftV12Errors.InvalidDeploymentState;
-            assert (msg.itemIndex == storage.nextItemIndex) throw NftV12Errors.InvalidItemIndex;
+            assert (message.queryId != 0) throw NftV12Errors.InvalidDeploymentState;
+            assert (message.itemIndex == storage.nextItemIndex) throw NftV12Errors.InvalidItemIndex;
             assert (
-                !storage.pendingDeployments.exists(msg.itemIndex)
+                !storage.pendingDeployments.exists(message.itemIndex)
             ) throw NftV12Errors.PendingDeploymentAlreadyExists;
             storage.nextItemIndex += 1;
             storage.save();
@@ -125,7 +125,7 @@ fun onInternalMessage(in: InMessage) {
         NftItemInitializedV12 => {
             var storage = lazy NftCollectionV12Storage.load();
             val expectedItemAddress = calcDeployedNftItemV12(
-                msg.itemIndex,
+                message.itemIndex,
                 contract.getAddress(),
                 storage.nftItemCode,
             ).calculateAddress();
@@ -133,10 +133,10 @@ fun onInternalMessage(in: InMessage) {
                 in.senderAddress == expectedItemAddress
             ) throw NftV12Errors.NotFromExpectedNftItem;
 
-            val lookup = storage.pendingDeployments.get(msg.itemIndex);
+            val lookup = storage.pendingDeployments.get(message.itemIndex);
             assert (lookup.isFound) throw NftV12Errors.PendingDeploymentNotFound;
             var pending = lookup.loadValue();
-            assert (pending.queryId == msg.queryId) throw NftV12Errors.InvalidDeploymentState;
+            assert (pending.queryId == message.queryId) throw NftV12Errors.InvalidDeploymentState;
             assert (
                 pending.itemAddress == in.senderAddress
             ) throw NftV12Errors.NotFromExpectedNftItem;
@@ -146,39 +146,39 @@ fun onInternalMessage(in: InMessage) {
 
             pending.status = NFT_V12_DEPLOYMENT_READY_FOR_MANAGER;
             pending.exitCode = 0;
-            storage.pendingDeployments.set(msg.itemIndex, pending);
+            storage.pendingDeployments.set(message.itemIndex, pending);
             storage.save();
 
             notifyManagerOfSuccessfulDeployment(
                 pending.managerAddress,
                 pending.queryId,
-                msg.itemIndex,
+                message.itemIndex,
                 pending.itemAddress,
             );
         }
 
         NftItemDeploymentAckV12 => {
             var storage = lazy NftCollectionV12Storage.load();
-            val lookup = storage.pendingDeployments.get(msg.itemIndex);
+            val lookup = storage.pendingDeployments.get(message.itemIndex);
             assert (lookup.isFound) throw NftV12Errors.PendingDeploymentNotFound;
             val pending = lookup.loadValue();
             assert (in.senderAddress == pending.managerAddress) throw NftV12Errors.NotFromManager;
-            assert (pending.queryId == msg.queryId) throw NftV12Errors.InvalidDeploymentState;
+            assert (pending.queryId == message.queryId) throw NftV12Errors.InvalidDeploymentState;
             assert (
                 pending.status == NFT_V12_DEPLOYMENT_READY_FOR_MANAGER ||
                 pending.status == NFT_V12_DEPLOYMENT_FAILED
             ) throw NftV12Errors.DeploymentNoticeNotReady;
-            storage.pendingDeployments.delete(msg.itemIndex);
+            storage.pendingDeployments.delete(message.itemIndex);
             storage.save();
         }
 
         RetryNftItemDeploymentNoticeV12 => {
             val storage = lazy NftCollectionV12Storage.load();
-            val lookup = storage.pendingDeployments.get(msg.itemIndex);
+            val lookup = storage.pendingDeployments.get(message.itemIndex);
             assert (lookup.isFound) throw NftV12Errors.PendingDeploymentNotFound;
             val pending = lookup.loadValue();
             assert (in.senderAddress == pending.managerAddress) throw NftV12Errors.NotFromManager;
-            assert (pending.queryId == msg.queryId) throw NftV12Errors.InvalidDeploymentState;
+            assert (pending.queryId == message.queryId) throw NftV12Errors.InvalidDeploymentState;
 
             if (pending.status == NFT_V12_DEPLOYMENT_WAITING_FOR_ITEM) {
                 val retryItem = createMessage({
@@ -187,7 +187,7 @@ fun onInternalMessage(in: InMessage) {
                     value: 0,
                     body: RequestNftItemConfirmationV12 {
                         queryId: pending.queryId,
-                        itemIndex: msg.itemIndex,
+                        itemIndex: message.itemIndex,
                     },
                 });
                 retryItem.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
@@ -195,7 +195,7 @@ fun onInternalMessage(in: InMessage) {
                 notifyManagerOfSuccessfulDeployment(
                     pending.managerAddress,
                     pending.queryId,
-                    msg.itemIndex,
+                    message.itemIndex,
                     pending.itemAddress,
                 );
             } else {
@@ -205,7 +205,7 @@ fun onInternalMessage(in: InMessage) {
                 notifyManagerOfFailedDeployment(
                     pending.managerAddress,
                     pending.queryId,
-                    msg.itemIndex,
+                    message.itemIndex,
                     pending.exitCode,
                 );
             }
@@ -218,7 +218,7 @@ fun onInternalMessage(in: InMessage) {
                 dest: in.senderAddress,
                 value: 0,
                 body: ResponseRoyaltyParams {
-                    queryId: msg.queryId,
+                    queryId: message.queryId,
                     royaltyParams: storage.royaltyParams.load(),
                 },
             });
@@ -228,7 +228,7 @@ fun onInternalMessage(in: InMessage) {
         ChangeCollectionAdmin => {
             var storage = lazy NftCollectionV12Storage.load();
             assert (in.senderAddress == storage.adminAddress) throw NftV12Errors.NotFromAdmin;
-            storage.adminAddress = msg.newAdminAddress;
+            storage.adminAddress = message.newAdminAddress;
             storage.save();
         }
 
