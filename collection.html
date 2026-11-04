@@ -316,6 +316,12 @@
 
     <section class="russia-collection" id="russia-collection" hidden>
       <button class="collection-back" id="back-to-collections" type="button" aria-label="Вернуться к коллекциям">←</button>
+      <nav class="collection-sections" aria-label="Разделы коллекции">
+        <button class="collection-section-tab is-active" type="button" data-collection-tab="mint" aria-pressed="true">Минт</button>
+        <button class="collection-section-tab" type="button" data-collection-tab="auctions" aria-pressed="false">Аукционы</button>
+        <button class="collection-section-tab" type="button" data-collection-tab="market" aria-pressed="false">Рынок</button>
+      </nav>
+      <div class="collection-tab-panel" id="collection-panel-mint">
       <div class="russia-collection-content">
         <h1>Зарегистрировать номерной знак России</h1>
         <p class="russia-collection-subtitle">Вводите комбинацию вашего номера в поле снизу</p>
@@ -358,6 +364,9 @@
         </div>
 
       </div>
+      </div>
+      <div class="collection-tab-panel" id="collection-panel-auctions" hidden></div>
+      <div class="collection-tab-panel" id="collection-panel-market" hidden></div>
     </section>
   </main>
 
@@ -486,6 +495,29 @@
 
       document.getElementById("registration-field").addEventListener("click", () => input.focus());
       render();
+    })();
+
+    (() => {
+      const tabs = Array.from(document.querySelectorAll("[data-collection-tab]"));
+      const panels = {
+        mint: document.getElementById("collection-panel-mint"),
+        auctions: document.getElementById("collection-panel-auctions"),
+        market: document.getElementById("collection-panel-market")
+      };
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const selected = tab.dataset.collectionTab;
+          tabs.forEach((item) => {
+            const active = item === tab;
+            item.classList.toggle("is-active", active);
+            item.setAttribute("aria-pressed", String(active));
+          });
+          Object.entries(panels).forEach(([name, panel]) => {
+            panel.hidden = name !== selected;
+          });
+        });
+      });
     })();
   </script>
 </body>
