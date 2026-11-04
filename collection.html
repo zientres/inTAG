@@ -400,7 +400,8 @@
       }
 
       function parseInput(raw) {
-        const chars = Array.from(raw.toUpperCase().replace(/Ё/g, "Е"));
+        const latinToRussian = { A: "А", B: "В", E: "Е", K: "К", M: "М", H: "Н", O: "О", P: "Р", C: "С", T: "Т", Y: "У", X: "Х" };
+        const chars = Array.from(raw.toUpperCase().replace(/Ё/g, "Е")).map(char => latinToRussian[char] || char);
         let result = "";
         let badLetter = false;
         const pattern = ["letter", "digit", "digit", "digit", "letter", "letter"];
