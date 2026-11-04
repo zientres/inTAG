@@ -2,11 +2,11 @@ import "@acton/build"
 import "@acton/emulation/network"
 import "@acton/emulation/testing"
 import "@acton/testing/expect"
-import "../../wrappers/NftCollection.gen"
-import "../../wrappers/NftItem.gen"
-import "../../wrappers/utils"
-import "../../contracts/nft-v1.1/messages"
-import "../../contracts/nft-v1.1/types"
+import "@wrappers/NftCollection.gen"
+import "@wrappers/NftItem.gen"
+import "@wrappers/utils"
+import "@contracts/nft-v1.1/messages"
+import "@contracts/nft-v1.1/types"
 
 const NFT_E2E_NOW = 1000
 const NFT_E2E_ROYALTY_QUERY_ID = 7301
