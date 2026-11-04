@@ -6,6 +6,7 @@ import "@acton/emulation/network"
 import "@acton/testing/assert"
 import "@contracts/nft-v1.1/messages"
 import "@contracts/nft-v1.1/types"
+import "@contracts/nft-v1.2/types"
 
 struct NftItemV12 {
     address: address
@@ -13,7 +14,7 @@ struct NftItemV12 {
 }
 
 fun NftItemV12.fromStorage(
-    storage: NftItemStorageNotInitialized,
+    storage: NftItemV12StorageNotInitialized,
     toShard: AddressShardingOptions? = null,
 ): NftItemV12 {
     val stateInit = ContractState {
