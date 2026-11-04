@@ -31,8 +31,10 @@ struct AuctionManagerStorage {
     securityFundAddress: address?
     nextAuctionId: uint64
     nextItemIndex: uint64
+    nextMintItemIndex: uint64
     nextQueryId: uint64
     auctions: map<uint64, AuctionV1>
+    itemToAuction: map<uint64, uint64>
     refundCredits: map<address, coins>
     payoutCredits: map<address, coins>
     processedBounces: map<uint64, bool>
