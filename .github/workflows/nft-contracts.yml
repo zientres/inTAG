@@ -1,0 +1,47 @@
+name: NFT contracts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Acton.toml"
+      - "contracts/nft-v1.1/**"
+      - "tests/nft-v1.1/**"
+      - "wrappers/**"
+      - "scripts/**"
+      - ".github/workflows/nft-contracts.yml"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  build-and-test:
+    name: Build and test NFT collection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Setup Acton
+        uses: ton-blockchain/setup-acton@2d38fd579e1bf8753a3e0cff9ad695612b98a676
+
+      - name: Show Acton version
+        run: acton --version
+
+      - name: Build contracts
+        run: acton build
+
+      - name: Check formatting
+        run: acton fmt --check
+
+      - name: Lint contracts
+        run: acton check --output-format github
+
+      - name: Run NFT tests
+        run: acton test tests/nft-v1.1
