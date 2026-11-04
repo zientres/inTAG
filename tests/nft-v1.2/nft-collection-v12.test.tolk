@@ -149,3 +149,54 @@ get fun `test nft v1.2: rejects deployment from non-admin`() {
         exitCode: NftV12Errors.NotFromAdmin,
     });
 }
+
+get fun `test nft v1.2: rejects forged item initialization callback`() {
+    val (collection, _, _) = setupNftCollectionV12Test();
+    val attacker = testing.treasury("forged-nft-item");
+    val forged = NftItemInitializedV12 {
+        queryId: 13001,
+        itemIndex: 0,
+    }.toCell();
+
+    val result = collection.sendAny(
+        attacker.address,
+        forged,
+        { value: grams("0.03"), bounce: true },
+    );
+
+    expect(result).toHaveFailedTx<NftItemInitializedV12>({
+        from: attacker.address,
+        to: collection.address,
+        exitCode: NftV12Errors.NotFromExpectedNftItem,
+    });
+}
+
+get fun `test nft v1.2: only manager can acknowledge deployment`() {
+    val (collection, manager, owner) = setupNftCollectionV12Test();
+    val attacker = testing.treasury("fake-manager");
+    val queryId = 13002;
+    val itemIndex = 0;
+
+    collection.sendDeployNftV12(
+        manager.address,
+        queryId,
+        itemIndex,
+        grams("0.02"),
+        owner.address,
+        "ack.json",
+        { value: grams("0.1"), bounce: true },
+    );
+
+    val result = collection.sendNftItemDeploymentAckV12(
+        attacker.address,
+        queryId,
+        itemIndex,
+        { value: grams("0.03"), bounce: true },
+    );
+
+    expect(result).toHaveFailedTx<NftItemDeploymentAckV12>({
+        from: attacker.address,
+        to: collection.address,
+        exitCode: NftV12Errors.NotFromManager,
+    });
+}
