@@ -90,6 +90,8 @@ fun onInternalMessage(in: InMessage) {
             var storage = lazy AuctionManagerStorage.load();
             assert (in.senderAddress == storage.ownerAddress) throw AuctionManagerErrors.NotFromOwner;
             assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (!storage.payoutConfigLocked) throw AuctionManagerErrors.InvalidPayoutConfiguration;
+            assert (!storage.processedQueries.exists(msg.queryId)) throw AuctionManagerErrors.InvalidQueryId;
             assert (
                 msg.treasuryAddress != null && msg.securityFundAddress != null
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
@@ -105,6 +107,7 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
             storage.treasuryAddress = treasury;
             storage.securityFundAddress = securityFund;
+            storage.processedQueries.set(msg.queryId, true);
             storage.save();
         }
 
@@ -112,6 +115,7 @@ fun onInternalMessage(in: InMessage) {
             var storage = lazy AuctionManagerStorage.load();
             assert (in.senderAddress == storage.ownerAddress) throw AuctionManagerErrors.NotFromOwner;
             assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (!storage.processedQueries.exists(msg.queryId)) throw AuctionManagerErrors.InvalidQueryId;
             assert (
                 storage.treasuryAddress != null && storage.securityFundAddress != null
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
@@ -138,12 +142,15 @@ fun onInternalMessage(in: InMessage) {
             storage.itemToAuction.set(msg.itemIndex, auctionId);
             storage.nextAuctionId += 1;
             storage.nextItemIndex += 1;
+            storage.payoutConfigLocked = true;
+            storage.processedQueries.set(msg.queryId, true);
             storage.save();
         }
 
         PlaceBidV1 => {
             var storage = lazy AuctionManagerStorage.load();
             assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (!storage.processedQueries.exists(msg.queryId)) throw AuctionManagerErrors.InvalidQueryId;
             val lookup = storage.auctions.get(msg.auctionId);
             assert (lookup.isFound) throw AuctionManagerErrors.InvalidAuctionId;
             var auction = lookup.loadValue();
@@ -164,6 +171,7 @@ fun onInternalMessage(in: InMessage) {
             auction.highestBid = msg.bidAmount;
             auction.highestBidder = in.senderAddress;
             storage.auctions.set(msg.auctionId, auction);
+            storage.processedQueries.set(msg.queryId, true);
             storage.save();
 
             if (previousBidder != null && previousBid > 0) {
@@ -177,6 +185,7 @@ fun onInternalMessage(in: InMessage) {
         FinishAuctionV1 => {
             var storage = lazy AuctionManagerStorage.load();
             assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (!storage.processedQueries.exists(msg.queryId)) throw AuctionManagerErrors.InvalidQueryId;
             assert (in.valueCoins >= AUCTION_V1_MIN_FINISH_OVERHEAD) throw AuctionManagerErrors.InsufficientAttachedValue;
             val lookup = storage.auctions.get(msg.auctionId);
             assert (lookup.isFound) throw AuctionManagerErrors.InvalidAuctionId;
@@ -187,6 +196,7 @@ fun onInternalMessage(in: InMessage) {
             if (auction.highestBidder == null || auction.highestBid == 0) {
                 auction.status = AUCTION_V1_CLOSED_NO_BIDS;
                 storage.auctions.set(msg.auctionId, auction);
+                storage.processedQueries.set(msg.queryId, true);
                 storage.save();
                 return;
             }
@@ -197,6 +207,7 @@ fun onInternalMessage(in: InMessage) {
             auction.status = AUCTION_V1_WAITING_FOR_MINT;
             auction.mintQueryId = mintQueryId;
             storage.auctions.set(msg.auctionId, auction);
+            storage.processedQueries.set(msg.queryId, true);
             storage.save();
 
             val deploy = createMessage({
@@ -296,11 +307,13 @@ fun onInternalMessage(in: InMessage) {
         ClaimRefundV1 => {
             var storage = lazy AuctionManagerStorage.load();
             assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (!storage.processedQueries.exists(msg.queryId)) throw AuctionManagerErrors.InvalidQueryId;
             val lookup = storage.refundCredits.get(in.senderAddress);
             assert (lookup.isFound) throw AuctionManagerErrors.NoRefundAvailable;
             val amount = lookup.loadValue();
             assert (amount > 0) throw AuctionManagerErrors.NoRefundAvailable;
             storage.refundCredits.delete(in.senderAddress);
+            storage.processedQueries.set(msg.queryId, true);
             val queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
@@ -310,11 +323,13 @@ fun onInternalMessage(in: InMessage) {
         ClaimPayoutV1 => {
             var storage = lazy AuctionManagerStorage.load();
             assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (!storage.processedQueries.exists(msg.queryId)) throw AuctionManagerErrors.InvalidQueryId;
             val lookup = storage.payoutCredits.get(in.senderAddress);
             assert (lookup.isFound) throw AuctionManagerErrors.NoPayoutAvailable;
             val amount = lookup.loadValue();
             assert (amount > 0) throw AuctionManagerErrors.NoPayoutAvailable;
             storage.payoutCredits.delete(in.senderAddress);
+            storage.processedQueries.set(msg.queryId, true);
             val queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
