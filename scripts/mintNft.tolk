@@ -8,7 +8,6 @@ import "@acton/testing/assert"
 
 import "@wrappers/NftCollection.gen"
 import "@wrappers/NftItem.gen"
-import "@contracts/nft-v1.1/messages"
 
 const NFT_ITEM_DEPLOY_AMOUNT = grams("0.02")
 const NFT_COLLECTION_MESSAGE_VALUE = grams("0.08")
