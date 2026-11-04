@@ -1,3 +1,4 @@
+import "@stdlib/strings"
 import "@acton/build"
 import "@acton/io"
 import "@acton/prompts"
@@ -18,26 +19,28 @@ fun main() {
     val collection = NftCollection.fromAddress(collectionAddress);
 
     val collectionData = collection.getCollectionData();
-    assert (wallet.address == collectionData.adminAddress) throw "Connected wallet is not collection admin";
+    if (wallet.address != collectionData.adminAddress) {
+        Assert.fail("Connected wallet is not the NFT collection admin");
+    }
 
     val itemIndex = collectionData.nextItemIndex;
-    val itemContent = prompt(
-        "NFT metadata filename (must already be published)",
-        "",
-        itemIndex.toString() + ".json",
-    );
-
-    assert (itemContent != "") throw "NFT metadata filename cannot be empty";
-    assert (itemContent.endsWith(".json")) throw "NFT content must be a JSON filename";
-    assert (!itemContent.contains("/")) throw "Use only a filename, not a path";
-
+    val itemContent = StringBuilder.create().append(itemIndex.toDecimalString()).append(".json").build();
     val ownerAddress = promptAddress("NFT recipient wallet address");
+
     println("Collection: {}", collectionAddress);
     println("NFT index: {}", itemIndex);
     println("Metadata URL: {}/{}", "https://zientres.github.io/inTAG/metadata", itemContent);
     println("Recipient: {}", ownerAddress);
-    println("Attached value: {} TON", NFT_ITEM_DEPLOY_AMOUNT);
-    assert (confirm("Metadata JSON and its unique plate image are already published. Continue with Testnet mint?", false)) throw "Mint cancelled by user";
+    println("Attached value: {:grams}", NFT_ITEM_DEPLOY_AMOUNT);
+
+    if (!confirm(
+        "Have you published this NFT's JSON metadata and unique plate image? Continue with Testnet mint?",
+        false,
+        "This sends a real transaction on TON Testnet. The recipient will receive the NFT.",
+    )) {
+        println("Mint cancelled. No transaction was sent.");
+        return;
+    }
 
     val result = collection.sendDeployNft(
         wallet.address,
@@ -56,10 +59,18 @@ fun main() {
     val item = NftItem.fromAddress(nftAddress);
     val nftData = item.getNftData();
 
-    assert (nftData.isInitialized) throw "NFT item deployment was not confirmed";
-    assert (nftData.itemIndex == itemIndex) throw "NFT item index mismatch";
-    assert (nftData.ownerAddress! == ownerAddress) throw "NFT owner mismatch";
-    assert (nftData.collectionAddress == collectionAddress) throw "NFT collection mismatch";
+    if (!nftData.isInitialized) {
+        Assert.fail("NFT item deployment was not confirmed");
+    }
+    if (nftData.itemIndex != itemIndex) {
+        Assert.fail("NFT item index mismatch");
+    }
+    if (nftData.ownerAddress! != ownerAddress) {
+        Assert.fail("NFT owner mismatch");
+    }
+    if (nftData.collectionAddress != collectionAddress) {
+        Assert.fail("NFT collection mismatch");
+    }
 
     println("NFT_MINTED=true");
     println("NFT_INDEX={}", itemIndex);
