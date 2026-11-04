@@ -288,3 +288,63 @@ get fun `test auction manager: distributes the winning bid only after mint confi
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
 }
+
+get fun `test auction manager: refunds winner if NFT deployment fails`() {
+    val creator = testing.treasury("failed-mint-creator");
+    val collection = testing.treasury("failed-mint-collection");
+    val bidder = testing.treasury("failed-mint-winner");
+    val treasury = testing.treasury("failed-mint-treasury");
+    val securityFund = testing.treasury("failed-mint-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var auctions: map<uint64, AuctionV1> = [];
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "FAILED 77",
+            metadataContent: "failed.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("4"),
+            highestBidder: bidder.address,
+            status: AUCTION_V1_WAITING_FOR_MINT,
+            mintQueryId: 78,
+        },
+    );
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: creator.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 1,
+        nextMintItemIndex: 0,
+        nextQueryId: 100,
+        auctions,
+        refundCredits: [],
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val failure = manager.sendAny(
+        collection.address,
+        NftItemDeploymentFailedV12 {
+            queryId: 78,
+            itemIndex: 0,
+            exitCode: 77,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(failure).toHaveSuccessfulTx<NftItemDeploymentFailedV12>({
+        from: collection.address,
+        to: manager.address,
+    });
+    expect(failure).toHaveTx<RefundTransferV1>({
+        from: manager.address,
+        to: bidder.address,
+    });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_MINT_FAILED);
+}
