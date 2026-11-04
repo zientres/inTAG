@@ -1,6 +1,6 @@
 [package]
 name = "tagitalspace-contracts"
-description = "TagitalSpace TON Testnet NFT and auction contracts"
+description = "TagitalSpace TON Testnet NFT collection contracts"
 version = "0.1.0"
 license = "MIT"
 
@@ -27,3 +27,13 @@ throw-requires-errors-enum = "allow"
 
 [fmt]
 width = 100
+
+[scripts]
+test-nft = "acton test tests/nft-v1.1"
+
+[import-mappings]
+acton = ".acton"
+contracts = "contracts"
+gen = "gen"
+tests = "tests"
+wrappers = "wrappers"
