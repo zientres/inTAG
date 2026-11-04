@@ -4,10 +4,8 @@ import "@acton/io"
 import "@acton/prompts"
 import "@acton/emulation/network"
 import "@acton/emulation/scripts"
-import "../../wrappers/NftCollection.gen"
-import "../../wrappers/NftItem.gen"
-import "../../contracts/nft-v1.1/messages"
-import "../../contracts/nft-v1.1/types"
+import "@wrappers/NftCollection.gen"
+import "@contracts/nft-v1.1/types"
 
 const ONCHAIN_CONTENT_PREFIX = 0x00
 
@@ -64,8 +62,8 @@ fun makeNftCollectionStorage(admin: address, info: NftCollectionInfo): NftCollec
 }
 
 fun deployNftCollection(deployer: ActonWallet, info: NftCollectionInfo): NftCollection {
-    assert (info.commonContent != "") throw 1001;
-    assert (info.image != "") throw 1002;
+    assert (info.commonContent.sha256() != "".sha256()) throw 1001;
+    assert (info.image.sha256() != "".sha256()) throw 1002;
     val collection = NftCollection.fromStorage(makeNftCollectionStorage(deployer.address, info));
     val res = collection.deploy(deployer.address, { value: grams("0.2"), bounce: false });
     res.waitForFirstTransaction();
