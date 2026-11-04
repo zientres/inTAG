@@ -3,7 +3,6 @@
 
 import "@acton/build"
 import "@acton/emulation/network"
-import "@acton/testing/assert"
 import "@contracts/nft-v1.1/messages"
 import "@contracts/nft-v1.1/types"
 import "@contracts/nft-v1.2/types"
