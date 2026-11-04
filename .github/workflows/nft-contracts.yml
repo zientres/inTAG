@@ -6,7 +6,9 @@ on:
     paths:
       - "Acton.toml"
       - "contracts/nft-v1.1/**"
+      - "contracts/nft-v1.2/**"
       - "tests/nft-v1.1/**"
+      - "tests/nft-v1.2/**"
       - "wrappers/**"
       - "scripts/**"
       - ".github/workflows/nft-contracts.yml"
@@ -18,7 +20,7 @@ permissions: {}
 
 jobs:
   build-and-test:
-    name: Build and test NFT collection
+    name: Build and test NFT collections
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -46,5 +48,8 @@ jobs:
       - name: Lint contracts
         run: acton check --output-format github
 
-      - name: Run NFT tests
+      - name: Run NFT v1.1 tests
         run: acton test tests/nft-v1.1
+
+      - name: Run NFT v1.2 tests
+        run: acton test tests/nft-v1.2

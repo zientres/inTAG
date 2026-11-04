@@ -15,6 +15,14 @@ depends = ["NftItem"]
 src = "contracts/nft-v1.1/NftItem.tolk"
 depends = []
 
+[contracts.NftCollectionV12]
+src = "contracts/nft-v1.2/NftCollectionV12.tolk"
+depends = ["NftItemV12"]
+
+[contracts.NftItemV12]
+src = "contracts/nft-v1.2/NftItemV12.tolk"
+depends = []
+
 [build]
 output-fift = "build/fift"
 
@@ -30,12 +38,13 @@ width = 100
 
 [scripts]
 test-nft = "acton test tests/nft-v1.1"
+test-nft-v12 = "acton test tests/nft-v1.2"
 deploy-nft-collection = "acton script scripts/deployCollection.tolk --net testnet --tonconnect"
+deploy-nft-collection-v12 = "acton script scripts/deployCollectionV12.tolk --net testnet --tonconnect"
 mint-nft = "acton script scripts/mintNft.tolk --net testnet --tonconnect"
 
 [import-mappings]
 acton = ".acton"
 contracts = "contracts"
 gen = "gen"
-tests = "tests"
 wrappers = "wrappers"
