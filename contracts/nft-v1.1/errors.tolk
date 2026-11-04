@@ -1,3 +1,5 @@
+// these error codes are quite strange, but they are exactly the same as in FunC implementation
+
 enum Errors {
     BatchLimitExceeded = 399
     InvalidWorkchain = 333
