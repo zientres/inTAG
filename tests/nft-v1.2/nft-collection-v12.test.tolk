@@ -196,3 +196,23 @@ get fun `test nft v1.2: only manager can acknowledge deployment`() {
         exitCode: NftV12Errors.NotFromManager,
     });
 }
+
+get fun `test nft v1.2: rejects zero deployment query id`() {
+    val (collection, manager, owner) = setupNftCollectionV12Test();
+
+    val result = collection.sendDeployNftV12(
+        manager.address,
+        0,
+        0,
+        grams("0.02"),
+        owner.address,
+        "zero-query-id.json",
+        { value: grams("0.1"), bounce: true },
+    );
+
+    expect(result).toHaveFailedTx<DeployNftV12>({
+        from: manager.address,
+        to: collection.address,
+        exitCode: NftV12Errors.InvalidDeploymentState,
+    });
+}
