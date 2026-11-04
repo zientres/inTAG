@@ -49,6 +49,7 @@ configure-auction-manager = "acton script scripts/configureAuctionManager.tolk -
 deploy-nft-collection = "acton script scripts/deployCollection.tolk --net testnet --tonconnect"
 deploy-nft-collection-v12 = "acton script scripts/deployCollectionV12.tolk --net testnet --tonconnect"
 mint-nft = "acton script scripts/mintNft.tolk --net testnet --tonconnect"
+transfer-collection-admin = "acton script scripts/transferCollectionAdminToAuctionManager.tolk --net testnet --tonconnect"
 
 [import-mappings]
 acton = ".acton"
@@ -56,5 +57,3 @@ contracts = "contracts"
 gen = "gen"
 wrappers = "wrappers"
 
-
-transfer-collection-admin = "acton script scripts/transferCollectionAdminToAuctionManager.tolk --net testnet --tonconnect"
