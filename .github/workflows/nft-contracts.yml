@@ -7,8 +7,10 @@ on:
       - "Acton.toml"
       - "contracts/nft-v1.1/**"
       - "contracts/nft-v1.2/**"
+      - "contracts/auction-manager/**"
       - "tests/nft-v1.1/**"
       - "tests/nft-v1.2/**"
+      - "tests/auction-manager/**"
       - "wrappers/**"
       - "scripts/**"
       - ".github/workflows/nft-contracts.yml"
@@ -20,7 +22,7 @@ permissions: {}
 
 jobs:
   build-and-test:
-    name: Build and test NFT collections
+    name: Build and test NFT and auction contracts
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,3 +55,6 @@ jobs:
 
       - name: Run NFT v1.2 tests
         run: acton test tests/nft-v1.2
+
+      - name: Run Auction Manager tests
+        run: acton test tests/auction-manager
