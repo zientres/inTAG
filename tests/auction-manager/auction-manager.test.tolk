@@ -171,3 +171,51 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_NO_BIDS);
 }
+
+get fun `test auction manager: refunds the previous leader immediately`() {
+    val (manager, creator, _, _, _) = setupAuctionManagerTest();
+    val create = manager.sendAny(
+        creator.address,
+        CreateAuctionV1 {
+            queryId: 20,
+            itemIndex: 0,
+            plate: "B777BB 77",
+            metadataContent: "1.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() + 3600) as uint32,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(create).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+
+    val firstBidder = testing.treasury("first-bidder");
+    val secondBidder = testing.treasury("second-bidder");
+    val firstBid = manager.sendAny(
+        firstBidder.address,
+        PlaceBidV1 {
+            queryId: 21,
+            auctionId: 0,
+            bidAmount: grams("1"),
+        }.toCell(),
+        { value: grams("1.2"), bounce: true },
+    );
+    expect(firstBid).toHaveSuccessfulTx<PlaceBidV1>({ to: manager.address });
+
+    val secondBid = manager.sendAny(
+        secondBidder.address,
+        PlaceBidV1 {
+            queryId: 22,
+            auctionId: 0,
+            bidAmount: grams("1.1"),
+        }.toCell(),
+        { value: grams("1.3"), bounce: true },
+    );
+    expect(secondBid).toHaveSuccessfulTx<PlaceBidV1>({ to: manager.address });
+    expect(secondBid).toHaveTx<RefundTransferV1>({
+        from: manager.address,
+        to: firstBidder.address,
+    });
+    expect(manager.getAuction(0)!.highestBid).toEqual(grams("1.1"));
+    expect(manager.getAuction(0)!.highestBidder).toEqual(secondBidder.address);
+}
