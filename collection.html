@@ -354,6 +354,7 @@
           <p class="registration-hint" id="registration-hint" role="status" aria-live="polite" hidden>Используйте русские буквы: А В Е К М Н О Р С Т У Х</p>
           <button class="primary-button registration-search-button" id="registration-search-button" type="submit" hidden data-i18n="search">Поиск</button>
         </form>
+        <div id="registration-result" role="status" aria-live="polite" hidden style="margin-top:18px;padding:16px 18px;border:1px solid rgba(120,186,255,.18);border-radius:14px;background:rgba(9,26,46,.55);color:#dce9f8;font-size:14px;line-height:1.55"></div>
         <div class="registration-regions-modal" id="registration-regions-modal" aria-hidden="true">
           <div class="registration-regions-backdrop" data-regions-close></div>
           <div class="registration-regions-dialog" role="dialog" aria-modal="true" aria-label="Коды регионов России" data-i18n-aria-label="regionCodesDialog">
@@ -370,6 +371,7 @@
   </main>
 
   <script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js"></script>
+  <script src="registry-client.js"></script>
   <script src="script.js?v=equal-cells-clean-start"></script>
   <script>
     (() => {
@@ -480,7 +482,7 @@
         }
       });
 
-      form.addEventListener("submit", event => {
+      form.addEventListener("submit", async event => {
         event.preventDefault();
         if (plate.length < 7) return;
         let region = plate.slice(6);
@@ -492,6 +494,30 @@
         }
         plate = plate.slice(0, 6) + region;
         render();
+
+        const result = document.getElementById("registration-result");
+        result.hidden = false;
+        result.textContent = "Проверяю номер в TON Testnet…";
+        searchButton.disabled = true;
+        try {
+          if (!window.tagitalSpaceRegistry) {
+            throw new Error("Клиент реестра не загрузился. Обновите страницу.");
+          }
+          const lookup = await window.tagitalSpaceRegistry.lookupRussianPlate(plate);
+          if (lookup.status === "free") {
+            result.textContent = "Номер не найден в реестре TagitalSpace Testnet. Он свободен для создания аукциона.";
+          } else if (lookup.status === "auction") {
+            result.textContent = "Для этого номера уже идёт аукцион. Откройте раздел «Аукционы».";
+          } else if (lookup.status === "minted") {
+            result.textContent = "Этот номер уже выпущен как NFT. Адрес владельца: " + (lookup.owner || "получен из реестра");
+          } else {
+            result.textContent = "Реестр вернул неизвестный статус номера.";
+          }
+        } catch (error) {
+          result.textContent = error.message || "Не удалось проверить номер в TON Testnet.";
+        } finally {
+          searchButton.disabled = false;
+        }
       });
 
       document.getElementById("registration-field").addEventListener("click", () => input.focus());
