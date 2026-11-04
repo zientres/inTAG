@@ -72,11 +72,7 @@ get fun `test nft v1.2: confirms item initialization before manager notification
     expect(deploy).toHaveTx<NftItemDeploymentConfirmedV12>({
         from: collection.address,
         to: manager.address,
-        body: NftItemDeploymentConfirmedV12 {
-            queryId,
-            itemIndex,
-            nftAddress,
-        }.toCell(),
+        body: NftItemDeploymentConfirmedV12 { queryId, itemIndex, nftAddress }.toCell(),
     });
 
     val pending = collection.getPendingNftDeployment(itemIndex as uint64);
