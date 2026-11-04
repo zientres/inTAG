@@ -4,10 +4,10 @@ import "@acton/io"
 import "@acton/prompts"
 import "@acton/emulation/network"
 import "@acton/emulation/scripts"
-import "../../contracts/nft-v1.1/messages"
-import "../../contracts/nft-v1.1/types"
 import "../../wrappers/NftCollection.gen"
 import "../../wrappers/NftItem.gen"
+import "../../contracts/nft-v1.1/messages"
+import "../../contracts/nft-v1.1/types"
 
 const ONCHAIN_CONTENT_PREFIX = 0x00
 
@@ -36,7 +36,11 @@ fun promptNftWallet(message: string): ActonWallet {
 fun promptNftCollectionInfo(): NftCollectionInfo {
     return {
         name: prompt("Collection name", "", "TagitalSpace"),
-        description: prompt("Collection description", "", "Digital license plate collectibles from around the world"),
+        description: prompt(
+            "Collection description",
+            "",
+            "Digital license plate collectibles from around the world",
+        ),
         image: prompt("Collection image URL", "", ""),
         commonContent: prompt("Base URL for NFT item JSON metadata (must end with /)", "", ""),
     };
