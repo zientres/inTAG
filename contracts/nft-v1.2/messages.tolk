@@ -1,5 +1,3 @@
-import "@contracts/nft-v1.1/types"
-
 struct (0x54474901) NftItemInitAtDeploymentV12 {
     queryId: uint64
     itemIndex: uint64
