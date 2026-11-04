@@ -114,7 +114,9 @@ fun onInternalMessage(in: InMessage) {
 
         CreateAuctionV1 => {
             var storage = lazy AuctionManagerStorage.load();
-            assert (in.senderAddress == storage.ownerAddress) throw AuctionManagerErrors.NotFromOwner;
+            assert (
+                in.senderAddress == storage.ownerAddress
+            ) throw AuctionManagerErrors.NotFromOwner;
             assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             assert (
                 storage.payoutAddresses.exists(0) && storage.payoutAddresses.exists(1)
@@ -195,7 +197,9 @@ fun onInternalMessage(in: InMessage) {
             val lookup = storage.auctions.get(msg.auctionId);
             assert (lookup.isFound) throw AuctionManagerErrors.InvalidAuctionId;
             var auction = lookup.loadValue();
-            assert (auction.status == AUCTION_V1_ACTIVE) throw AuctionManagerErrors.AuctionAlreadyEnded;
+            assert (
+                auction.status == AUCTION_V1_ACTIVE
+            ) throw AuctionManagerErrors.AuctionAlreadyEnded;
             assert (blockchain.now() >= auction.endTime) throw AuctionManagerErrors.AuctionNotEnded;
 
             assert (
@@ -306,17 +310,23 @@ fun onInternalMessage(in: InMessage) {
 
         NftItemDeploymentFailedV12 => {
             var storage = lazy AuctionManagerStorage.load();
-            assert (in.senderAddress == storage.collectionAddress) throw AuctionManagerErrors.NotFromCollection;
+            assert (
+                in.senderAddress == storage.collectionAddress
+            ) throw AuctionManagerErrors.NotFromCollection;
             val auctionLookup = storage.auctions.get(msg.itemIndex);
             assert (auctionLookup.isFound) throw AuctionManagerErrors.InvalidMintConfirmation;
             var auction = auctionLookup.loadValue();
-            assert (auction.mintQueryId == msg.queryId) throw AuctionManagerErrors.InvalidMintConfirmation;
+            assert (
+                auction.mintQueryId == msg.queryId
+            ) throw AuctionManagerErrors.InvalidMintConfirmation;
 
             if (auction.status == AUCTION_V1_CLOSED_MINT_FAILED) {
                 sendMintAck(storage.collectionAddress, msg.queryId, msg.itemIndex);
                 return;
             }
-            assert (auction.status == AUCTION_V1_WAITING_FOR_MINT) throw AuctionManagerErrors.InvalidAuctionState;
+            assert (
+                auction.status == AUCTION_V1_WAITING_FOR_MINT
+            ) throw AuctionManagerErrors.InvalidAuctionState;
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
             storage.auctions.set(msg.itemIndex, auction);
