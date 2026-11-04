@@ -174,7 +174,18 @@ fun onInternalMessage(in: InMessage) {
             assert (in.senderAddress == pending.managerAddress) throw NftV12Errors.NotFromManager;
             assert (pending.queryId == msg.queryId) throw NftV12Errors.InvalidDeploymentState;
 
-            if (pending.status == NFT_V12_DEPLOYMENT_READY_FOR_MANAGER) {
+            if (pending.status == NFT_V12_DEPLOYMENT_WAITING_FOR_ITEM) {
+                val retryItem = createMessage({
+                    bounce: BounceMode.NoBounce,
+                    dest: pending.itemAddress,
+                    value: 0,
+                    body: RequestNftItemConfirmationV12 {
+                        queryId: pending.queryId,
+                        itemIndex: msg.itemIndex,
+                    },
+                });
+                retryItem.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
+            } else if (pending.status == NFT_V12_DEPLOYMENT_READY_FOR_MANAGER) {
                 notifyManagerOfSuccessfulDeployment(
                     pending.managerAddress,
                     pending.queryId,
