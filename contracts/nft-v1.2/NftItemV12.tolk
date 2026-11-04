@@ -63,7 +63,9 @@ fun onInternalMessage(in: InMessage) {
             if (message.forwardPayload.preloadUint(1) != 0) {
                 assert (fwdBits == 1 && fwdRefs == 1) throw Errors.IncorrectForwardPayload;
             }
-            assert (message.newOwnerAddress.getWorkchain() == BASECHAIN) throw Errors.InvalidWorkchain;
+            assert (
+                message.newOwnerAddress.getWorkchain() == BASECHAIN
+            ) throw Errors.InvalidWorkchain;
 
             val fwdFee = in.originalForwardFee;
             var restAmount = contract.getOriginalBalance() - MIN_TONS_FOR_STORAGE;
