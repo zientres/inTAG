@@ -152,7 +152,8 @@ fun onInternalMessage(in: InMessage) {
             assert (in.senderAddress == pending.managerAddress) throw NftV12Errors.NotFromManager;
             assert (pending.queryId == msg.queryId) throw NftV12Errors.InvalidDeploymentState;
             assert (
-                pending.status != NFT_V12_DEPLOYMENT_WAITING_FOR_ITEM
+                pending.status == NFT_V12_DEPLOYMENT_READY_FOR_MANAGER
+                || pending.status == NFT_V12_DEPLOYMENT_FAILED
             ) throw NftV12Errors.DeploymentNoticeNotReady;
             storage.pendingDeployments.delete(msg.itemIndex);
             storage.save();
