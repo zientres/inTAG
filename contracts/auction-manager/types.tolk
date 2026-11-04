@@ -29,6 +29,7 @@ struct AuctionManagerStorage {
     collectionAddress: address
     treasuryAddress: address?
     securityFundAddress: address?
+    payoutConfigLocked: bool
     nextAuctionId: uint64
     nextItemIndex: uint64
     nextMintItemIndex: uint64
@@ -38,6 +39,7 @@ struct AuctionManagerStorage {
     refundCredits: map<address, coins>
     payoutCredits: map<address, coins>
     processedBounces: map<uint64, bool>
+    processedQueries: map<uint64, bool>
 }
 
 fun AuctionManagerStorage.load(): AuctionManagerStorage {
