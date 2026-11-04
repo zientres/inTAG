@@ -1,5 +1,5 @@
-import "@acton/prompts"
 import "@acton/io"
+import "@acton/prompts"
 import "@acton/emulation/scripts"
 import "@wrappers/AuctionManager.gen"
 
