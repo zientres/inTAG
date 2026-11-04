@@ -243,9 +243,9 @@ fun onInternalMessage(in: InMessage) {
 
             val treasury = storage.treasuryAddress!;
             val securityFund = storage.securityFundAddress!;
-            val treasuryShare = auction.highestBid * 30 / 100;
-            val securityShare = auction.highestBid * 20 / 100;
-            val creatorShare = auction.highestBid - treasuryShare - securityShare;
+            val treasuryShare = (auction.highestBid * 30 / 100) as coins;
+            val securityShare = (auction.highestBid * 20 / 100) as coins;
+            val creatorShare = (auction.highestBid - treasuryShare - securityShare) as coins;
             var queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
