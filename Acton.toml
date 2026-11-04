@@ -23,6 +23,10 @@ depends = ["NftItemV12"]
 src = "contracts/nft-v1.2/NftItemV12.tolk"
 depends = []
 
+[contracts.AuctionManager]
+src = "contracts/auction-manager/AuctionManager.tolk"
+depends = ["NftCollectionV12"]
+
 [build]
 output-fift = "build/fift"
 
