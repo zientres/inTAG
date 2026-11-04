@@ -221,7 +221,10 @@ get fun `test nft v1.2: admin can skip an unused item index`() {
     val (collection, manager, _) = setupNftCollectionV12Test();
     val result = collection.sendAny(
         manager.address,
-        SkipNftItemIndexV12 { queryId: 14001, itemIndex: 0 }.toCell(),
+        SkipNftItemIndexV12 {
+            queryId: 14001,
+            itemIndex: 0,
+        }.toCell(),
         { value: grams("0.03"), bounce: true },
     );
     expect(result).toHaveSuccessfulTx<SkipNftItemIndexV12>({
@@ -236,7 +239,10 @@ get fun `test nft v1.2: rejects item index skip from non-admin`() {
     val attacker = testing.treasury("unauthorized-index-skipper");
     val result = collection.sendAny(
         attacker.address,
-        SkipNftItemIndexV12 { queryId: 14002, itemIndex: 0 }.toCell(),
+        SkipNftItemIndexV12 {
+            queryId: 14002,
+            itemIndex: 0,
+        }.toCell(),
         { value: grams("0.03"), bounce: true },
     );
     expect(result).toHaveFailedTx<SkipNftItemIndexV12>({
