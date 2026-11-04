@@ -34,10 +34,7 @@ fun calcDeployedNftItemV12(
     collectionAddress: address,
     nftItemCode: cell,
 ): AutoDeployAddress {
-    val emptyNftItemStorage: NftItemV12StorageNotInitialized = {
-        itemIndex,
-        collectionAddress,
-    };
+    val emptyNftItemStorage: NftItemV12StorageNotInitialized = { itemIndex, collectionAddress };
     return { stateInit: { code: nftItemCode, data: emptyNftItemStorage.toCell() } };
 }
 
