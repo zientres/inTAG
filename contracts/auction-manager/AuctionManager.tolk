@@ -253,7 +253,9 @@ fun onInternalMessage(in: InMessage) {
         RetryMintNoticeV1 => {
             val storage = lazy AuctionManagerStorage.load();
             assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
-            assert (in.valueCoins >= AUCTION_V1_MIN_CREATE_OVERHEAD) throw AuctionManagerErrors.InsufficientAttachedValue;
+            assert (
+                in.valueCoins >= AUCTION_V1_MIN_CREATE_OVERHEAD
+            ) throw AuctionManagerErrors.InsufficientAttachedValue;
             val lookup = storage.auctions.get(msg.auctionId);
             assert (lookup.isFound) throw AuctionManagerErrors.InvalidAuctionId;
             val auction = lookup.loadValue();
