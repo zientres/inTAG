@@ -3,22 +3,24 @@ import "@contracts/nft-v1.1/fees-management"
 import "@contracts/nft-v1.1/messages"
 import "@contracts/nft-v1.1/types"
 import "@contracts/nft-v1.2/messages"
+import "@contracts/nft-v1.2/types"
 
 contract NftItemV12 {
     author: "TagitalSpace"
     version: "1.2"
     description: "TEP-62 and TEP-64 NFT item with collection initialization confirmation"
     incomingMessages: AllowedMessageToNftItemV12
-    storage: NftItemStorage
-    storageAtDeployment: NftItemStorageNotInitialized
+    storage: NftItemV12Storage
+    storageAtDeployment: NftItemV12StorageNotInitialized
 }
 
 type AllowedMessageToNftItemV12 =
     | AskToChangeOwnership
     | RequestStaticData
+    | RequestNftItemConfirmationV12
 
 fun onInternalMessage(in: InMessage) {
-    var loadingStorage = NftItemStorage.startLoading();
+    var loadingStorage = NftItemV12Storage.startLoading();
     if (loadingStorage.isNotInitialized()) {
         assert (
             in.senderAddress == loadingStorage.collectionAddress
@@ -32,6 +34,7 @@ fun onInternalMessage(in: InMessage) {
             collectionAddress: loadingStorage.collectionAddress,
             ownerAddress: initParams.ownerAddress,
             content: initParams.content,
+            initQueryId: initParams.queryId,
         };
         storage.save();
 
@@ -117,6 +120,25 @@ fun onInternalMessage(in: InMessage) {
                 },
             });
             respondMsg.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
+        }
+
+        RequestNftItemConfirmationV12 => {
+            assert (
+                in.senderAddress == storage.collectionAddress
+            ) throw Errors.NotFromCollection;
+            assert (msg.itemIndex == storage.itemIndex) throw Errors.InvalidItemIndex;
+            assert (msg.queryId == storage.initQueryId) throw Errors.NotFromCollection;
+
+            val confirmation = createMessage({
+                bounce: BounceMode.NoBounce,
+                dest: storage.collectionAddress,
+                value: 0,
+                body: NftItemInitializedV12 {
+                    queryId: storage.initQueryId,
+                    itemIndex: storage.itemIndex,
+                },
+            });
+            confirmation.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
         }
 
         else => {
