@@ -82,11 +82,7 @@ fun AuctionManager.sendSetPayoutAddressesV1(
         bounce: config.bounce,
         value: config.value,
         dest: self.address,
-        body: SetPayoutAddressesV1 {
-            queryId,
-            treasuryAddress,
-            securityFundAddress,
-        },
+        body: SetPayoutAddressesV1 { queryId, treasuryAddress, securityFundAddress },
     });
     return net.send(from, genericMsg);
 }
