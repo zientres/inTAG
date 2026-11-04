@@ -53,6 +53,11 @@ fun NftItemStorage.save(self) {
     contract.setData(self.toCell());
 }
 
+// storage of an NFT item is tricky: it changes its shape after deployment;
+// initially, it has only itemIndex and collectionAddress: `NftItemStorageNotInitialized`;
+// after initialization, it becomes a fully filled `NftItemStorage`;
+// that's why NftItemStorage doesn't have a `load` method: only `startLoading`,
+// which helps detect presence of the rest fields, and `endLoading` called if initialized
 struct NftItemStorageLoader {
     itemIndex: uint64
     collectionAddress: address
@@ -72,8 +77,13 @@ fun NftItemStorageLoader.endLoading(mutate self): NftItemStorage {
     };
 }
 
-fun calcDeployedNftItem(itemIndex: uint64, collectionAddress: address, nftItemCode: cell): AutoDeployAddress {
+fun calcDeployedNftItem(
+    itemIndex: uint64,
+    collectionAddress: address,
+    nftItemCode: cell,
+): AutoDeployAddress {
     val emptyNftItemStorage: NftItemStorageNotInitialized = { itemIndex, collectionAddress };
+
     return { stateInit: { code: nftItemCode, data: emptyNftItemStorage.toCell() } };
 }
 
