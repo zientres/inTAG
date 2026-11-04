@@ -101,7 +101,11 @@ get fun `test auction manager: rejects a bid below the starting price`() {
     val bidder = testing.treasury("low-bidder");
     val bid = manager.sendAny(
         bidder.address,
-        PlaceBidV1 { queryId: 4, auctionId: 0, bidAmount: grams("0.5") }.toCell(),
+        PlaceBidV1 {
+            queryId: 4,
+            auctionId: 0,
+            bidAmount: grams("0.5"),
+        }.toCell(),
         { value: grams("0.7"), bounce: true },
     );
     expect(bid).toHaveFailedTx<PlaceBidV1>({
