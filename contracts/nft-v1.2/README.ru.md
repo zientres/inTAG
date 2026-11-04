@@ -9,7 +9,8 @@
 3. Коллекция принимает callback только от детерминированного адреса NFT Item и только при совпадении `queryId`. Она сохраняет состояние `READY_FOR_MANAGER` и отправляет Auction Manager `NftItemDeploymentConfirmedV12`.
 4. Auction Manager после обработки подтверждения отправляет `NftItemDeploymentAckV12`. Только после ACK запись ожидания удаляется.
 5. Если deploy NFT Item bounced, коллекция переводит запись в `FAILED` и отправляет `NftItemDeploymentFailedV12`. Менеджер должен обработать ошибку и подтвердить её ACK.
-6. Если уведомление менеджеру bounced, запись остаётся в коллекции. Администратор-менеджер может повторить его через `RetryNftItemDeploymentNoticeV12`.
+6. Если callback от NFT Item не дошёл до коллекции, менеджер вызывает `RetryNftItemDeploymentNoticeV12`: коллекция просит NFT Item повторить callback. Исходный `queryId` хранится в самом NFT Item и проверяется при повторном запросе.
+7. Если уведомление менеджеру bounced, запись остаётся в коллекции. Менеджер повторяет уведомление тем же вызовом `RetryNftItemDeploymentNoticeV12`.
 
 Индексы не переиспользуются после неудачного deployment. Прямой batch mint в этой версии не предусмотрен.
 
