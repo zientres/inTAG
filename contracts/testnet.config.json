@@ -15,9 +15,11 @@
   },
   "deployment": {
     "enabled": false,
-    "reason": "Auction Manager is not implemented and contracts have not yet been compiled and tested."
+    "reason": "NFT collection source, reference tests, and Testnet deployment script are prepared. Enable deployment only after Acton build/tests pass and collection metadata URLs are supplied."
   },
   "auction_manager": null,
   "collection": null,
-  "note": "Set auction_manager only after the Testnet Auction Manager contract is deployed and its get_plate_status(uint256) getter is verified."
+  "note": "Set auction_manager only after the Testnet Auction Manager contract is deployed and its get_plate_status(uint256) getter is verified.",
+  "collection_admin_before_auction_manager": "creator",
+  "royalty_recipient": "creator"
 }
