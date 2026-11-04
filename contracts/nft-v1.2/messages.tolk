@@ -41,3 +41,8 @@ struct (0x54474907) RetryNftItemDeploymentNoticeV12 {
     queryId: uint64
     itemIndex: uint64
 }
+
+struct (0x54474908) RequestNftItemConfirmationV12 {
+    queryId: uint64
+    itemIndex: uint64
+}
