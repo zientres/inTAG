@@ -349,7 +349,6 @@ get fun `test auction manager: refunds winner if NFT deployment fails`() {
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_MINT_FAILED);
 }
 
-
 get fun `test auction manager: bounced outbid refund becomes recoverable credit`() {
     val creator = testing.treasury("bounce-refund-creator");
     val collection = testing.treasury("bounce-refund-collection");
