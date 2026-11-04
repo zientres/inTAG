@@ -52,57 +52,57 @@ fun onInternalMessage(in: InMessage) {
     }
 
     var storage = loadingStorage.endLoading();
-    val msg = lazy AllowedMessageToNftItemV12.fromSlice(in.body);
+    val message = lazy AllowedMessageToNftItemV12.fromSlice(in.body);
 
-    match (msg) {
+    match (message) {
         AskToChangeOwnership => {
             assert (in.senderAddress == storage.ownerAddress) throw Errors.NotFromOwner;
 
-            val (fwdBits, fwdRefs) = msg.forwardPayload.remainingBitsAndRefsCount();
+            val (fwdBits, fwdRefs) = message.forwardPayload.remainingBitsAndRefsCount();
             assert (fwdBits != 0) throw Errors.IncorrectForwardPayload;
-            if (msg.forwardPayload.preloadUint(1) != 0) {
+            if (message.forwardPayload.preloadUint(1) != 0) {
                 assert (fwdBits == 1 && fwdRefs == 1) throw Errors.IncorrectForwardPayload;
             }
-            assert (msg.newOwnerAddress.getWorkchain() == BASECHAIN) throw Errors.InvalidWorkchain;
+            assert (message.newOwnerAddress.getWorkchain() == BASECHAIN) throw Errors.InvalidWorkchain;
 
             val fwdFee = in.originalForwardFee;
             var restAmount = contract.getOriginalBalance() - MIN_TONS_FOR_STORAGE;
-            if (msg.forwardTonAmount != 0) {
-                restAmount -= (msg.forwardTonAmount + fwdFee);
+            if (message.forwardTonAmount != 0) {
+                restAmount -= (message.forwardTonAmount + fwdFee);
             }
-            if (msg.sendExcessesTo != null) {
+            if (message.sendExcessesTo != null) {
                 assert (
-                    msg.sendExcessesTo.getWorkchain() == BASECHAIN
+                    message.sendExcessesTo.getWorkchain() == BASECHAIN
                 ) throw Errors.InvalidWorkchain;
                 restAmount -= fwdFee;
             }
 
             assert (restAmount >= 0) throw Errors.TooSmallRestAmount;
 
-            if (msg.forwardTonAmount != 0) {
+            if (message.forwardTonAmount != 0) {
                 val ownershipMsg = createMessage({
                     bounce: BounceMode.NoBounce,
-                    dest: msg.newOwnerAddress,
-                    value: msg.forwardTonAmount,
+                    dest: message.newOwnerAddress,
+                    value: message.forwardTonAmount,
                     body: NotificationForNewOwner {
-                        queryId: msg.queryId,
+                        queryId: message.queryId,
                         oldOwnerAddress: storage.ownerAddress,
-                        payload: msg.forwardPayload,
+                        payload: message.forwardPayload,
                     },
                 });
                 ownershipMsg.send(SEND_MODE_PAY_FEES_SEPARATELY);
             }
-            if (msg.sendExcessesTo != null) {
+            if (message.sendExcessesTo != null) {
                 val excessesMsg = createMessage({
                     bounce: BounceMode.NoBounce,
-                    dest: msg.sendExcessesTo,
+                    dest: message.sendExcessesTo,
                     value: restAmount,
-                    body: ReturnExcessesBack { queryId: msg.queryId },
+                    body: ReturnExcessesBack { queryId: message.queryId },
                 });
                 excessesMsg.send(SEND_MODE_PAY_FEES_SEPARATELY);
             }
 
-            storage.ownerAddress = msg.newOwnerAddress;
+            storage.ownerAddress = message.newOwnerAddress;
             storage.save();
         }
 
@@ -113,7 +113,7 @@ fun onInternalMessage(in: InMessage) {
                 value: 0,
                 body: UnsafeBodyNoRef {
                     forceInline: ResponseStaticData {
-                        queryId: msg.queryId,
+                        queryId: message.queryId,
                         itemIndex: storage.itemIndex as uint256,
                         collectionAddress: storage.collectionAddress,
                     },
@@ -124,8 +124,8 @@ fun onInternalMessage(in: InMessage) {
 
         RequestNftItemConfirmationV12 => {
             assert (in.senderAddress == storage.collectionAddress) throw Errors.NotFromCollection;
-            assert (msg.itemIndex == storage.itemIndex) throw Errors.InvalidItemIndex;
-            assert (msg.queryId == storage.initQueryId) throw Errors.NotFromCollection;
+            assert (message.itemIndex == storage.itemIndex) throw Errors.InvalidItemIndex;
+            assert (message.queryId == storage.initQueryId) throw Errors.NotFromCollection;
 
             val confirmation = createMessage({
                 bounce: BounceMode.NoBounce,
