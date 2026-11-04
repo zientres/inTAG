@@ -5,9 +5,9 @@ import "messages"
 import "types"
 
 contract NftCollection {
-    author: "TagitalSpace"
-    version: "0.1.0"
-    description: "TagitalSpace plate NFT collection. TEP-62 and TEP-64 compliant. The admin address is reserved for the Auction Manager contract."
+    author: "The Tolk Team"
+    version: "1.1"
+    description: "Standard NFT Collection. TEP-62 and TEP-64 compliant"
     incomingMessages: AllowedMessageToNftCollection
     storage: NftCollectionStorage
 }
@@ -39,8 +39,6 @@ fun onInternalMessage(in: InMessage) {
     match (msg) {
         DeployNft => {
             var storage = lazy NftCollectionStorage.load();
-            // SECURITY: adminAddress MUST be set to the Auction Manager contract address.
-            // The collection must never be deployed with an end-user wallet as admin.
             assert (in.senderAddress == storage.adminAddress) throw Errors.NotFromAdmin;
             assert (msg.itemIndex <= storage.nextItemIndex) throw Errors.InvalidItemIndex;
 
@@ -75,13 +73,24 @@ fun onInternalMessage(in: InMessage) {
             while (r.isFound) {
                 counter += 1;
                 assert (counter < BATCH_SIZE_LIMIT) throw Errors.BatchLimitExceeded;
+
+                // Error cast is used to replicate exit codes from FunC version
                 val itemIndex = r.getKey();
-                assert (itemIndex <= storage.nextItemIndex) throw (Errors.NotFromAdmin as int) + counter;
+                assert (
+                    itemIndex <= storage.nextItemIndex
+                ) throw (Errors.NotFromAdmin as int) + counter;
+
                 val dictItem = r.loadValue();
-                deployNftItem(itemIndex, storage.nftItemCode, dictItem.attachTonAmount, dictItem.initParams);
+                deployNftItem(
+                    itemIndex,
+                    storage.nftItemCode,
+                    dictItem.attachTonAmount,
+                    dictItem.initParams,
+                );
                 if (itemIndex == storage.nextItemIndex) {
                     storage.nextItemIndex += 1;
                 }
+
                 r = msg.deployList.iterateNext(r);
             }
             storage.save();
@@ -95,18 +104,20 @@ fun onInternalMessage(in: InMessage) {
         }
 
         else => {
+            // ignore empty messages, "wrong opcode" for others
             assert (in.body.isEmpty()) throw 0xFFFF;
         }
     }
 }
 
 fun onBouncedMessage(_in: InMessageBounced) {
-    // A failed item deployment does not grant minting rights to the caller.
+    // For receiving funds from possibly bounced deployment of NFT
 }
 
 get fun get_collection_data(): CollectionDataReply {
     val storage = lazy NftCollectionStorage.load();
     val content = lazy storage.content.load();
+
     return {
         nextItemIndex: storage.nextItemIndex,
         collectionMetadata: content.collectionMetadata,
@@ -116,7 +127,8 @@ get fun get_collection_data(): CollectionDataReply {
 
 get fun get_nft_address_by_index(itemIndex: int): address {
     val storage = lazy NftCollectionStorage.load();
-    return calcDeployedNftItem(itemIndex, contract.getAddress(), storage.nftItemCode).calculateAddress();
+    val nftDeployed = calcDeployedNftItem(itemIndex, contract.getAddress(), storage.nftItemCode);
+    return nftDeployed.calculateAddress();
 }
 
 get fun royalty_params(): RoyaltyParams {
@@ -124,9 +136,18 @@ get fun royalty_params(): RoyaltyParams {
     return storage.royaltyParams.load();
 }
 
-get fun get_nft_content(_itemIndex: int, individualNftContent: string): Cell<OffchainMetadataReply> {
+get fun get_nft_content(
+    _itemIndex: int,
+    individualNftContent: string,
+): Cell<OffchainMetadataReply> {
     val storage = lazy NftCollectionStorage.load();
     val content = lazy storage.content.load();
+
+    // construct a response from "common content" and "individual content";
+    // for example:
+    // common content = "https://site.org/my-collection/"
+    // individual nft-v1.1 = "my-picture-123.png"  (probably, a long string, snake-encoded)
+    // result         = concatenation
     var b = StringBuilder.create();
     b.append(content.commonContent);
     b.append(individualNftContent);
