@@ -12,6 +12,9 @@ fun setupAuctionManagerTest(): (AuctionManager, Treasury, Treasury, Treasury, Tr
     val collection = testing.treasury("nft-collection");
     val treasury = testing.treasury("treasury");
     val securityFund = testing.treasury("security-fund");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
     val manager = AuctionManager.fromStorage({
         ownerAddress: creator.address,
         collectionAddress: collection.address,
@@ -22,7 +25,7 @@ fun setupAuctionManagerTest(): (AuctionManager, Treasury, Treasury, Treasury, Tr
         auctions: [],
         refundCredits: [],
         payoutCredits: [],
-        payoutAddresses: [(0, treasury.address), (1, securityFund.address)],
+        payoutAddresses,
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
