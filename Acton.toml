@@ -30,6 +30,7 @@ width = 100
 
 [scripts]
 test-nft = "acton test tests/nft-v1.1"
+deploy-nft-collection = "acton script scripts/nft-v1.1/deployCollection.tolk --net testnet --tonconnect"
 
 [import-mappings]
 acton = ".acton"
