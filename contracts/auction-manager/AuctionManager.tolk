@@ -183,14 +183,26 @@ fun onInternalMessage(in: InMessage) {
             assert (auction.status == AUCTION_V1_ACTIVE) throw AuctionManagerErrors.AuctionAlreadyEnded;
             assert (blockchain.now() >= auction.endTime) throw AuctionManagerErrors.AuctionNotEnded;
 
+            assert (auction.itemIndex == storage.nextMintItemIndex) throw AuctionManagerErrors.ItemIndexOutOfSequence;
+
             if (auction.highestBidder == null || auction.highestBid == 0) {
+                val skipQueryId = storage.nextQueryId;
+                storage.nextQueryId += 1;
                 auction.status = AUCTION_V1_CLOSED_NO_BIDS;
+                auction.mintQueryId = skipQueryId;
+                storage.nextMintItemIndex += 1;
                 storage.auctions.set(msg.auctionId, auction);
                 storage.save();
+
+                val skip = createMessage({
+                    bounce: BounceMode.RichBounce,
+                    dest: storage.collectionAddress,
+                    value: AUCTION_V1_MIN_CREATE_OVERHEAD,
+                    body: SkipNftItemIndexV12 { queryId: skipQueryId, itemIndex: auction.itemIndex },
+                });
+                skip.send(SEND_MODE_PAY_FEES_SEPARATELY);
                 return;
             }
-
-            assert (auction.itemIndex == storage.nextMintItemIndex) throw AuctionManagerErrors.ItemIndexOutOfSequence;
             val mintQueryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             auction.status = AUCTION_V1_WAITING_FOR_MINT;
@@ -339,6 +351,27 @@ fun onBouncedMessage(in: InMessageBounced) {
         val transfer = PayoutTransferV1.fromCell(bounced.originalBody);
         addPayoutCredit(mutate storage, transfer.beneficiary, transfer.amount);
         storage.save();
+        return;
+    }
+
+    if (originalOpcode == 0x54474909) {
+        val skip = SkipNftItemIndexV12.fromCell(bounced.originalBody);
+        val auctionLookup = storage.auctions.get(skip.itemIndex);
+        if (!auctionLookup.isFound) {
+            return;
+        }
+        var auction = auctionLookup.loadValue();
+        if (
+            auction.status == AUCTION_V1_CLOSED_NO_BIDS &&
+            auction.mintQueryId == skip.queryId &&
+            storage.nextMintItemIndex == skip.itemIndex + 1
+        ) {
+            auction.status = AUCTION_V1_ACTIVE;
+            auction.mintQueryId = 0;
+            storage.nextMintItemIndex -= 1;
+            storage.auctions.set(skip.itemIndex, auction);
+            storage.save();
+        }
         return;
     }
 
