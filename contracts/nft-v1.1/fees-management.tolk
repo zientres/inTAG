@@ -1,0 +1,2 @@
+const MIN_TONS_FOR_STORAGE = grams("0.05")
+const BATCH_SIZE_LIMIT = 250
