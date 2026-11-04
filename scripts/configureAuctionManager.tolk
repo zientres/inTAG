@@ -5,7 +5,9 @@ import "@wrappers/AuctionManager.gen"
 
 fun main() {
     val owner = scripts.wallet(promptWallet("Connect Auction Manager owner wallet"));
-    val manager = AuctionManager.fromAddress(promptAddress("Enter Auction Manager Testnet address"));
+    val manager = AuctionManager.fromAddress(
+        promptAddress("Enter Auction Manager Testnet address"),
+    );
     val treasury = promptAddress("Enter Treasury wallet address");
     val securityFund = promptAddress("Enter development and security fund wallet address");
 
