@@ -398,5 +398,8 @@ get fun get_refund_credit(beneficiary: address): coins {
 get fun get_payout_credit(beneficiary: address): coins {
     val storage = lazy AuctionManagerStorage.load();
     val lookup = storage.payoutCredits.get(beneficiary);
-    return if (lookup.isFound) lookup.loadValue() else 0;
+    if (!lookup.isFound) {
+        return 0;
+    }
+    return lookup.loadValue();
 }
