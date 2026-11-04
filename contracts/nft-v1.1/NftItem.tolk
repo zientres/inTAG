@@ -4,9 +4,9 @@ import "messages"
 import "types"
 
 contract NftItem {
-    author: "TagitalSpace"
-    version: "0.1.0"
-    description: "TagitalSpace plate NFT item. TEP-62 and TEP-64 compliant."
+    author: "The Tolk Team"
+    version: "1.1"
+    description: "Standard NFT Item. TEP-62 and TEP-64 compliant"
     incomingMessages: AllowedMessageToNftItem
     storage: NftItemStorage
     storageAtDeployment: NftItemStorageNotInitialized
@@ -19,7 +19,11 @@ type AllowedMessageToNftItem =
 fun onInternalMessage(in: InMessage) {
     var loadingStorage = NftItemStorage.startLoading();
     if (loadingStorage.isNotInitialized()) {
-        assert (in.senderAddress == loadingStorage.collectionAddress) throw Errors.NotFromCollection;
+        assert (
+            in.senderAddress == loadingStorage.collectionAddress
+        ) throw Errors.NotFromCollection;
+
+        // using a message from collection, convert "uninitialized" to "initialized" state
         val initParams = NftItemInitAtDeployment.fromSlice(in.body);
         val storage: NftItemStorage = {
             itemIndex: loadingStorage.itemIndex,
@@ -32,11 +36,15 @@ fun onInternalMessage(in: InMessage) {
     }
 
     var storage = loadingStorage.endLoading();
+
     val msg = lazy AllowedMessageToNftItem.fromSlice(in.body);
 
     match (msg) {
         AskToChangeOwnership => {
             assert (in.senderAddress == storage.ownerAddress) throw Errors.NotFromOwner;
+
+            // validate Either format: bit 0 = inline (any payload follows),
+            // bit 1 = ref (must be exactly 1 bit + 1 ref)
             val (fwdBits, fwdRefs) = msg.forwardPayload.remainingBitsAndRefsCount();
             assert (fwdBits != 0) throw Errors.IncorrectForwardPayload;
             if (msg.forwardPayload.preloadUint(1) != 0) {
@@ -50,9 +58,13 @@ fun onInternalMessage(in: InMessage) {
                 restAmount -= (msg.forwardTonAmount + fwdFee);
             }
             if (msg.sendExcessesTo != null) {
-                assert (msg.sendExcessesTo.getWorkchain() == BASECHAIN) throw Errors.InvalidWorkchain;
+                assert (
+                    msg.sendExcessesTo.getWorkchain() == BASECHAIN
+                ) throw Errors.InvalidWorkchain;
                 restAmount -= fwdFee;
             }
+
+            // base nft-v1.1 spends fixed amount of gas, will not check for response
             assert (restAmount >= 0) throw Errors.TooSmallRestAmount;
 
             if (msg.forwardTonAmount != 0) {
@@ -77,6 +89,7 @@ fun onInternalMessage(in: InMessage) {
                 });
                 excessesMsg.send(SEND_MODE_PAY_FEES_SEPARATELY);
             }
+
             storage.ownerAddress = msg.newOwnerAddress;
             storage.save();
         }
@@ -86,6 +99,11 @@ fun onInternalMessage(in: InMessage) {
                 bounce: BounceMode.NoBounce,
                 dest: in.senderAddress,
                 value: 0,
+                // why ever, in FunC implementation, item index was encoded as 256-bit (not 64-bit),
+                // do the same here to pass FunC tests;
+                // but since a response becomes too long (64 + 256 + address), the compiler will create a ref;
+                // force the compiler not to create a ref, because it's guaranteed that with
+                // value (coins) = 0 it will nevertheless fit into a message cell directly
                 body: UnsafeBodyNoRef {
                     forceInline: ResponseStaticData {
                         queryId: msg.queryId,
@@ -98,6 +116,7 @@ fun onInternalMessage(in: InMessage) {
         }
 
         else => {
+            // ignore empty messages, "wrong opcode" for others
             assert (in.body.isEmpty()) throw 0xFFFF;
         }
     }
@@ -112,6 +131,7 @@ get fun get_nft_data(): NftDataReply {
             collectionAddress: loadingStorage.collectionAddress,
         };
     }
+
     val storage = loadingStorage.endLoading();
     return {
         isInitialized: true,
