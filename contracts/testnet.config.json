@@ -16,5 +16,8 @@
   "deployment": {
     "enabled": false,
     "reason": "Auction Manager is not implemented and contracts have not yet been compiled and tested."
-  }
+  },
+  "auction_manager": null,
+  "collection": null,
+  "note": "Set auction_manager only after the Testnet Auction Manager contract is deployed and its get_plate_status(uint256) getter is verified."
 }
