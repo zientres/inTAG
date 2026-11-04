@@ -44,6 +44,7 @@ width = 100
 test-nft = "acton test tests/nft-v1.1"
 test-nft-v12 = "acton test tests/nft-v1.2"
 test-auction-manager = "acton test tests/auction-manager"
+deploy-auction-manager = "acton script scripts/deployAuctionManager.tolk --net testnet --tonconnect"
 deploy-nft-collection = "acton script scripts/deployCollection.tolk --net testnet --tonconnect"
 deploy-nft-collection-v12 = "acton script scripts/deployCollectionV12.tolk --net testnet --tonconnect"
 mint-nft = "acton script scripts/mintNft.tolk --net testnet --tonconnect"
