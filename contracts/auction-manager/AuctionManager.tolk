@@ -15,6 +15,7 @@ type AllowedMessageToAuctionManager =
     | CreateAuctionV1
     | PlaceBidV1
     | FinishAuctionV1
+    | RetryMintNoticeV1
     | ClaimRefundV1
     | ClaimPayoutV1
     | SetPayoutAddressesV1
@@ -247,6 +248,32 @@ fun onInternalMessage(in: InMessage) {
                 },
             });
             deploy.send(SEND_MODE_PAY_FEES_SEPARATELY);
+        }
+
+        RetryMintNoticeV1 => {
+            val storage = lazy AuctionManagerStorage.load();
+            assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (in.valueCoins >= AUCTION_V1_MIN_CREATE_OVERHEAD) throw AuctionManagerErrors.InsufficientAttachedValue;
+            val lookup = storage.auctions.get(msg.auctionId);
+            assert (lookup.isFound) throw AuctionManagerErrors.InvalidAuctionId;
+            val auction = lookup.loadValue();
+            assert (
+                auction.status == AUCTION_V1_WAITING_FOR_MINT ||
+                auction.status == AUCTION_V1_CLOSED_PAID ||
+                auction.status == AUCTION_V1_CLOSED_MINT_FAILED
+            ) throw AuctionManagerErrors.InvalidAuctionState;
+            assert (auction.mintQueryId != 0) throw AuctionManagerErrors.InvalidMintConfirmation;
+
+            val retry = createMessage({
+                bounce: BounceMode.RichBounce,
+                dest: storage.collectionAddress,
+                value: AUCTION_V1_MIN_CREATE_OVERHEAD,
+                body: RetryNftItemDeploymentNoticeV12 {
+                    queryId: auction.mintQueryId,
+                    itemIndex: auction.itemIndex,
+                },
+            });
+            retry.send(SEND_MODE_PAY_FEES_SEPARATELY);
         }
 
         NftItemDeploymentConfirmedV12 => {
