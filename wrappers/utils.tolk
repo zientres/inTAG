@@ -1,6 +1,6 @@
 import "@acton/emulation/network"
-import "NftItem.gen"
-import "../contracts/nft-v1.1/messages"
+import "@wrappers/NftItem.gen"
+import "@contracts/nft-v1.1/messages"
 
 /// Sends `AskToChangeOwnership` with `forwardPayload` inlined into the message body.
 fun NftItem.sendTransferPayloadInline(
