@@ -110,6 +110,18 @@ fun onInternalMessage(in: InMessage) {
             );
         }
 
+        SkipNftItemIndexV12 => {
+            var storage = lazy NftCollectionV12Storage.load();
+            assert (in.senderAddress == storage.adminAddress) throw NftV12Errors.NotFromAdmin;
+            assert (msg.queryId != 0) throw NftV12Errors.InvalidDeploymentState;
+            assert (msg.itemIndex == storage.nextItemIndex) throw NftV12Errors.InvalidItemIndex;
+            assert (
+                !storage.pendingDeployments.exists(msg.itemIndex)
+            ) throw NftV12Errors.PendingDeploymentAlreadyExists;
+            storage.nextItemIndex += 1;
+            storage.save();
+        }
+
         NftItemInitializedV12 => {
             var storage = lazy NftCollectionV12Storage.load();
             val expectedItemAddress = calcDeployedNftItemV12(
