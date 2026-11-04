@@ -34,9 +34,50 @@ fun calcDeployedNftItemV12(
     collectionAddress: address,
     nftItemCode: cell,
 ): AutoDeployAddress {
-    val emptyNftItemStorage: NftItemStorageNotInitialized = {
+    val emptyNftItemStorage: NftItemV12StorageNotInitialized = {
         itemIndex,
         collectionAddress,
     };
     return { stateInit: { code: nftItemCode, data: emptyNftItemStorage.toCell() } };
+}
+
+struct NftItemV12Storage {
+    itemIndex: uint64
+    collectionAddress: address
+    ownerAddress: address
+    content: string
+    initQueryId: uint64
+}
+
+struct NftItemV12StorageNotInitialized {
+    itemIndex: uint64
+    collectionAddress: address
+}
+
+struct NftItemV12StorageLoader {
+    itemIndex: uint64
+    collectionAddress: address
+    private rest: RemainingBitsAndRefs
+}
+
+fun NftItemV12StorageLoader.isNotInitialized(self): bool {
+    return self.rest.isEmpty();
+}
+
+fun NftItemV12StorageLoader.endLoading(mutate self): NftItemV12Storage {
+    return {
+        itemIndex: self.itemIndex,
+        collectionAddress: self.collectionAddress,
+        ownerAddress: self.rest.loadAny(),
+        content: self.rest.loadAny(),
+        initQueryId: self.rest.loadAny(),
+    };
+}
+
+fun NftItemV12Storage.startLoading(): NftItemV12StorageLoader {
+    return NftItemV12StorageLoader.fromCell(contract.getData());
+}
+
+fun NftItemV12Storage.save(self) {
+    contract.setData(self.toCell());
 }
