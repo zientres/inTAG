@@ -2465,3 +2465,23 @@ button {
     font-size: 12px;
   }
 }
+
+
+/* Центрирование содержимого активного раздела коллекции */
+#collection-panel-mint {
+  min-height: calc(100vh - 150px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#collection-panel-mint[hidden] {
+  display: none;
+}
+#collection-panel-mint .russia-collection-content {
+  margin-top: 0;
+}
+@media (max-width: 600px) {
+  #collection-panel-mint {
+    min-height: calc(100vh - 125px);
+  }
+}
