@@ -28,13 +28,13 @@ fun sendRefund(
     amount: coins,
     queryId: uint64,
 ) {
-    val message = createMessage({
+    val refundMessage = createMessage({
         bounce: BounceMode.RichBounce,
         dest: beneficiary,
         value: amount,
         body: RefundTransferV1 { queryId, auctionId, beneficiary, amount },
     });
-    message.send(SEND_MODE_PAY_FEES_SEPARATELY);
+    refundMessage.send(SEND_MODE_PAY_FEES_SEPARATELY);
 }
 
 fun sendPayout(
@@ -46,23 +46,23 @@ fun sendPayout(
     if (amount == 0) {
         return;
     }
-    val message = createMessage({
+    val payoutMessage = createMessage({
         bounce: BounceMode.RichBounce,
         dest: beneficiary,
         value: amount,
         body: PayoutTransferV1 { queryId, auctionId, beneficiary, amount },
     });
-    message.send(SEND_MODE_PAY_FEES_SEPARATELY);
+    payoutMessage.send(SEND_MODE_PAY_FEES_SEPARATELY);
 }
 
 fun sendMintAck(collectionAddress: address, queryId: uint64, itemIndex: uint64) {
-    val message = createMessage({
+    val ackMessage = createMessage({
         bounce: BounceMode.NoBounce,
         dest: collectionAddress,
         value: 0,
         body: NftItemDeploymentAckV12 { queryId, itemIndex },
     });
-    message.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
+    ackMessage.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
 }
 
 fun addRefundCredit(mutate storage: AuctionManagerStorage, beneficiary: address, amount: coins) {
