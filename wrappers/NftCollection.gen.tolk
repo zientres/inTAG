@@ -6,8 +6,8 @@
 import "@acton/build"
 import "@acton/emulation/network"
 import "@acton/testing/assert"
-import "../contracts/messages"
-import "../contracts/types"
+import "../contracts/nft-v1.1/messages"
+import "../contracts/nft-v1.1/types"
 
 /// Storage `NftCollectionStorage` is defined in `../contracts/types`
 struct NftCollection {
