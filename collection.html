@@ -186,6 +186,21 @@
       .registration-search-field .registration-cell.registration-region-cell { min-width: 46px; margin-left: 8px; }
       .registration-search-field .registration-cell.registration-region-cell::after { left: -6px; }
     }
+
+    .registration-search-row { display:flex; align-items:center; gap:14px; width:100%; }
+    .registration-search-row .registration-search-field { flex:1 1 0; min-width:0; }
+    .registration-region-help { flex:0 0 auto; padding:10px 13px; border:1px solid rgba(120,186,255,.14); border-radius:12px; background:rgba(9,26,46,.92); font-size:12px; line-height:1.5; animation:registration-hint-in .18s ease both; }
+    .registration-region-help[hidden] { display:none; }
+    .registration-region-help a { color:#78baff; text-decoration:none; white-space:nowrap; }
+    .registration-region-help a:hover { color:#a8d4ff; text-decoration:underline; }
+    .registration-regions-modal { position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; padding:32px; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .18s ease,visibility .18s ease; }
+    .registration-regions-modal.is-open { opacity:1; visibility:visible; pointer-events:auto; }
+    .registration-regions-backdrop { position:absolute; inset:0; background:rgba(2,8,17,.86); backdrop-filter:blur(5px); }
+    .registration-regions-dialog { position:relative; z-index:1; width:min(1100px,94vw); max-height:90vh; transform:scale(.96) translateY(8px); transition:transform .2s ease; }
+    .registration-regions-modal.is-open .registration-regions-dialog { transform:scale(1) translateY(0); }
+    .registration-regions-dialog img { display:block; width:100%; max-height:90vh; object-fit:contain; border-radius:12px; box-shadow:0 18px 70px rgba(0,0,0,.5); }
+    .registration-regions-close { position:absolute; z-index:2; top:-16px; right:-16px; width:38px; height:38px; border:1px solid rgba(255,255,255,.28); border-radius:50%; color:#fff; background:#10243b; font-size:27px; line-height:1; cursor:pointer; box-shadow:0 4px 18px rgba(0,0,0,.35); }
+    @media(max-width:760px) { .registration-search-row { align-items:stretch; flex-direction:column; gap:9px; } .registration-region-help { align-self:flex-end; } .registration-regions-modal { padding:22px 12px; } .registration-regions-dialog { width:96vw; } .registration-regions-close { top:-13px; right:-5px; } }
   </style>
 </head>
 <body>
@@ -306,6 +321,7 @@
         <p class="russia-collection-subtitle">Вводите комбинацию вашего номера в поле снизу</p>
 
         <form class="registration-search" id="registration-search" novalidate>
+          <div class="registration-search-row">
           <div class="registration-search-field" id="registration-field">
             <span class="registration-search-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none">
@@ -326,9 +342,20 @@
               aria-label="Введите номер в формате А777АА 777" autocomplete="off"
               autocapitalize="characters" spellcheck="false">
           </div>
+          <div class="registration-region-help" id="registration-region-help" hidden>
+            <a href="#" id="registration-regions-open">Посмотреть регионы России</a>
+          </div>
+          </div>
           <p class="registration-hint" id="registration-hint" role="status" aria-live="polite" hidden>Используйте русские буквы<br>A B E K M H O P C T У X</p>
           <button class="primary-button registration-search-button" id="registration-search-button" type="submit" hidden>Поиск</button>
         </form>
+        <div class="registration-regions-modal" id="registration-regions-modal" aria-hidden="true">
+          <div class="registration-regions-backdrop" data-regions-close></div>
+          <div class="registration-regions-dialog" role="dialog" aria-modal="true" aria-label="Коды регионов России">
+            <button class="registration-regions-close" type="button" aria-label="Закрыть" data-regions-close>×</button>
+            <img src="regRussia.jpg" alt="Таблица разрешённых автомобильных кодов регионов России">
+          </div>
+        </div>
 
       </div>
     </section>
@@ -387,6 +414,27 @@
         return { value: result, badLetter };
       }
 
+      const regionHelp = document.getElementById("registration-region-help");
+      const regionsModal = document.getElementById("registration-regions-modal");
+      const regionsOpen = document.getElementById("registration-regions-open");
+      function openRegions() {
+        regionsModal.classList.add("is-open");
+        regionsModal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        regionsModal.querySelector(".registration-regions-close").focus();
+      }
+      function closeRegions() {
+        regionsModal.classList.remove("is-open");
+        regionsModal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        regionsOpen.focus();
+      }
+      regionsOpen.addEventListener("click", event => { event.preventDefault(); openRegions(); });
+      regionsModal.querySelectorAll("[data-regions-close]").forEach(el => el.addEventListener("click", closeRegions));
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && regionsModal.classList.contains("is-open")) closeRegions();
+      });
+
       function render() {
         for (let i = 0; i < 6; i++) {
           const char = plate[i] || "";
@@ -395,6 +443,7 @@
           cells[i].classList.toggle("is-active", i === plate.length && plate.length < 6);
         }
         const region = plate.slice(6);
+        regionHelp.hidden = plate.length < 6;
         regionCell.textContent = region;
         regionCell.classList.toggle("is-filled", Boolean(region));
         regionCell.classList.toggle("is-active", plate.length >= 6 && region.length < 3);
