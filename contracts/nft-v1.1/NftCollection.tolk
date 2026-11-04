@@ -43,7 +43,12 @@ fun onInternalMessage(in: InMessage) {
             assert (message.itemIndex <= storage.nextItemIndex) throw Errors.InvalidItemIndex;
 
             val isLast = message.itemIndex == storage.nextItemIndex;
-            deployNftItem(message.itemIndex, storage.nftItemCode, message.attachTonAmount, message.initParams);
+            deployNftItem(
+                message.itemIndex,
+                storage.nftItemCode,
+                message.attachTonAmount,
+                message.initParams,
+            );
             if (isLast) {
                 storage.nextItemIndex += 1;
                 storage.save();
