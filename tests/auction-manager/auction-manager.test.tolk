@@ -14,21 +14,15 @@ fun setupAuctionManagerTest(): (AuctionManager, Treasury, Treasury, Treasury, Tr
     val securityFund = testing.treasury("security-fund");
     val manager = AuctionManager.fromStorage({
         ownerAddress: creator.address,
-        creatorAddress: creator.address,
         collectionAddress: collection.address,
-        treasuryAddress: treasury.address,
-        securityFundAddress: securityFund.address,
         payoutConfigLocked: false,
-        nextAuctionId: 0,
         nextItemIndex: 0,
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        itemToAuction: [],
         refundCredits: [],
         payoutCredits: [],
-        processedBounces: [],
-        processedQueries: [],
+        payoutAddresses: [(0, treasury.address), (1, securityFund.address)],
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
