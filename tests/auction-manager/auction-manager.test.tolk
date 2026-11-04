@@ -217,7 +217,7 @@ get fun `test auction manager: refunds the previous leader immediately`() {
         to: firstBidder.address,
     });
     expect(manager.getAuction(0)!.highestBid).toEqual(grams("1.1"));
-    expect(manager.getAuction(0)!.highestBidder).toEqual(secondBidder.address);
+    expect(manager.getAuction(0)!.highestBidder!).toEqual(secondBidder.address);
 }
 
 get fun `test auction manager: distributes the winning bid only after mint confirmation`() {
@@ -258,7 +258,7 @@ get fun `test auction manager: distributes the winning bid only after mint confi
         payoutCredits: [],
         payoutAddresses,
     });
-    val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
+    val deploy = manager.deploy(creator.address, { value: grams("10.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
 
     val confirmation = manager.sendAny(
@@ -326,7 +326,7 @@ get fun `test auction manager: refunds winner if NFT deployment fails`() {
         payoutCredits: [],
         payoutAddresses,
     });
-    val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
+    val deploy = manager.deploy(creator.address, { value: grams("4.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
 
     val failure = manager.sendAny(
