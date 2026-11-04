@@ -34,16 +34,16 @@ type AllowedMessageToNftCollection =
     | ChangeCollectionAdmin
 
 fun onInternalMessage(in: InMessage) {
-    val msg = lazy AllowedMessageToNftCollection.fromSlice(in.body);
+    val message = lazy AllowedMessageToNftCollection.fromSlice(in.body);
 
-    match (msg) {
+    match (message) {
         DeployNft => {
             var storage = lazy NftCollectionStorage.load();
             assert (in.senderAddress == storage.adminAddress) throw Errors.NotFromAdmin;
-            assert (msg.itemIndex <= storage.nextItemIndex) throw Errors.InvalidItemIndex;
+            assert (message.itemIndex <= storage.nextItemIndex) throw Errors.InvalidItemIndex;
 
-            val isLast = msg.itemIndex == storage.nextItemIndex;
-            deployNftItem(msg.itemIndex, storage.nftItemCode, msg.attachTonAmount, msg.initParams);
+            val isLast = message.itemIndex == storage.nextItemIndex;
+            deployNftItem(message.itemIndex, storage.nftItemCode, message.attachTonAmount, message.initParams);
             if (isLast) {
                 storage.nextItemIndex += 1;
                 storage.save();
@@ -57,7 +57,7 @@ fun onInternalMessage(in: InMessage) {
                 dest: in.senderAddress,
                 value: 0,
                 body: ResponseRoyaltyParams {
-                    queryId: msg.queryId,
+                    queryId: message.queryId,
                     royaltyParams: storage.royaltyParams.load(),
                 },
             });
@@ -69,7 +69,7 @@ fun onInternalMessage(in: InMessage) {
             assert (in.senderAddress == storage.adminAddress) throw Errors.NotFromAdmin;
 
             var counter = 0;
-            var r = msg.deployList.findFirst();
+            var r = message.deployList.findFirst();
             while (r.isFound) {
                 counter += 1;
                 assert (counter < BATCH_SIZE_LIMIT) throw Errors.BatchLimitExceeded;
@@ -91,7 +91,7 @@ fun onInternalMessage(in: InMessage) {
                     storage.nextItemIndex += 1;
                 }
 
-                r = msg.deployList.iterateNext(r);
+                r = message.deployList.iterateNext(r);
             }
             storage.save();
         }
@@ -99,7 +99,7 @@ fun onInternalMessage(in: InMessage) {
         ChangeCollectionAdmin => {
             var storage = lazy NftCollectionStorage.load();
             assert (in.senderAddress == storage.adminAddress) throw Errors.NotFromAdmin;
-            storage.adminAddress = msg.newAdminAddress;
+            storage.adminAddress = message.newAdminAddress;
             storage.save();
         }
 
