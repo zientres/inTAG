@@ -348,3 +348,151 @@ get fun `test auction manager: refunds winner if NFT deployment fails`() {
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_MINT_FAILED);
 }
+
+
+get fun `test auction manager: bounced outbid refund becomes recoverable credit`() {
+    val creator = testing.treasury("bounce-refund-creator");
+    val collection = testing.treasury("bounce-refund-collection");
+    val treasury = testing.treasury("bounce-refund-treasury");
+    val securityFund = testing.treasury("bounce-refund-security");
+    val nextBidder = testing.treasury("bounce-refund-next-bidder");
+    val unavailableBidder = randomAddress("unavailable-refund-recipient");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var auctions: map<uint64, AuctionV1> = [];
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "BOUNCE 77",
+            metadataContent: "bounce.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() + 3600) as uint32,
+            highestBid: grams("1"),
+            highestBidder: unavailableBidder,
+            status: AUCTION_V1_ACTIVE,
+            mintQueryId: 0,
+        },
+    );
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: creator.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 1,
+        nextMintItemIndex: 0,
+        nextQueryId: 100,
+        auctions,
+        refundCredits: [],
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val bid = manager.sendAny(
+        nextBidder.address,
+        PlaceBidV1 {
+            queryId: 101,
+            auctionId: 0,
+            bidAmount: grams("1.1"),
+        }.toCell(),
+        { value: grams("1.3"), bounce: true },
+    );
+    expect(bid).toHaveSuccessfulTx<PlaceBidV1>({ to: manager.address });
+    expect(manager.getAuction(0)!.highestBidder!).toEqual(nextBidder.address);
+    expect(manager.getRefundCredit(unavailableBidder)).toEqual(grams("1"));
+}
+
+get fun `test auction manager: bounced creator payout becomes recoverable credit`() {
+    val deployer = testing.treasury("bounce-payout-deployer");
+    val collection = testing.treasury("bounce-payout-collection");
+    val treasury = testing.treasury("bounce-payout-treasury");
+    val securityFund = testing.treasury("bounce-payout-security");
+    val winner = testing.treasury("bounce-payout-winner");
+    val unavailableCreator = randomAddress("unavailable-payout-recipient");
+    val nftItem = testing.treasury("bounce-payout-nft-item");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var auctions: map<uint64, AuctionV1> = [];
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "PAYOUT 77",
+            metadataContent: "payout.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("10"),
+            highestBidder: winner.address,
+            status: AUCTION_V1_WAITING_FOR_MINT,
+            mintQueryId: 88,
+        },
+    );
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: unavailableCreator,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 1,
+        nextMintItemIndex: 0,
+        nextQueryId: 100,
+        auctions,
+        refundCredits: [],
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val confirmation = manager.sendAny(
+        collection.address,
+        NftItemDeploymentConfirmedV12 {
+            queryId: 88,
+            itemIndex: 0,
+            nftAddress: nftItem.address,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(confirmation).toHaveSuccessfulTx<NftItemDeploymentConfirmedV12>({
+        from: collection.address,
+        to: manager.address,
+    });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
+    expect(manager.getPayoutCredit(unavailableCreator)).toEqual(grams("5"));
+}
+
+get fun `test auction manager: payout addresses cannot change after first auction`() {
+    val (manager, creator, _, treasury, securityFund) = setupAuctionManagerTest();
+    val create = manager.sendAny(
+        creator.address,
+        CreateAuctionV1 {
+            queryId: 201,
+            itemIndex: 0,
+            plate: "LOCK 77",
+            metadataContent: "lock.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() + 3600) as uint32,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(create).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+
+    val change = manager.sendAny(
+        creator.address,
+        SetPayoutAddressesV1 {
+            queryId: 202,
+            treasuryAddress: treasury.address,
+            securityFundAddress: securityFund.address,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(change).toHaveFailedTx<SetPayoutAddressesV1>({
+        from: creator.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.InvalidPayoutConfiguration,
+    });
+}
