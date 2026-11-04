@@ -124,18 +124,21 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
     payoutAddresses.set(0, treasury.address);
     payoutAddresses.set(1, securityFund.address);
     var auctions: map<uint64, AuctionV1> = [];
-    auctions.set(0, {
-        itemIndex: 0,
-        plate: "EMPTY 00",
-        metadataContent: "empty.json",
-        startingBid: grams("1"),
-        minimumBidStep: grams("0.1"),
-        endTime: (blockchain.now() - 1) as uint32,
-        highestBid: 0,
-        highestBidder: null,
-        status: AUCTION_V1_ACTIVE,
-        mintQueryId: 0,
-    });
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "EMPTY 00",
+            metadataContent: "empty.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: 0,
+            highestBidder: null,
+            status: AUCTION_V1_ACTIVE,
+            mintQueryId: 0,
+        },
+    );
     val manager = AuctionManager.fromStorage({
         ownerAddress: creator.address,
         collectionAddress: collection.address,
@@ -153,7 +156,10 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
 
     val finish = manager.sendAny(
         testing.treasury("finisher").address,
-        FinishAuctionV1 { queryId: 101, auctionId: 0 }.toCell(),
+        FinishAuctionV1 {
+            queryId: 101,
+            auctionId: 0,
+        }.toCell(),
         { value: grams("0.2"), bounce: true },
     );
     expect(finish).toHaveSuccessfulTx<FinishAuctionV1>({
