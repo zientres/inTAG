@@ -123,9 +123,7 @@ fun onInternalMessage(in: InMessage) {
         }
 
         RequestNftItemConfirmationV12 => {
-            assert (
-                in.senderAddress == storage.collectionAddress
-            ) throw Errors.NotFromCollection;
+            assert (in.senderAddress == storage.collectionAddress) throw Errors.NotFromCollection;
             assert (msg.itemIndex == storage.itemIndex) throw Errors.InvalidItemIndex;
             assert (msg.queryId == storage.initQueryId) throw Errors.NotFromCollection;
 
