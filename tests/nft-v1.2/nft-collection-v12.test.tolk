@@ -216,3 +216,32 @@ get fun `test nft v1.2: rejects zero deployment query id`() {
         exitCode: NftV12Errors.InvalidDeploymentState,
     });
 }
+
+get fun `test nft v1.2: admin can skip an unused item index`() {
+    val (collection, manager, _) = setupNftCollectionV12Test();
+    val result = collection.sendAny(
+        manager.address,
+        SkipNftItemIndexV12 { queryId: 14001, itemIndex: 0 }.toCell(),
+        { value: grams("0.03"), bounce: true },
+    );
+    expect(result).toHaveSuccessfulTx<SkipNftItemIndexV12>({
+        from: manager.address,
+        to: collection.address,
+    });
+    expect(collection.getCollectionData().nextItemIndex).toEqual(1);
+}
+
+get fun `test nft v1.2: rejects item index skip from non-admin`() {
+    val (collection, _, _) = setupNftCollectionV12Test();
+    val attacker = testing.treasury("unauthorized-index-skipper");
+    val result = collection.sendAny(
+        attacker.address,
+        SkipNftItemIndexV12 { queryId: 14002, itemIndex: 0 }.toCell(),
+        { value: grams("0.03"), bounce: true },
+    );
+    expect(result).toHaveFailedTx<SkipNftItemIndexV12>({
+        from: attacker.address,
+        to: collection.address,
+        exitCode: NftV12Errors.NotFromAdmin,
+    });
+}
