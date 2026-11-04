@@ -87,8 +87,8 @@ fun onInternalMessage(in: InMessage) {
             assert (
                 msg.treasuryAddress != null && msg.securityFundAddress != null
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            val treasury = msg.treasuryAddress!!;
-            val securityFund = msg.securityFundAddress!!;
+            val treasury = msg.treasuryAddress!;
+            val securityFund = msg.securityFundAddress!;
             assert (
                 isValidManagerAddress(treasury) && isValidManagerAddress(securityFund)
             ) throw AuctionManagerErrors.InvalidAddress;
@@ -165,7 +165,7 @@ fun onInternalMessage(in: InMessage) {
                 val refundQueryId = storage.nextQueryId;
                 storage.nextQueryId += 1;
                 storage.save();
-                sendRefund(msg.auctionId, previousBidder!!, previousBid, refundQueryId);
+                sendRefund(msg.auctionId, previousBidder!, previousBid, refundQueryId);
             }
         }
 
@@ -202,7 +202,7 @@ fun onInternalMessage(in: InMessage) {
                     queryId: mintQueryId,
                     itemIndex: auction.itemIndex,
                     attachTonAmount: AUCTION_V1_ITEM_DEPLOY_VALUE,
-                    ownerAddress: auction.highestBidder!!,
+                    ownerAddress: auction.highestBidder!,
                     content: auction.metadataContent,
                 },
             });
@@ -236,8 +236,8 @@ fun onInternalMessage(in: InMessage) {
             storage.nextMintItemIndex += 1;
             storage.save();
 
-            val treasury = storage.treasuryAddress!!;
-            val securityFund = storage.securityFundAddress!!;
+            val treasury = storage.treasuryAddress!;
+            val securityFund = storage.securityFundAddress!;
             val treasuryShare = auction.highestBid * 30 / 100;
             val securityShare = auction.highestBid * 20 / 100;
             val creatorShare = auction.highestBid - treasuryShare - securityShare;
@@ -283,7 +283,7 @@ fun onInternalMessage(in: InMessage) {
                 val refundQueryId = storage.nextQueryId;
                 storage.nextQueryId += 1;
                 storage.save();
-                sendRefund(auctionId, auction.highestBidder!!, auction.highestBid, refundQueryId);
+                sendRefund(auctionId, auction.highestBidder!, auction.highestBid, refundQueryId);
             }
             sendMintAck(storage.collectionAddress, msg.queryId, msg.itemIndex);
         }
