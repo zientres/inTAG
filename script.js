@@ -116,6 +116,8 @@ if (missingElements.length > 0) {
   const translations = {
     ru: {
       pageTitle: "TagitalSpace",
+      collectionPageTitle: "TagitalSpace — Collections", communityPageTitle: "TagitalSpace — Community", auctionsPageTitle: "TagitalSpace — Auctions",
+      collectionPageTitle: "TagitalSpace — Коллекции", communityPageTitle: "TagitalSpace — Сообщество", auctionsPageTitle: "TagitalSpace — Аукционы",
       navCollection: "Коллекции",
       navAuctions: "Аукционы",
       navMarket: "Рынок",
@@ -144,11 +146,13 @@ if (missingElements.length > 0) {
       homeAria: "TagitalSpace — главная",
       logoAlt: "Логотип TagitalSpace",
       plateAria: "Номерной знак",
-      progressAria: "Смена номерного знака"
+      progressAria: "Смена номерного знака", countryRussia: "Россия", openRussiaCollection: "Открыть коллекцию России", backToCollections: "Вернуться к коллекциям", collectionSections: "Разделы коллекции", tabMint: "Минт", tabAuctions: "Аукционы", tabMarket: "Рынок", registerRussiaPlate: "Зарегистрировать номерной знак России", registrationSubtitle: "Вводите комбинацию вашего номера в поле снизу", plateInputLabel: "Введите номер в формате А777АА 777", viewRegions: "Посмотреть регионы России", invalidLettersHint: "Используйте русские буквы: А В Е К М Н О Р С Т У Х", search: "Поиск", regionCodesDialog: "Коды регионов России", close: "Закрыть", regionCodesImageAlt: "Таблица разрешённых автомобильных кодов регионов России", invalidRegion: "Такого кода региона нет в списке"
     },
 
     en: {
       pageTitle: "TagitalSpace",
+      collectionPageTitle: "TagitalSpace — Collections", communityPageTitle: "TagitalSpace — Community", auctionsPageTitle: "TagitalSpace — Auctions",
+      collectionPageTitle: "TagitalSpace — Коллекции", communityPageTitle: "TagitalSpace — Сообщество", auctionsPageTitle: "TagitalSpace — Аукционы",
       navCollection: "Collections",
       navAuctions: "Auctions",
       navMarket: "Market",
@@ -177,7 +181,7 @@ if (missingElements.length > 0) {
       homeAria: "TagitalSpace — Home",
       logoAlt: "TagitalSpace logo",
       plateAria: "License plate",
-      progressAria: "License plate rotation"
+      progressAria: "License plate rotation", countryRussia: "Russia", openRussiaCollection: "Open the Russia collection", backToCollections: "Back to collections", collectionSections: "Collection sections", tabMint: "Mint", tabAuctions: "Auctions", tabMarket: "Market", registerRussiaPlate: "Register a Russian license plate", registrationSubtitle: "Enter your plate combination in the field below", plateInputLabel: "Enter a plate in the format A777AA 777", viewRegions: "View Russian region codes", invalidLettersHint: "Use Russian letters: А В Е К М Н О Р С Т У Х", search: "Search", regionCodesDialog: "Russian region codes", close: "Close", regionCodesImageAlt: "Table of permitted Russian vehicle registration region codes", invalidRegion: "This region code is not in the list"
     }
   };
 
@@ -221,15 +225,24 @@ if (missingElements.length > 0) {
     if (!dictionary) return;
 
     document.documentElement.lang = language;
-    document.title = dictionary.pageTitle;
+    const titleKey = document.querySelector("title")?.dataset.i18n;
+    document.title = titleKey && dictionary[titleKey] ? dictionary[titleKey] : dictionary.pageTitle;
 
     document.querySelectorAll("[data-i18n]").forEach((element) => {
       const key = element.dataset.i18n;
-
-      if (dictionary[key] !== undefined) {
-        element.textContent = dictionary[key];
-      }
+      if (dictionary[key] !== undefined) element.textContent = dictionary[key];
     });
+    ["aria-label", "alt", "placeholder", "title"].forEach((attribute) => {
+      const dataAttribute = `data-i18n-${attribute}`;
+      document.querySelectorAll(`[${dataAttribute}]`).forEach((element) => {
+        const key = element.getAttribute(dataAttribute);
+        if (dictionary[key] !== undefined) element.setAttribute(attribute, dictionary[key]);
+      });
+    });
+    const registrationHint = document.getElementById("registration-hint");
+    if (registrationHint && dictionary.invalidLettersHint) registrationHint.textContent = dictionary.invalidLettersHint;
+    const invalidRegionCell = document.querySelector(".registration-region-cell.is-invalid");
+    if (invalidRegionCell && dictionary.invalidRegion) invalidRegionCell.setAttribute("title", dictionary.invalidRegion);
 
     document.querySelector(".brand")?.setAttribute(
       "aria-label",
