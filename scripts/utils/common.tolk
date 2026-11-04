@@ -62,8 +62,6 @@ fun makeNftCollectionStorage(admin: address, info: NftCollectionInfo): NftCollec
 }
 
 fun deployNftCollection(deployer: ActonWallet, info: NftCollectionInfo): NftCollection {
-    assert (info.commonContent.sha256() != "".sha256()) throw 1001;
-    assert (info.image.sha256() != "".sha256()) throw 1002;
     val collection = NftCollection.fromStorage(makeNftCollectionStorage(deployer.address, info));
     val res = collection.deploy(deployer.address, { value: grams("0.2"), bounce: false });
     res.waitForFirstTransaction();
