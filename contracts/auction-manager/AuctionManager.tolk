@@ -84,23 +84,23 @@ fun addPayoutCredit(mutate storage: AuctionManagerStorage, beneficiary: address,
 }
 
 fun onInternalMessage(in: InMessage) {
-    val msg = lazy AllowedMessageToAuctionManager.fromSlice(in.body);
+    val message = lazy AllowedMessageToAuctionManager.fromSlice(in.body);
 
-    match (msg) {
+    match (message) {
         SetPayoutAddressesV1 => {
             var storage = lazy AuctionManagerStorage.load();
             assert (
                 in.senderAddress == storage.ownerAddress
             ) throw AuctionManagerErrors.NotFromOwner;
-            assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             assert (
                 !storage.payoutConfigLocked
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
             assert (
-                msg.treasuryAddress != null && msg.securityFundAddress != null
+                message.treasuryAddress != null && message.securityFundAddress != null
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            val treasury = msg.treasuryAddress!;
-            val securityFund = msg.securityFundAddress!;
+            val treasury = message.treasuryAddress!;
+            val securityFund = message.securityFundAddress!;
             assert (
                 isValidManagerAddress(treasury) && isValidManagerAddress(securityFund)
             ) throw AuctionManagerErrors.InvalidAddress;
@@ -118,7 +118,7 @@ fun onInternalMessage(in: InMessage) {
             assert (
                 in.senderAddress == storage.ownerAddress
             ) throw AuctionManagerErrors.NotFromOwner;
-            assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             assert (
                 storage.payoutAddresses.exists(0) && storage.payoutAddresses.exists(1)
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
@@ -126,23 +126,23 @@ fun onInternalMessage(in: InMessage) {
                 in.valueCoins >= AUCTION_V1_MIN_CREATE_OVERHEAD
             ) throw AuctionManagerErrors.InsufficientAttachedValue;
             assert (
-                msg.itemIndex == storage.nextItemIndex
+                message.itemIndex == storage.nextItemIndex
             ) throw AuctionManagerErrors.ItemIndexOutOfSequence;
             assert (
-                msg.startingBid > 0 && msg.minimumBidStep > 0
+                message.startingBid > 0 && message.minimumBidStep > 0
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
             assert (
-                msg.endTime > blockchain.now()
+                message.endTime > blockchain.now()
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
             val auctionId = storage.nextItemIndex;
             val auction: AuctionV1 = {
-                itemIndex: msg.itemIndex,
-                plate: msg.plate,
-                metadataContent: msg.metadataContent,
-                startingBid: msg.startingBid,
-                minimumBidStep: msg.minimumBidStep,
-                endTime: msg.endTime,
+                itemIndex: message.itemIndex,
+                plate: message.plate,
+                metadataContent: message.metadataContent,
+                startingBid: message.startingBid,
+                minimumBidStep: message.minimumBidStep,
+                endTime: message.endTime,
                 highestBid: 0,
                 highestBidder: null,
                 status: AUCTION_V1_ACTIVE,
@@ -156,8 +156,8 @@ fun onInternalMessage(in: InMessage) {
 
         PlaceBidV1 => {
             var storage = lazy AuctionManagerStorage.load();
-            assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
-            val lookup = storage.auctions.get(msg.auctionId);
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            val lookup = storage.auctions.get(message.auctionId);
             assert (lookup.isFound) throw AuctionManagerErrors.InvalidAuctionId;
             var auction = lookup.loadValue();
             assert (
@@ -165,37 +165,37 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.AuctionAlreadyEnded;
             assert (blockchain.now() < auction.endTime) throw AuctionManagerErrors.BidAfterDeadline;
             assert (
-                in.valueCoins >= msg.bidAmount + AUCTION_V1_MIN_BID_OVERHEAD
+                in.valueCoins >= message.bidAmount + AUCTION_V1_MIN_BID_OVERHEAD
             ) throw AuctionManagerErrors.InsufficientAttachedValue;
 
             var minimum: coins = auction.startingBid;
             if (auction.highestBidder != null) {
                 minimum = (auction.highestBid + auction.minimumBidStep) as coins;
             }
-            assert (msg.bidAmount >= minimum) throw AuctionManagerErrors.BidTooLow;
+            assert (message.bidAmount >= minimum) throw AuctionManagerErrors.BidTooLow;
 
             val previousBidder = auction.highestBidder;
             val previousBid = auction.highestBid;
-            auction.highestBid = msg.bidAmount;
+            auction.highestBid = message.bidAmount;
             auction.highestBidder = in.senderAddress;
-            storage.auctions.set(msg.auctionId, auction);
+            storage.auctions.set(message.auctionId, auction);
             storage.save();
 
             if (previousBidder != null && previousBid > 0) {
                 val refundQueryId = storage.nextQueryId;
                 storage.nextQueryId += 1;
                 storage.save();
-                sendRefund(msg.auctionId, previousBidder!, previousBid, refundQueryId);
+                sendRefund(message.auctionId, previousBidder, previousBid, refundQueryId);
             }
         }
 
         FinishAuctionV1 => {
             var storage = lazy AuctionManagerStorage.load();
-            assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             assert (
                 in.valueCoins >= AUCTION_V1_MIN_FINISH_OVERHEAD
             ) throw AuctionManagerErrors.InsufficientAttachedValue;
-            val lookup = storage.auctions.get(msg.auctionId);
+            val lookup = storage.auctions.get(message.auctionId);
             assert (lookup.isFound) throw AuctionManagerErrors.InvalidAuctionId;
             var auction = lookup.loadValue();
             assert (
@@ -213,7 +213,7 @@ fun onInternalMessage(in: InMessage) {
                 auction.status = AUCTION_V1_CLOSED_NO_BIDS;
                 auction.mintQueryId = skipQueryId;
                 storage.nextMintItemIndex += 1;
-                storage.auctions.set(msg.auctionId, auction);
+                storage.auctions.set(message.auctionId, auction);
                 storage.save();
 
                 val skip = createMessage({
@@ -232,7 +232,7 @@ fun onInternalMessage(in: InMessage) {
             storage.nextQueryId += 1;
             auction.status = AUCTION_V1_WAITING_FOR_MINT;
             auction.mintQueryId = mintQueryId;
-            storage.auctions.set(msg.auctionId, auction);
+            storage.auctions.set(message.auctionId, auction);
             storage.save();
 
             val deploy = createMessage({
@@ -243,7 +243,7 @@ fun onInternalMessage(in: InMessage) {
                     queryId: mintQueryId,
                     itemIndex: auction.itemIndex,
                     attachTonAmount: AUCTION_V1_ITEM_DEPLOY_VALUE,
-                    ownerAddress: auction.highestBidder!,
+                    ownerAddress: auction.highestBidder,
                     content: auction.metadataContent,
                 },
             });
@@ -252,11 +252,11 @@ fun onInternalMessage(in: InMessage) {
 
         RetryMintNoticeV1 => {
             val storage = lazy AuctionManagerStorage.load();
-            assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             assert (
                 in.valueCoins >= AUCTION_V1_MIN_CREATE_OVERHEAD
             ) throw AuctionManagerErrors.InsufficientAttachedValue;
-            val lookup = storage.auctions.get(msg.auctionId);
+            val lookup = storage.auctions.get(message.auctionId);
             assert (lookup.isFound) throw AuctionManagerErrors.InvalidAuctionId;
             val auction = lookup.loadValue();
             assert (
@@ -283,18 +283,18 @@ fun onInternalMessage(in: InMessage) {
             assert (
                 in.senderAddress == storage.collectionAddress
             ) throw AuctionManagerErrors.NotFromCollection;
-            val auctionLookup = storage.auctions.get(msg.itemIndex);
+            val auctionLookup = storage.auctions.get(message.itemIndex);
             assert (auctionLookup.isFound) throw AuctionManagerErrors.InvalidMintConfirmation;
             var auction = auctionLookup.loadValue();
             assert (
-                auction.mintQueryId == msg.queryId
+                auction.mintQueryId == message.queryId
             ) throw AuctionManagerErrors.InvalidMintConfirmation;
             assert (
-                msg.nftAddress != address.fromWorkchainAndHash(0, 0)
+                message.nftAddress != address.fromWorkchainAndHash(0, 0)
             ) throw AuctionManagerErrors.InvalidMintConfirmation;
 
             if (auction.status == AUCTION_V1_CLOSED_PAID) {
-                sendMintAck(storage.collectionAddress, msg.queryId, msg.itemIndex);
+                sendMintAck(storage.collectionAddress, message.queryId, message.itemIndex);
                 return;
             }
             assert (
@@ -313,7 +313,7 @@ fun onInternalMessage(in: InMessage) {
             val securityFund = securityLookup.loadValue();
 
             auction.status = AUCTION_V1_CLOSED_PAID;
-            storage.auctions.set(msg.itemIndex, auction);
+            storage.auctions.set(message.itemIndex, auction);
             storage.nextMintItemIndex += 1;
             storage.save();
 
@@ -323,18 +323,18 @@ fun onInternalMessage(in: InMessage) {
             var queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
-            sendPayout(msg.itemIndex, storage.ownerAddress, creatorShare, queryId);
+            sendPayout(message.itemIndex, storage.ownerAddress, creatorShare, queryId);
 
             queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
-            sendPayout(msg.itemIndex, treasury, treasuryShare, queryId);
+            sendPayout(message.itemIndex, treasury, treasuryShare, queryId);
 
             queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
-            sendPayout(msg.itemIndex, securityFund, securityShare, queryId);
-            sendMintAck(storage.collectionAddress, msg.queryId, msg.itemIndex);
+            sendPayout(message.itemIndex, securityFund, securityShare, queryId);
+            sendMintAck(storage.collectionAddress, message.queryId, message.itemIndex);
         }
 
         NftItemDeploymentFailedV12 => {
@@ -342,15 +342,15 @@ fun onInternalMessage(in: InMessage) {
             assert (
                 in.senderAddress == storage.collectionAddress
             ) throw AuctionManagerErrors.NotFromCollection;
-            val auctionLookup = storage.auctions.get(msg.itemIndex);
+            val auctionLookup = storage.auctions.get(message.itemIndex);
             assert (auctionLookup.isFound) throw AuctionManagerErrors.InvalidMintConfirmation;
             var auction = auctionLookup.loadValue();
             assert (
-                auction.mintQueryId == msg.queryId
+                auction.mintQueryId == message.queryId
             ) throw AuctionManagerErrors.InvalidMintConfirmation;
 
             if (auction.status == AUCTION_V1_CLOSED_MINT_FAILED) {
-                sendMintAck(storage.collectionAddress, msg.queryId, msg.itemIndex);
+                sendMintAck(storage.collectionAddress, message.queryId, message.itemIndex);
                 return;
             }
             assert (
@@ -358,7 +358,7 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
-            storage.auctions.set(msg.itemIndex, auction);
+            storage.auctions.set(message.itemIndex, auction);
             storage.nextMintItemIndex += 1;
             storage.save();
 
@@ -367,18 +367,18 @@ fun onInternalMessage(in: InMessage) {
                 storage.nextQueryId += 1;
                 storage.save();
                 sendRefund(
-                    msg.itemIndex,
-                    auction.highestBidder!,
+                    message.itemIndex,
+                    auction.highestBidder,
                     auction.highestBid,
                     refundQueryId,
                 );
             }
-            sendMintAck(storage.collectionAddress, msg.queryId, msg.itemIndex);
+            sendMintAck(storage.collectionAddress, message.queryId, message.itemIndex);
         }
 
         ClaimRefundV1 => {
             var storage = lazy AuctionManagerStorage.load();
-            assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             val lookup = storage.refundCredits.get(in.senderAddress);
             assert (lookup.isFound) throw AuctionManagerErrors.NoRefundAvailable;
             val amount = lookup.loadValue();
@@ -392,7 +392,7 @@ fun onInternalMessage(in: InMessage) {
 
         ClaimPayoutV1 => {
             var storage = lazy AuctionManagerStorage.load();
-            assert (msg.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             val lookup = storage.payoutCredits.get(in.senderAddress);
             assert (lookup.isFound) throw AuctionManagerErrors.NoPayoutAvailable;
             val amount = lookup.loadValue();
