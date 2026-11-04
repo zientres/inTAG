@@ -16,6 +16,7 @@ contract NftCollectionV12 {
 type AllowedMessageToNftCollectionV12 =
     | RequestRoyaltyParams
     | DeployNftV12
+    | SkipNftItemIndexV12
     | NftItemInitializedV12
     | NftItemDeploymentAckV12
     | RetryNftItemDeploymentNoticeV12
