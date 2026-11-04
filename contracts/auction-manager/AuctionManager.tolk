@@ -99,8 +99,8 @@ fun onInternalMessage(in: InMessage) {
             assert (
                 message.treasuryAddress != null && message.securityFundAddress != null
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            val treasury = message.treasuryAddress!;
-            val securityFund = message.securityFundAddress!;
+            val treasury = message.treasuryAddress;
+            val securityFund = message.securityFundAddress;
             assert (
                 isValidManagerAddress(treasury) && isValidManagerAddress(securityFund)
             ) throw AuctionManagerErrors.InvalidAddress;
