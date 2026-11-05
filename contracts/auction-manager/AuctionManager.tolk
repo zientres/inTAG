@@ -2,6 +2,7 @@ import "@contracts/auction-manager/errors"
 import "@contracts/auction-manager/messages"
 import "@contracts/auction-manager/types"
 import "@contracts/nft-v1.2/messages"
+import "@stdlib/strings"
 
 contract AuctionManager {
     author: "TagitalSpace"
@@ -133,6 +134,12 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
             assert (
                 message.endTime > blockchain.now()
+            ) throw AuctionManagerErrors.InvalidAuctionParameters;
+            assert (
+                message.plate.calculateLength() > 0 &&
+                message.plate.calculateLength() <= AUCTION_V1_MAX_PLATE_BYTES &&
+                message.metadataContent.calculateLength() > 0 &&
+                message.metadataContent.calculateLength() <= AUCTION_V1_MAX_METADATA_CONTENT_BYTES
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
             val auctionId = storage.nextItemIndex;
