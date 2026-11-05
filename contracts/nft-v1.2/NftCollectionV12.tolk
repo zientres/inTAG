@@ -228,6 +228,9 @@ fun onInternalMessage(in: InMessage) {
         ChangeCollectionAdmin => {
             var storage = lazy NftCollectionV12Storage.load();
             assert (in.senderAddress == storage.adminAddress) throw NftV12Errors.NotFromAdmin;
+            assert (
+                message.newAdminAddress != address.fromWorkchainAndHash(0, 0)
+            ) throw NftV12Errors.InvalidAdminAddress;
             storage.adminAddress = message.newAdminAddress;
             storage.save();
         }
