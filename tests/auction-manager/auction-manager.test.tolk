@@ -644,7 +644,6 @@ get fun `test auction manager: bounced payout claim restores the credit`() {
     expect(manager.getPayoutCredit(unavailableBeneficiary)).toEqual(grams("5"));
 }
 
-
 get fun `test auction manager: rejects NFT confirmation from an untrusted sender`() {
     val deployer = testing.treasury("forged-confirm-deployer");
     val collection = testing.treasury("forged-confirm-collection");
@@ -656,18 +655,21 @@ get fun `test auction manager: rejects NFT confirmation from an untrusted sender
     payoutAddresses.set(0, treasury.address);
     payoutAddresses.set(1, securityFund.address);
     var auctions: map<uint64, AuctionV1> = [];
-    auctions.set(0, {
-        itemIndex: 0,
-        plate: "FORGED 77",
-        metadataContent: "forged.json",
-        startingBid: grams("1"),
-        minimumBidStep: grams("0.1"),
-        endTime: (blockchain.now() - 1) as uint32,
-        highestBid: grams("5"),
-        highestBidder: winner.address,
-        status: AUCTION_V1_WAITING_FOR_MINT,
-        mintQueryId: 700,
-    });
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "FORGED 77",
+            metadataContent: "forged.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("5"),
+            highestBidder: winner.address,
+            status: AUCTION_V1_WAITING_FOR_MINT,
+            mintQueryId: 700,
+        },
+    );
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
         collectionAddress: collection.address,
@@ -710,18 +712,21 @@ get fun `test auction manager: rejects NFT confirmation with an incorrect query 
     payoutAddresses.set(0, treasury.address);
     payoutAddresses.set(1, securityFund.address);
     var auctions: map<uint64, AuctionV1> = [];
-    auctions.set(0, {
-        itemIndex: 0,
-        plate: "QUERY 77",
-        metadataContent: "query.json",
-        startingBid: grams("1"),
-        minimumBidStep: grams("0.1"),
-        endTime: (blockchain.now() - 1) as uint32,
-        highestBid: grams("5"),
-        highestBidder: winner.address,
-        status: AUCTION_V1_WAITING_FOR_MINT,
-        mintQueryId: 710,
-    });
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "QUERY 77",
+            metadataContent: "query.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("5"),
+            highestBidder: winner.address,
+            status: AUCTION_V1_WAITING_FOR_MINT,
+            mintQueryId: 710,
+        },
+    );
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
         collectionAddress: collection.address,
@@ -754,7 +759,6 @@ get fun `test auction manager: rejects NFT confirmation with an incorrect query 
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_MINT);
 }
 
-
 get fun `test auction manager: rejects NFT failure from an untrusted sender`() {
     val deployer = testing.treasury("forged-failure-deployer");
     val collection = testing.treasury("forged-failure-collection");
@@ -766,18 +770,21 @@ get fun `test auction manager: rejects NFT failure from an untrusted sender`() {
     payoutAddresses.set(0, treasury.address);
     payoutAddresses.set(1, securityFund.address);
     var auctions: map<uint64, AuctionV1> = [];
-    auctions.set(0, {
-        itemIndex: 0,
-        plate: "FORGED FAIL 77",
-        metadataContent: "forged-failure.json",
-        startingBid: grams("1"),
-        minimumBidStep: grams("0.1"),
-        endTime: (blockchain.now() - 1) as uint32,
-        highestBid: grams("5"),
-        highestBidder: winner.address,
-        status: AUCTION_V1_WAITING_FOR_MINT,
-        mintQueryId: 720,
-    });
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "FORGED FAIL 77",
+            metadataContent: "forged-failure.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("5"),
+            highestBidder: winner.address,
+            status: AUCTION_V1_WAITING_FOR_MINT,
+            mintQueryId: 720,
+        },
+    );
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
         collectionAddress: collection.address,
@@ -821,18 +828,21 @@ get fun `test auction manager: rejects NFT failure with an incorrect query id`()
     payoutAddresses.set(0, treasury.address);
     payoutAddresses.set(1, securityFund.address);
     var auctions: map<uint64, AuctionV1> = [];
-    auctions.set(0, {
-        itemIndex: 0,
-        plate: "WRONG FAIL 77",
-        metadataContent: "wrong-failure.json",
-        startingBid: grams("1"),
-        minimumBidStep: grams("0.1"),
-        endTime: (blockchain.now() - 1) as uint32,
-        highestBid: grams("5"),
-        highestBidder: winner.address,
-        status: AUCTION_V1_WAITING_FOR_MINT,
-        mintQueryId: 730,
-    });
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "WRONG FAIL 77",
+            metadataContent: "wrong-failure.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("5"),
+            highestBidder: winner.address,
+            status: AUCTION_V1_WAITING_FOR_MINT,
+            mintQueryId: 730,
+        },
+    );
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
         collectionAddress: collection.address,
@@ -866,7 +876,6 @@ get fun `test auction manager: rejects NFT failure with an incorrect query id`()
     expect(manager.getRefundCredit(winner.address)).toEqual(0);
 }
 
-
 get fun `test auction manager: duplicate mint confirmation does not pay out twice`() {
     val deployer = testing.treasury("duplicate-confirm-deployer");
     val collection = testing.treasury("duplicate-confirm-collection");
@@ -879,18 +888,21 @@ get fun `test auction manager: duplicate mint confirmation does not pay out twic
     payoutAddresses.set(0, treasury.address);
     payoutAddresses.set(1, securityFund.address);
     var auctions: map<uint64, AuctionV1> = [];
-    auctions.set(0, {
-        itemIndex: 0,
-        plate: "DUPLICATE 77",
-        metadataContent: "duplicate.json",
-        startingBid: grams("1"),
-        minimumBidStep: grams("0.1"),
-        endTime: (blockchain.now() - 1) as uint32,
-        highestBid: grams("10"),
-        highestBidder: winner.address,
-        status: AUCTION_V1_WAITING_FOR_MINT,
-        mintQueryId: 740,
-    });
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "DUPLICATE 77",
+            metadataContent: "duplicate.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("10"),
+            highestBidder: winner.address,
+            status: AUCTION_V1_WAITING_FOR_MINT,
+            mintQueryId: 740,
+        },
+    );
     val manager = AuctionManager.fromStorage({
         ownerAddress: unavailableCreator,
         collectionAddress: collection.address,
@@ -929,7 +941,6 @@ get fun `test auction manager: duplicate mint confirmation does not pay out twic
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
     expect(manager.getPayoutCredit(unavailableCreator)).toEqual(grams("5"));
 }
-
 get fun `test auction manager: duplicate mint failure does not refund twice`() {
     val deployer = testing.treasury("duplicate-failure-deployer");
     val collection = testing.treasury("duplicate-failure-collection");
@@ -940,18 +951,21 @@ get fun `test auction manager: duplicate mint failure does not refund twice`() {
     payoutAddresses.set(0, treasury.address);
     payoutAddresses.set(1, securityFund.address);
     var auctions: map<uint64, AuctionV1> = [];
-    auctions.set(0, {
-        itemIndex: 0,
-        plate: "DUPLICATE FAIL 77",
-        metadataContent: "duplicate-failure.json",
-        startingBid: grams("1"),
-        minimumBidStep: grams("0.1"),
-        endTime: (blockchain.now() - 1) as uint32,
-        highestBid: grams("5"),
-        highestBidder: unavailableWinner,
-        status: AUCTION_V1_WAITING_FOR_MINT,
-        mintQueryId: 750,
-    });
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "DUPLICATE FAIL 77",
+            metadataContent: "duplicate-failure.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("5"),
+            highestBidder: unavailableWinner,
+            status: AUCTION_V1_WAITING_FOR_MINT,
+            mintQueryId: 750,
+        },
+    );
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
         collectionAddress: collection.address,
