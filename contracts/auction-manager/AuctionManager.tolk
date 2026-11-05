@@ -1,8 +1,8 @@
+import "@stdlib/strings"
 import "@contracts/auction-manager/errors"
 import "@contracts/auction-manager/messages"
 import "@contracts/auction-manager/types"
 import "@contracts/nft-v1.2/messages"
-import "@stdlib/strings"
 
 contract AuctionManager {
     author: "TagitalSpace"
