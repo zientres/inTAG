@@ -463,6 +463,84 @@ get fun `test auction manager: bounced creator payout becomes recoverable credit
     expect(manager.getPayoutCredit(unavailableCreator)).toEqual(grams("5"));
 }
 
+get fun `test auction manager: beneficiary can claim bounced refund credit`() {
+    val deployer = testing.treasury("claim-refund-deployer");
+    val beneficiary = testing.treasury("claim-refund-beneficiary");
+    val collection = testing.treasury("claim-refund-collection");
+    val treasury = testing.treasury("claim-refund-treasury");
+    val securityFund = testing.treasury("claim-refund-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var refundCredits: map<address, coins> = [];
+    refundCredits.set(beneficiary.address, grams("1"));
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: deployer.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 300,
+        auctions: [],
+        refundCredits,
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val claim = manager.sendAny(
+        beneficiary.address,
+        ClaimRefundV1 { queryId: 301 }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(claim).toHaveSuccessfulTx<ClaimRefundV1>({ to: manager.address });
+    expect(claim).toHaveTx<RefundTransferV1>({
+        from: manager.address,
+        to: beneficiary.address,
+    });
+    expect(manager.getRefundCredit(beneficiary.address)).toEqual(0);
+}
+
+get fun `test auction manager: beneficiary can claim bounced payout credit`() {
+    val deployer = testing.treasury("claim-payout-deployer");
+    val beneficiary = testing.treasury("claim-payout-beneficiary");
+    val collection = testing.treasury("claim-payout-collection");
+    val treasury = testing.treasury("claim-payout-treasury");
+    val securityFund = testing.treasury("claim-payout-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var payoutCredits: map<address, coins> = [];
+    payoutCredits.set(beneficiary.address, grams("5"));
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: deployer.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 400,
+        auctions: [],
+        refundCredits: [],
+        payoutCredits,
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val claim = manager.sendAny(
+        beneficiary.address,
+        ClaimPayoutV1 { queryId: 401 }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(claim).toHaveSuccessfulTx<ClaimPayoutV1>({ to: manager.address });
+    expect(claim).toHaveTx<PayoutTransferV1>({
+        from: manager.address,
+        to: beneficiary.address,
+    });
+    expect(manager.getPayoutCredit(beneficiary.address)).toEqual(0);
+}
+
 get fun `test auction manager: payout addresses cannot change after first auction`() {
     val (manager, creator, _, treasury, securityFund) = setupAuctionManagerTest();
     val create = manager.sendAny(
