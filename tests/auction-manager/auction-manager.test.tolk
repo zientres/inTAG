@@ -941,6 +941,7 @@ get fun `test auction manager: duplicate mint confirmation does not pay out twic
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
     expect(manager.getPayoutCredit(unavailableCreator)).toEqual(grams("5"));
 }
+
 get fun `test auction manager: duplicate mint failure does not refund twice`() {
     val deployer = testing.treasury("duplicate-failure-deployer");
     val collection = testing.treasury("duplicate-failure-collection");
