@@ -4,6 +4,7 @@ import "@acton/emulation/testing"
 import "@acton/testing/expect"
 import "@wrappers/NftCollectionV12.gen"
 import "@wrappers/NftItemV12.gen"
+import "@contracts/nft-v1.1/messages"
 import "@contracts/nft-v1.1/types"
 import "@contracts/nft-v1.2/errors"
 import "@contracts/nft-v1.2/messages"
@@ -257,6 +258,7 @@ get fun `test nft v1.2: rejects changing collection admin to zero address`() {
     val result = collection.sendAny(
         manager.address,
         ChangeCollectionAdmin {
+            queryId: 15001,
             newAdminAddress: address.fromWorkchainAndHash(0, 0),
         }.toCell(),
         { value: grams("0.03"), bounce: true },
