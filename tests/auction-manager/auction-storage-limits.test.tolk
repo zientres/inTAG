@@ -1,3 +1,4 @@
+import "@stdlib/strings"
 import "@acton/emulation/network"
 import "@acton/emulation/testing"
 import "@acton/testing/expect"
@@ -5,7 +6,6 @@ import "@wrappers/AuctionManager.gen"
 import "@contracts/auction-manager/errors"
 import "@contracts/auction-manager/messages"
 import "@contracts/auction-manager/types"
-import "@stdlib/strings"
 
 fun setupAuctionStorageLimitsTest(): (AuctionManager, Treasury) {
     val creator = testing.treasury("storage-limit-creator");
