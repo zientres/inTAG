@@ -573,3 +573,73 @@ get fun `test auction manager: payout addresses cannot change after first auctio
         exitCode: AuctionManagerErrors.InvalidPayoutConfiguration,
     });
 }
+
+get fun `test auction manager: bounced refund claim restores the credit`() {
+    val deployer = testing.treasury("claim-bounce-refund-deployer");
+    val unavailableBeneficiary = randomAddress("claim-bounce-refund-beneficiary");
+    val collection = testing.treasury("claim-bounce-refund-collection");
+    val treasury = testing.treasury("claim-bounce-refund-treasury");
+    val securityFund = testing.treasury("claim-bounce-refund-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var refundCredits: map<address, coins> = [];
+    refundCredits.set(unavailableBeneficiary, grams("1"));
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: deployer.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 500,
+        auctions: [],
+        refundCredits,
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val claim = manager.sendAny(
+        unavailableBeneficiary,
+        ClaimRefundV1 { queryId: 501 }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(claim).toHaveSuccessfulTx<ClaimRefundV1>({ to: manager.address });
+    expect(manager.getRefundCredit(unavailableBeneficiary)).toEqual(grams("1"));
+}
+
+get fun `test auction manager: bounced payout claim restores the credit`() {
+    val deployer = testing.treasury("claim-bounce-payout-deployer");
+    val unavailableBeneficiary = randomAddress("claim-bounce-payout-beneficiary");
+    val collection = testing.treasury("claim-bounce-payout-collection");
+    val treasury = testing.treasury("claim-bounce-payout-treasury");
+    val securityFund = testing.treasury("claim-bounce-payout-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var payoutCredits: map<address, coins> = [];
+    payoutCredits.set(unavailableBeneficiary, grams("5"));
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: deployer.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 600,
+        auctions: [],
+        refundCredits: [],
+        payoutCredits,
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val claim = manager.sendAny(
+        unavailableBeneficiary,
+        ClaimPayoutV1 { queryId: 601 }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(claim).toHaveSuccessfulTx<ClaimPayoutV1>({ to: manager.address });
+    expect(manager.getPayoutCredit(unavailableBeneficiary)).toEqual(grams("5"));
+}
