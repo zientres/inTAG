@@ -463,6 +463,45 @@ get fun `test auction manager: bounced creator payout becomes recoverable credit
     expect(manager.getPayoutCredit(unavailableCreator)).toEqual(grams("5"));
 }
 
+get fun `test auction manager: rejects refund claim without enough attached value`() {
+    val deployer = testing.treasury("claim-refund-low-value-deployer");
+    val beneficiary = testing.treasury("claim-refund-low-value-beneficiary");
+    val collection = testing.treasury("claim-refund-low-value-collection");
+    val treasury = testing.treasury("claim-refund-low-value-treasury");
+    val securityFund = testing.treasury("claim-refund-low-value-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var refundCredits: map<address, coins> = [];
+    refundCredits.set(beneficiary.address, grams("1"));
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: deployer.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 290,
+        auctions: [],
+        refundCredits,
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val claim = manager.sendAny(
+        beneficiary.address,
+        ClaimRefundV1 { queryId: 291 }.toCell(),
+        { value: grams("0.001"), bounce: true },
+    );
+    expect(claim).toHaveFailedTx<ClaimRefundV1>({
+        from: beneficiary.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.InsufficientAttachedValue,
+    });
+    expect(manager.getRefundCredit(beneficiary.address)).toEqual(grams("1"));
+}
+
 get fun `test auction manager: beneficiary can claim bounced refund credit`() {
     val deployer = testing.treasury("claim-refund-deployer");
     val beneficiary = testing.treasury("claim-refund-beneficiary");
@@ -500,6 +539,45 @@ get fun `test auction manager: beneficiary can claim bounced refund credit`() {
         to: beneficiary.address,
     });
     expect(manager.getRefundCredit(beneficiary.address)).toEqual(0);
+}
+
+get fun `test auction manager: rejects payout claim without enough attached value`() {
+    val deployer = testing.treasury("claim-payout-low-value-deployer");
+    val beneficiary = testing.treasury("claim-payout-low-value-beneficiary");
+    val collection = testing.treasury("claim-payout-low-value-collection");
+    val treasury = testing.treasury("claim-payout-low-value-treasury");
+    val securityFund = testing.treasury("claim-payout-low-value-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var payoutCredits: map<address, coins> = [];
+    payoutCredits.set(beneficiary.address, grams("5"));
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: deployer.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 390,
+        auctions: [],
+        refundCredits: [],
+        payoutCredits,
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val claim = manager.sendAny(
+        beneficiary.address,
+        ClaimPayoutV1 { queryId: 391 }.toCell(),
+        { value: grams("0.001"), bounce: true },
+    );
+    expect(claim).toHaveFailedTx<ClaimPayoutV1>({
+        from: beneficiary.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.InsufficientAttachedValue,
+    });
+    expect(manager.getPayoutCredit(beneficiary.address)).toEqual(grams("5"));
 }
 
 get fun `test auction manager: beneficiary can claim bounced payout credit`() {
