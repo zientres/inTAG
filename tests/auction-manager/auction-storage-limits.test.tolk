@@ -81,7 +81,7 @@ get fun `test auction manager: rejects plate longer than 64 bytes`() {
         to: manager.address,
         exitCode: AuctionManagerErrors.InvalidAuctionParameters,
     });
-    expect(manager.getAuction(0)).toBeNull();
+    expect(manager.getAuction(0)).toEqual(null);
 }
 
 get fun `test auction manager: rejects metadata path longer than 256 bytes`() {
@@ -98,7 +98,7 @@ get fun `test auction manager: rejects metadata path longer than 256 bytes`() {
         to: manager.address,
         exitCode: AuctionManagerErrors.InvalidAuctionParameters,
     });
-    expect(manager.getAuction(0)).toBeNull();
+    expect(manager.getAuction(0)).toEqual(null);
 }
 
 get fun `test auction manager: rejects empty plate`() {
@@ -110,7 +110,7 @@ get fun `test auction manager: rejects empty plate`() {
         to: manager.address,
         exitCode: AuctionManagerErrors.InvalidAuctionParameters,
     });
-    expect(manager.getAuction(0)).toBeNull();
+    expect(manager.getAuction(0)).toEqual(null);
 }
 
 get fun `test auction manager: rejects empty metadata path`() {
@@ -122,5 +122,5 @@ get fun `test auction manager: rejects empty metadata path`() {
         to: manager.address,
         exitCode: AuctionManagerErrors.InvalidAuctionParameters,
     });
-    expect(manager.getAuction(0)).toBeNull();
+    expect(manager.getAuction(0)).toEqual(null);
 }
