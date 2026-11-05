@@ -1,3 +1,4 @@
+import "@acton/build"
 import "@acton/emulation/network"
 import "@acton/emulation/testing"
 import "@acton/testing/expect"
@@ -6,6 +7,7 @@ import "@wrappers/NftCollectionV12.gen"
 import "@wrappers/NftItemV12.gen"
 import "@contracts/nft-v1.1/errors"
 import "@contracts/nft-v1.1/messages"
+import "@contracts/nft-v1.1/types"
 import "@contracts/nft-v1.2/messages"
 import "@contracts/nft-v1.2/types"
 
