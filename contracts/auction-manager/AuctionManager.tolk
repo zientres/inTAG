@@ -135,11 +135,12 @@ fun onInternalMessage(in: InMessage) {
             assert (
                 message.endTime > blockchain.now()
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
+            val plateLength = message.plate.calculateLength();
+            val metadataContentLength = message.metadataContent.calculateLength();
             assert (
-                message.plate.calculateLength() > 0 &&
-                message.plate.calculateLength() <= AUCTION_V1_MAX_PLATE_BYTES &&
-                message.metadataContent.calculateLength() > 0 &&
-                message.metadataContent.calculateLength() <= AUCTION_V1_MAX_METADATA_CONTENT_BYTES
+                plateLength > 0 && plateLength <= AUCTION_V1_MAX_PLATE_BYTES &&
+                metadataContentLength > 0 &&
+                metadataContentLength <= AUCTION_V1_MAX_METADATA_CONTENT_BYTES
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
             val auctionId = storage.nextItemIndex;
