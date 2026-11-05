@@ -379,6 +379,9 @@ fun onInternalMessage(in: InMessage) {
         ClaimRefundV1 => {
             var storage = lazy AuctionManagerStorage.load();
             assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (
+                in.valueCoins >= AUCTION_V1_MIN_CLAIM_OVERHEAD
+            ) throw AuctionManagerErrors.InsufficientAttachedValue;
             val lookup = storage.refundCredits.get(in.senderAddress);
             assert (lookup.isFound) throw AuctionManagerErrors.NoRefundAvailable;
             val amount = lookup.loadValue();
@@ -393,6 +396,9 @@ fun onInternalMessage(in: InMessage) {
         ClaimPayoutV1 => {
             var storage = lazy AuctionManagerStorage.load();
             assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (
+                in.valueCoins >= AUCTION_V1_MIN_CLAIM_OVERHEAD
+            ) throw AuctionManagerErrors.InsufficientAttachedValue;
             val lookup = storage.payoutCredits.get(in.senderAddress);
             assert (lookup.isFound) throw AuctionManagerErrors.NoPayoutAvailable;
             val amount = lookup.loadValue();
