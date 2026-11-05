@@ -7,4 +7,5 @@ enum NftV12Errors {
     PendingDeploymentNotFound = 406
     DeploymentNoticeNotReady = 407
     InvalidDeploymentState = 408
+    InvalidAdminAddress = 409
 }
