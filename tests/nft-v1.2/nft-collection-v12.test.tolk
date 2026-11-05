@@ -251,3 +251,20 @@ get fun `test nft v1.2: rejects item index skip from non-admin`() {
         exitCode: NftV12Errors.NotFromAdmin,
     });
 }
+
+get fun `test nft v1.2: rejects changing collection admin to zero address`() {
+    val (collection, manager, _) = setupNftCollectionV12Test();
+    val result = collection.sendAny(
+        manager.address,
+        ChangeCollectionAdmin {
+            newAdminAddress: address.fromWorkchainAndHash(0, 0),
+        }.toCell(),
+        { value: grams("0.03"), bounce: true },
+    );
+    expect(result).toHaveFailedTx<ChangeCollectionAdmin>({
+        from: manager.address,
+        to: collection.address,
+        exitCode: NftV12Errors.InvalidAdminAddress,
+    });
+    expect(collection.getCollectionData().adminAddress).toEqual(manager.address);
+}
