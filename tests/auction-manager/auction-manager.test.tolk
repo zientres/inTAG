@@ -865,3 +865,128 @@ get fun `test auction manager: rejects NFT failure with an incorrect query id`()
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_MINT);
     expect(manager.getRefundCredit(winner.address)).toEqual(0);
 }
+
+
+get fun `test auction manager: duplicate mint confirmation does not pay out twice`() {
+    val deployer = testing.treasury("duplicate-confirm-deployer");
+    val collection = testing.treasury("duplicate-confirm-collection");
+    val unavailableCreator = randomAddress("duplicate-confirm-creator");
+    val winner = testing.treasury("duplicate-confirm-winner");
+    val treasury = testing.treasury("duplicate-confirm-treasury");
+    val securityFund = testing.treasury("duplicate-confirm-security");
+    val nftItem = testing.treasury("duplicate-confirm-nft-item");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var auctions: map<uint64, AuctionV1> = [];
+    auctions.set(0, {
+        itemIndex: 0,
+        plate: "DUPLICATE 77",
+        metadataContent: "duplicate.json",
+        startingBid: grams("1"),
+        minimumBidStep: grams("0.1"),
+        endTime: (blockchain.now() - 1) as uint32,
+        highestBid: grams("10"),
+        highestBidder: winner.address,
+        status: AUCTION_V1_WAITING_FOR_MINT,
+        mintQueryId: 740,
+    });
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: unavailableCreator,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 1,
+        nextMintItemIndex: 0,
+        nextQueryId: 741,
+        auctions,
+        refundCredits: [],
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val confirmation = NftItemDeploymentConfirmedV12 {
+        queryId: 740,
+        itemIndex: 0,
+        nftAddress: nftItem.address,
+    }.toCell();
+    val first = manager.sendAny(
+        collection.address,
+        confirmation,
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(first).toHaveSuccessfulTx<NftItemDeploymentConfirmedV12>({ to: manager.address });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
+    expect(manager.getPayoutCredit(unavailableCreator)).toEqual(grams("5"));
+
+    val replay = manager.sendAny(
+        collection.address,
+        confirmation,
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(replay).toHaveSuccessfulTx<NftItemDeploymentConfirmedV12>({ to: manager.address });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
+    expect(manager.getPayoutCredit(unavailableCreator)).toEqual(grams("5"));
+}
+
+get fun `test auction manager: duplicate mint failure does not refund twice`() {
+    val deployer = testing.treasury("duplicate-failure-deployer");
+    val collection = testing.treasury("duplicate-failure-collection");
+    val unavailableWinner = randomAddress("duplicate-failure-winner");
+    val treasury = testing.treasury("duplicate-failure-treasury");
+    val securityFund = testing.treasury("duplicate-failure-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var auctions: map<uint64, AuctionV1> = [];
+    auctions.set(0, {
+        itemIndex: 0,
+        plate: "DUPLICATE FAIL 77",
+        metadataContent: "duplicate-failure.json",
+        startingBid: grams("1"),
+        minimumBidStep: grams("0.1"),
+        endTime: (blockchain.now() - 1) as uint32,
+        highestBid: grams("5"),
+        highestBidder: unavailableWinner,
+        status: AUCTION_V1_WAITING_FOR_MINT,
+        mintQueryId: 750,
+    });
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: deployer.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 1,
+        nextMintItemIndex: 0,
+        nextQueryId: 751,
+        auctions,
+        refundCredits: [],
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val failure = NftItemDeploymentFailedV12 {
+        queryId: 750,
+        itemIndex: 0,
+        exitCode: 77,
+    }.toCell();
+    val first = manager.sendAny(
+        collection.address,
+        failure,
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(first).toHaveSuccessfulTx<NftItemDeploymentFailedV12>({ to: manager.address });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_MINT_FAILED);
+    expect(manager.getRefundCredit(unavailableWinner)).toEqual(grams("5"));
+
+    val replay = manager.sendAny(
+        collection.address,
+        failure,
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(replay).toHaveSuccessfulTx<NftItemDeploymentFailedV12>({ to: manager.address });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_MINT_FAILED);
+    expect(manager.getRefundCredit(unavailableWinner)).toEqual(grams("5"));
+}
