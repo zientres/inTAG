@@ -643,3 +643,113 @@ get fun `test auction manager: bounced payout claim restores the credit`() {
     expect(claim).toHaveSuccessfulTx<ClaimPayoutV1>({ to: manager.address });
     expect(manager.getPayoutCredit(unavailableBeneficiary)).toEqual(grams("5"));
 }
+
+
+get fun `test auction manager: rejects NFT confirmation from an untrusted sender`() {
+    val deployer = testing.treasury("forged-confirm-deployer");
+    val collection = testing.treasury("forged-confirm-collection");
+    val attacker = testing.treasury("forged-confirm-attacker");
+    val winner = testing.treasury("forged-confirm-winner");
+    val treasury = testing.treasury("forged-confirm-treasury");
+    val securityFund = testing.treasury("forged-confirm-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var auctions: map<uint64, AuctionV1> = [];
+    auctions.set(0, {
+        itemIndex: 0,
+        plate: "FORGED 77",
+        metadataContent: "forged.json",
+        startingBid: grams("1"),
+        minimumBidStep: grams("0.1"),
+        endTime: (blockchain.now() - 1) as uint32,
+        highestBid: grams("5"),
+        highestBidder: winner.address,
+        status: AUCTION_V1_WAITING_FOR_MINT,
+        mintQueryId: 700,
+    });
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: deployer.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 1,
+        nextMintItemIndex: 0,
+        nextQueryId: 701,
+        auctions,
+        refundCredits: [],
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val forged = manager.sendAny(
+        attacker.address,
+        NftItemDeploymentConfirmedV12 {
+            queryId: 700,
+            itemIndex: 0,
+            nftAddress: testing.treasury("forged-nft-item").address,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(forged).toHaveFailedTx<NftItemDeploymentConfirmedV12>({
+        from: attacker.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.NotFromCollection,
+    });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_MINT);
+}
+
+get fun `test auction manager: rejects NFT confirmation with an incorrect query id`() {
+    val deployer = testing.treasury("wrong-query-deployer");
+    val collection = testing.treasury("wrong-query-collection");
+    val winner = testing.treasury("wrong-query-winner");
+    val treasury = testing.treasury("wrong-query-treasury");
+    val securityFund = testing.treasury("wrong-query-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var auctions: map<uint64, AuctionV1> = [];
+    auctions.set(0, {
+        itemIndex: 0,
+        plate: "QUERY 77",
+        metadataContent: "query.json",
+        startingBid: grams("1"),
+        minimumBidStep: grams("0.1"),
+        endTime: (blockchain.now() - 1) as uint32,
+        highestBid: grams("5"),
+        highestBidder: winner.address,
+        status: AUCTION_V1_WAITING_FOR_MINT,
+        mintQueryId: 710,
+    });
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: deployer.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 1,
+        nextMintItemIndex: 0,
+        nextQueryId: 711,
+        auctions,
+        refundCredits: [],
+        payoutCredits: [],
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val wrongQuery = manager.sendAny(
+        collection.address,
+        NftItemDeploymentConfirmedV12 {
+            queryId: 999,
+            itemIndex: 0,
+            nftAddress: testing.treasury("wrong-query-nft-item").address,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(wrongQuery).toHaveFailedTx<NftItemDeploymentConfirmedV12>({
+        from: collection.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.InvalidMintConfirmation,
+    });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_MINT);
+}
