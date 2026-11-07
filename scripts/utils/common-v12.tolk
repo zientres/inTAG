@@ -10,13 +10,11 @@ import "@contracts/nft-v1.2/types"
 
 const ONCHAIN_CONTENT_PREFIX_V12 = 0x00
 const COLLECTION_IMAGE_URL_V12 = "https://zientres.github.io/inTAG/logo.png"
-const NFT_METADATA_BASE_URL_V12 = "https://zientres.github.io/inTAG/metadata/"
 
 struct NftCollectionV12Info {
     name: string
     description: string
     image: string
-    commonContent: string
 }
 
 fun buildOnchainMetadataV12(info: NftCollectionV12Info): cell {
@@ -43,11 +41,6 @@ fun promptNftCollectionInfoV12(): NftCollectionV12Info {
             "Digital license plate collectibles from around the world",
         ),
         image: prompt("Collection image URL", "", COLLECTION_IMAGE_URL_V12),
-        commonContent: prompt(
-            "Base URL for NFT item JSON metadata (must end with /)",
-            "",
-            NFT_METADATA_BASE_URL_V12,
-        ),
     };
 }
 
@@ -60,7 +53,7 @@ fun makeNftCollectionV12Storage(
         nextItemIndex: 0,
         content: CollectionContent {
             collectionMetadata: buildOnchainMetadataV12(info),
-            commonContent: info.commonContent,
+            commonContent: "",
         }.toCell(),
         nftItemCode: build("NftItemV12"),
         royaltyParams: RoyaltyParams {
