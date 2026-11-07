@@ -59,6 +59,18 @@ get fun `test auction manager: creator can create sequential auction`() {
     expect(auction!.startingBid).toEqual(grams("1"));
     expect(auction!.minimumBidStep).toEqual(grams("0.1"));
     expect(auction!.status).toEqual(AUCTION_V1_ACTIVE);
+    expect(manager.getNextItemIndex()).toEqual(1);
+
+    val summary = manager.getAuctionSummary(0);
+    expect(summary != null).toBeTrue();
+    var summarySlice = summary!.beginParse();
+    expect(summarySlice.loadUint(64)).toEqual(0);
+    summarySlice.loadRef();
+    expect(summarySlice.loadCoins()).toEqual(grams("1"));
+    expect(summarySlice.loadCoins()).toEqual(grams("0.1"));
+    expect(summarySlice.loadUint(32)).toEqual(endTime);
+    expect(summarySlice.loadCoins()).toEqual(0);
+    expect(summarySlice.loadUint(8)).toEqual(AUCTION_V1_ACTIVE);
 }
 
 get fun `test auction manager: any wallet can create an auction and duplicate plate is rejected`() {
