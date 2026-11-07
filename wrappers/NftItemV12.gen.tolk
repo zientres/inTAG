@@ -86,6 +86,6 @@ fun NftItemV12.sendAny(
     return net.send(from, genericMsg);
 }
 
-fun NftItemV12.getNftData(self): NftDataReply {
+fun NftItemV12.getNftData(self): NftDataReplyV12 {
     return net.runGetMethod(self.address, "get_nft_data");
 }
