@@ -115,6 +115,53 @@ get fun `test auction manager: rejects a bid below the starting price`() {
     });
 }
 
+get fun `test auction manager: rejects a bid below the minimum increment`() {
+    val (manager, creator, _, _, _) = setupAuctionManagerTest();
+    manager.sendAny(
+        creator.address,
+        CreateAuctionV1 {
+            queryId: 5,
+            itemIndex: 0,
+            plate: "D555DD 77",
+            metadataContent: "minimum-step.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() + 3600) as uint32,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+
+    val firstBidder = testing.treasury("minimum-step-first-bidder");
+    val secondBidder = testing.treasury("minimum-step-second-bidder");
+    val firstBid = manager.sendAny(
+        firstBidder.address,
+        PlaceBidV1 {
+            queryId: 6,
+            auctionId: 0,
+            bidAmount: grams("1"),
+        }.toCell(),
+        { value: grams("1.2"), bounce: true },
+    );
+    expect(firstBid).toHaveSuccessfulTx<PlaceBidV1>({ to: manager.address });
+
+    val secondBid = manager.sendAny(
+        secondBidder.address,
+        PlaceBidV1 {
+            queryId: 7,
+            auctionId: 0,
+            bidAmount: grams("1.09"),
+        }.toCell(),
+        { value: grams("2.2"), bounce: true },
+    );
+    expect(secondBid).toHaveFailedTx<PlaceBidV1>({
+        from: secondBidder.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.BidTooLow,
+    });
+    expect(manager.getAuction(0)!.highestBid).toEqual(grams("1"));
+    expect(manager.getAuction(0)!.highestBidder!).toEqual(firstBidder.address);
+}
+
 get fun `test auction manager: closes an empty auction by skipping its collection index`() {
     val creator = testing.treasury("empty-auction-creator");
     val collection = testing.treasury("empty-auction-collection");
