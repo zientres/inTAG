@@ -674,6 +674,38 @@ get fun get_auction_summary(auctionId: uint64): cell? {
         .endCell();
 }
 
+get fun get_active_auctions(): cell {
+    val storage = lazy AuctionManagerStorage.load();
+    var list = beginCell().endCell();
+    var index = storage.nextItemIndex;
+    var included = 0;
+    while (index > 0 && included < 20) {
+        index -= 1;
+        val lookup = storage.auctions.get(index);
+        if (lookup.isFound) {
+            val auction = lookup.loadValue();
+            if (
+                auction.status == AUCTION_V1_ACTIVE ||
+                auction.status == AUCTION_V1_WAITING_FOR_MINT ||
+                auction.status == AUCTION_V1_WAITING_FOR_SKIP
+            ) {
+                val summary = beginCell()
+                    .storeUint(auction.itemIndex, 64)
+                    .storeString(auction.plate)
+                    .storeCoins(auction.startingBid)
+                    .storeCoins(auction.minimumBidStep)
+                    .storeUint(auction.endTime, 32)
+                    .storeCoins(auction.highestBid)
+                    .storeUint(auction.status, 8)
+                    .endCell();
+                list = beginCell().storeRef(summary).storeRef(list).endCell();
+                included += 1;
+            }
+        }
+    }
+    return list;
+}
+
 get fun get_plate_status(plateHash: uint256): int {
     val storage = lazy AuctionManagerStorage.load();
     val extra = lazy storage.extra.load();
