@@ -9,7 +9,6 @@ fun main() {
     val deployer = scripts.wallet(promptWallet("Connect Auction Manager Testnet owner wallet"));
     val collectionAddress = promptAddress("Enter the compatible NFT Collection v1.2 Testnet address");
 
-    val payoutAddresses: map<uint8, address> = [];
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
         collectionAddress,
