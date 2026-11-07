@@ -129,10 +129,12 @@ fun onInternalMessage(in: InMessage) {
             assert (in.senderAddress == storage.adminAddress) throw NftV12Errors.NotFromAdmin;
             assert (message.queryId != 0) throw NftV12Errors.InvalidDeploymentState;
 
-            val completedLookup = storage.completedSkips.get(message.itemIndex);
-            if (completedLookup.isFound) {
+            if (
+                storage.lastSkippedQueryId != 0 &&
+                storage.lastSkippedItemIndex == message.itemIndex
+            ) {
                 assert (
-                    completedLookup.loadValue() == message.queryId
+                    storage.lastSkippedQueryId == message.queryId
                 ) throw NftV12Errors.InvalidDeploymentState;
                 notifyManagerOfSkippedIndex(
                     storage.adminAddress,
@@ -147,7 +149,8 @@ fun onInternalMessage(in: InMessage) {
                 !storage.pendingDeployments.exists(message.itemIndex)
             ) throw NftV12Errors.PendingDeploymentAlreadyExists;
 
-            storage.completedSkips.set(message.itemIndex, message.queryId);
+            storage.lastSkippedItemIndex = message.itemIndex;
+            storage.lastSkippedQueryId = message.queryId;
             storage.nextItemIndex += 1;
             storage.save();
 
