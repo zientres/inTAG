@@ -164,6 +164,11 @@ get fun `test nft v1.2 item: returns TEP-62 static data`() {
 get fun `test nft v1.2 item: forwards TON to the new owner`() {
     val (_, owner, receiver, item) = setupNftItemV12Test();
     val forwardAmount = grams("0.02");
+    val forwardPayload = beginCell().storeUint(0, 32).storeString("Forwarded").endCell();
+    val expectedForwardPayload = beginCell()
+        .storeBool(true)
+        .storeRef(forwardPayload)
+        .toSlice() as RemainingBitsAndRefs;
     val queryId = 45;
 
     val result = item.sendAskToChangeOwnership(
@@ -173,7 +178,7 @@ get fun `test nft v1.2 item: forwards TON to the new owner`() {
         null,
         null,
         forwardAmount,
-        PayloadInline { value: createEmptySlice() },
+        PayloadInRef { value: forwardPayload },
         { value: grams("0.1"), bounce: true },
     );
 
@@ -184,11 +189,12 @@ get fun `test nft v1.2 item: forwards TON to the new owner`() {
     expect(result).toHaveTx<NotificationForNewOwner>({
         from: item.address,
         to: receiver.address,
+        value: forwardAmount,
         bounce: false,
         body: NotificationForNewOwner {
             queryId,
             oldOwnerAddress: owner.address,
-            payload: createEmptySlice(),
+            payload: expectedForwardPayload,
         }.toCell(),
     });
     expect(item.getNftData().ownerAddress!).toEqual(receiver.address);
