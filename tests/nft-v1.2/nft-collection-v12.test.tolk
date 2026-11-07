@@ -29,6 +29,7 @@ fun setupNftCollectionV12Test(): (NftCollectionV12, Treasury, Treasury) {
         nftItemCode: build("NftItemV12"),
         royaltyParams: royaltyParams.toCell(),
         pendingDeployments: [],
+        completedSkips: [],
     });
 
     val deploy = collection.deploy(manager.address, { value: grams("0.2"), bounce: false });
@@ -231,6 +232,30 @@ get fun `test nft v1.2: admin can skip an unused item index`() {
     expect(result).toHaveSuccessfulTx<SkipNftItemIndexV12>({
         from: manager.address,
         to: collection.address,
+    });
+    expect(result).toHaveTx<NftItemIndexSkippedV12>({
+        from: collection.address,
+        to: manager.address,
+        body: NftItemIndexSkippedV12 { queryId: 14001, itemIndex: 0 }.toCell(),
+    });
+    expect(collection.getCollectionData().nextItemIndex).toEqual(1);
+
+    val retry = collection.sendAny(
+        manager.address,
+        SkipNftItemIndexV12 {
+            queryId: 14001,
+            itemIndex: 0,
+        }.toCell(),
+        { value: grams("0.03"), bounce: true },
+    );
+    expect(retry).toHaveSuccessfulTx<SkipNftItemIndexV12>({
+        from: manager.address,
+        to: collection.address,
+    });
+    expect(retry).toHaveTx<NftItemIndexSkippedV12>({
+        from: collection.address,
+        to: manager.address,
+        body: NftItemIndexSkippedV12 { queryId: 14001, itemIndex: 0 }.toCell(),
     });
     expect(collection.getCollectionData().nextItemIndex).toEqual(1);
 }
