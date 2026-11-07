@@ -218,7 +218,7 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
             val canonicalPlate = StringBuilder.create().append("RU|").append(message.plate).build();
-            val plateKey = beginCell().storeString(canonicalPlate).endCell().hash();
+            val plateKey = canonicalPlate.hash();
             val plateLookup = extra.plateToAuctionId.get(plateKey);
             assert (!plateLookup.isFound) throw AuctionManagerErrors.AuctionAlreadyExists;
 
@@ -406,7 +406,7 @@ fun onInternalMessage(in: InMessage) {
 
             auction.status = AUCTION_V1_CLOSED_NO_BIDS;
             val canonicalPlate = StringBuilder.create().append("RU|").append(auction.plate).build();
-            val plateKey = beginCell().storeString(canonicalPlate).endCell().hash();
+            val plateKey = canonicalPlate.hash();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
             storage.extra = extra.toCell();
@@ -491,7 +491,7 @@ fun onInternalMessage(in: InMessage) {
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
             val canonicalPlate = StringBuilder.create().append("RU|").append(auction.plate).build();
-            val plateKey = beginCell().storeString(canonicalPlate).endCell().hash();
+            val plateKey = canonicalPlate.hash();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
             storage.extra = extra.toCell();
