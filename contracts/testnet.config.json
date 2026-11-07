@@ -15,7 +15,7 @@
   },
   "deployment": {
     "enabled": false,
-    "reason": "NFT collection source, reference tests, and Testnet deployment script are prepared. Enable deployment only after Acton build/tests pass and collection metadata URLs are supplied."
+    "reason": "NFT collection source and Testnet deployment scripts are prepared. Enable deployment only after Acton build/tests pass and the collection name, description, and logo URL are reviewed."
   },
   "auction_manager": null,
   "collection": null,
