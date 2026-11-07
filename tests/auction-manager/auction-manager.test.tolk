@@ -1433,3 +1433,62 @@ get fun `test auction manager: bounced treasury withdrawal restores treasury acc
     expect(withdrawal).toHaveSuccessfulTx<WithdrawTreasuryV1>({ to: manager.address });
     expect(manager.getTreasuryBalance()).toEqual(grams("1"));
 }
+
+get fun `test auction manager: bounced security fund payout becomes recoverable credit`() {
+    val deployer = testing.treasury("bounce-security-deployer");
+    val collection = testing.treasury("bounce-security-collection");
+    val creator = testing.treasury("bounce-security-creator");
+    val winner = testing.treasury("bounce-security-winner");
+    val unavailableSecurityFund = randomAddress("unavailable-security-fund");
+    val nftItem = testing.treasury("bounce-security-nft-item");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(1, unavailableSecurityFund);
+    var auctions: map<uint64, AuctionV1> = [];
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "SECURITY PAYOUT 77",
+            metadataContent: "security-payout.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("10"),
+            highestBidder: winner.address,
+            status: AUCTION_V1_WAITING_FOR_MINT,
+            mintQueryId: 89,
+        },
+    );
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: creator.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 1,
+        nextMintItemIndex: 0,
+        nextQueryId: 100,
+        auctions,
+        refundCredits: [],
+        payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("10"),
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val confirmation = manager.sendAny(
+        collection.address,
+        NftItemDeploymentConfirmedV12 {
+            queryId: 89,
+            itemIndex: 0,
+            nftAddress: nftItem.address,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(confirmation).toHaveSuccessfulTx<NftItemDeploymentConfirmedV12>({
+        from: collection.address,
+        to: manager.address,
+    });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
+    expect(manager.getPayoutCredit(unavailableSecurityFund)).toEqual(grams("2"));
+}
