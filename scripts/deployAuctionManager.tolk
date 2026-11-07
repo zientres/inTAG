@@ -22,7 +22,8 @@ fun main() {
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        payoutAddresses,
+        plateToAuctionId: [],
+        securityFundAddress: null,
     });
 
     val result = manager.deploy(
