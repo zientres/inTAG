@@ -97,7 +97,6 @@ get fun `test auction manager: rejects empty plate`() {
     expect(manager.getAuction(0)).toEqual(null);
 }
 
-
 get fun `test auction manager: rejects auctions longer than two hours`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
     val result = manager.sendAny(
