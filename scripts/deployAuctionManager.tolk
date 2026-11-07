@@ -20,6 +20,8 @@ fun main() {
         auctions: [],
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: 0,
         payoutAddresses,
     });
 
