@@ -51,18 +51,18 @@ fun createRegistryAuction(
     );
 }
 
-get fun `test auction manager: accepts maximum configured plate length`() {
+get fun `test auction manager: accepts a valid Russian plate format`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
-    val plate = "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP";
+    val plate = "А777АА77";
     val result = createRegistryAuction(manager, creator, plate, 1);
 
     expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
-    expect(manager.getAuction(0)!.plate.calculateLength()).toEqual(64);
+    expect(manager.getAuction(0)!.plate.calculateLength()).toEqual(11);
 }
 
-get fun `test auction manager: rejects plate longer than 64 bytes`() {
+get fun `test auction manager: rejects non-Russian plate format`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
-    val plate = "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP";
+    val plate = "А777АА77";
     val result = createRegistryAuction(manager, creator, plate, 2);
 
     expect(result).toHaveFailedTx<CreateAuctionV1>({
@@ -92,7 +92,7 @@ get fun `test auction manager: rejects auctions longer than 90 minutes`() {
         creator.address,
         CreateAuctionV1 {
             queryId: 7,
-            plate: "C555CC77",
+            plate: "С555СС77",
             startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 5401) as uint32,
@@ -122,7 +122,7 @@ get fun `test auction manager: any wallet can create an auction and registry rep
 get fun `test auction manager: rejects duplicate plate auctions from different wallets`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
     val secondCreator = testing.treasury("registry-second-user");
-    val plate = "B123BB77";
+    val plate = "В123ВВ77";
     val first = createRegistryAuction(manager, creator, plate, 5);
     expect(first).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
 
