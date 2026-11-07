@@ -130,8 +130,7 @@ fun onInternalMessage(in: InMessage) {
             assert (message.queryId != 0) throw NftV12Errors.InvalidDeploymentState;
 
             if (
-                storage.lastSkippedQueryId != 0 &&
-                storage.lastSkippedItemIndex == message.itemIndex
+                storage.lastSkippedQueryId != 0 && storage.lastSkippedItemIndex == message.itemIndex
             ) {
                 assert (
                     storage.lastSkippedQueryId == message.queryId
