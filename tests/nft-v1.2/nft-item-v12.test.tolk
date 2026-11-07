@@ -160,3 +160,65 @@ get fun `test nft v1.2 item: returns TEP-62 static data`() {
         }.toCell(),
     });
 }
+
+get fun `test nft v1.2 item: forwards TON to the new owner`() {
+    val (_, owner, receiver, item) = setupNftItemV12Test();
+    val forwardAmount = grams("0.02");
+    val queryId = 45;
+
+    val result = item.sendAskToChangeOwnership(
+        owner.address,
+        queryId,
+        receiver.address,
+        null,
+        null,
+        forwardAmount,
+        PayloadInline { value: createEmptySlice() },
+        { value: grams("0.1"), bounce: true },
+    );
+
+    expect(result).toHaveSuccessfulTx<AskToChangeOwnership>({
+        from: owner.address,
+        to: item.address,
+    });
+    expect(result).toHaveTx<NotificationForNewOwner>({
+        from: item.address,
+        to: receiver.address,
+        bounce: false,
+        body: NotificationForNewOwner {
+            queryId,
+            oldOwnerAddress: owner.address,
+            payload: createEmptySlice(),
+        }.toCell(),
+    });
+    expect(item.getNftData().ownerAddress!).toEqual(receiver.address);
+}
+
+get fun `test nft v1.2 item: returns excesses to the requested address`() {
+    val (_, owner, receiver, item) = setupNftItemV12Test();
+    val excessesReceiver = testing.treasury("nft-v12-excesses-receiver");
+    val queryId = 46;
+
+    val result = item.sendAskToChangeOwnership(
+        owner.address,
+        queryId,
+        receiver.address,
+        excessesReceiver.address,
+        null,
+        0,
+        PayloadInline { value: createEmptySlice() },
+        { value: grams("0.1"), bounce: true },
+    );
+
+    expect(result).toHaveSuccessfulTx<AskToChangeOwnership>({
+        from: owner.address,
+        to: item.address,
+    });
+    expect(result).toHaveTx<ReturnExcessesBack>({
+        from: item.address,
+        to: excessesReceiver.address,
+        bounce: false,
+        body: ReturnExcessesBack { queryId }.toCell(),
+    });
+    expect(item.getNftData().ownerAddress!).toEqual(receiver.address);
+}
