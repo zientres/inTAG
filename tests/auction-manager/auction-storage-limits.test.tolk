@@ -25,6 +25,8 @@ fun setupAuctionStorageLimitsTest(): (AuctionManager, Treasury) {
         auctions: [],
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: 0,
         payoutAddresses,
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
