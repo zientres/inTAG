@@ -147,7 +147,7 @@ fun onInternalMessage(in: InMessage) {
     }
 }
 
-get fun get_nft_data(): NftDataReply {
+get fun get_nft_data(): NftDataReplyV12 {
     var loadingStorage = NftItemV12Storage.startLoading();
     if (loadingStorage.isNotInitialized()) {
         return {
