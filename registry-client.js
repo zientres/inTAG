@@ -125,5 +125,125 @@
     return { endTime, boc: result.boc };
   }
 
-  window.tagitalSpaceRegistry = { lookupRussianPlate, createRussianAuction };
+  async function runGetMethod(method, stack = []) {
+    const config = await loadTestnetConfig();
+    const response = await fetch(TONCENTER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address: config.auction_manager,
+        method,
+        stack
+      })
+    });
+    if (!response.ok) throw new Error("TON Testnet API вернул HTTP " + response.status + ".");
+    const data = await response.json();
+    const result = data.result;
+    if (!data.ok || !result || Number(result.exit_code) !== 0 || !Array.isArray(result.stack)) {
+      throw new Error("Не удалось прочитать данные аукциона из TON Testnet.");
+    }
+    return result.stack;
+  }
+
+  function randomQueryId() {
+    const random = new Uint32Array(2);
+    crypto.getRandomValues(random);
+    const queryId = (BigInt(random[0]) << 32n) | BigInt(random[1]);
+    return queryId === 0n ? 1n : queryId;
+  }
+
+  async function getAuctionSummary(auctionId) {
+    const stack = await runGetMethod("get_auction_summary", [["num", "0x" + BigInt(auctionId).toString(16)]]);
+    const item = stack[0];
+    if (!item || item[0] !== "cell" || !item[1]) return null;
+
+    const { Cell } = await loadTonCore();
+    const summary = Cell.fromBase64(item[1]);
+    const slice = summary.beginParse();
+    const itemIndex = Number(slice.loadUintBig(64));
+    const plateCell = slice.loadRef();
+    const plateSlice = plateCell.beginParse();
+    const plateBytes = plateSlice.loadBuffer(Math.ceil(plateSlice.remainingBits / 8));
+    const plate = new TextDecoder().decode(plateBytes);
+    const startingBid = slice.loadCoins();
+    const minimumBidStep = slice.loadCoins();
+    const endTime = slice.loadUint(32);
+    const highestBid = slice.loadCoins();
+    const status = slice.loadUint(8);
+
+    return { auctionId: Number(auctionId), itemIndex, plate, startingBid, minimumBidStep, endTime, highestBid, status };
+  }
+
+  async function listAuctions() {
+    const stack = await runGetMethod("get_next_item_index");
+    const total = Number(BigInt(stack[0][1]));
+    const first = Math.max(0, total - 100);
+    const auctions = [];
+    for (let offset = first; offset < total; offset += 5) {
+      const batch = [];
+      for (let id = offset; id < Math.min(total, offset + 5); id++) {
+        batch.push(getAuctionSummary(id));
+      }
+      const summaries = await Promise.all(batch);
+      for (const auction of summaries) {
+        if (auction && [0, 1, 5].includes(auction.status)) auctions.push(auction);
+      }
+    }
+    return auctions.sort((a, b) => a.endTime - b.endTime);
+  }
+
+  async function sendManagerMessage(body, attachedAmount) {
+    const config = await loadTestnetConfig();
+    const tonConnect = window.tagitalSpaceTonConnect;
+    if (!tonConnect?.wallet) throw new Error("Сначала подключите TON-кошелёк.");
+    if (tonConnect.wallet.account.chain !== "-3") {
+      throw new Error("Для участия в аукционе подключите кошелёк к TON Testnet.");
+    }
+    const now = Math.floor(Date.now() / 1000);
+    return tonConnect.sendTransaction({
+      validUntil: now + 600,
+      messages: [{
+        address: config.auction_manager,
+        amount: attachedAmount.toString(),
+        payload: body.toBoc().toString("base64")
+      }]
+    });
+  }
+
+  async function placeBid(auctionId, amountTon) {
+    const amount = String(amountTon).trim();
+    if (!/^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,9})?$/.test(amount)) {
+      throw new Error("Введите сумму ставки в TON, максимум 9 знаков после запятой.");
+    }
+    const [whole, fraction = ""] = amount.split(".");
+    const bidAmount = BigInt(whole) * 1000000000n + BigInt((fraction + "000000000").slice(0, 9));
+    if (bidAmount <= 0n) throw new Error("Ставка должна быть больше нуля.");
+
+    const { beginCell } = await loadTonCore();
+    const body = beginCell()
+      .storeUint(0x54474102, 32)
+      .storeUint(randomQueryId(), 64)
+      .storeUint(BigInt(auctionId), 64)
+      .storeCoins(bidAmount)
+      .endCell();
+    return sendManagerMessage(body, bidAmount + 100000000n);
+  }
+
+  async function finishAuction(auctionId) {
+    const { beginCell } = await loadTonCore();
+    const body = beginCell()
+      .storeUint(0x54474103, 32)
+      .storeUint(randomQueryId(), 64)
+      .storeUint(BigInt(auctionId), 64)
+      .endCell();
+    return sendManagerMessage(body, 200000000n);
+  }
+
+  window.tagitalSpaceRegistry = {
+    lookupRussianPlate,
+    createRussianAuction,
+    listAuctions,
+    placeBid,
+    finishAuction
+  };
 })();
