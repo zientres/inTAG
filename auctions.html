@@ -176,6 +176,185 @@
         flex: initial;
       }
     }
+  
+    .auctions-page {
+      width: min(100% - 48px, 980px);
+      margin: 0 auto;
+      padding: 84px 0 110px;
+    }
+    .auctions-page-eyebrow {
+      margin: 0 0 18px;
+      color: #8fa6c0;
+      font-size: 12px;
+      letter-spacing: .16em;
+    }
+    .auctions-page-title {
+      margin: 0;
+      color: #f3f6fb;
+      font-size: clamp(32px, 5vw, 48px);
+      line-height: 1.12;
+      font-weight: 620;
+    }
+    .auctions-page-intro {
+      max-width: 700px;
+      margin: 20px 0 0;
+      color: #aebed1;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .auctions-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 34px 0 20px;
+    }
+    .auctions-toolbar-label {
+      color: #dce7f5;
+      font-size: 14px;
+    }
+    .auctions-refresh {
+      min-height: 40px;
+      padding: 0 16px;
+      border: 1px solid rgba(120,186,255,.3);
+      border-radius: 8px;
+      color: #eaf2fc;
+      background: rgba(120,186,255,.06);
+      font: inherit;
+      cursor: pointer;
+    }
+    .auctions-refresh:hover {
+      border-color: #78baff;
+      background: rgba(120,186,255,.12);
+    }
+    .auctions-message {
+      min-height: 24px;
+      margin: 0 0 18px;
+      color: #9fb2c9;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .auctions-list {
+      display: grid;
+      gap: 14px;
+    }
+    .auction-card {
+      padding: 24px;
+      border: 1px solid rgba(120,186,255,.16);
+      border-radius: 14px;
+      background: rgba(8,24,42,.58);
+    }
+    .auction-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .auction-plate {
+      margin: 0;
+      color: #f4f7fb;
+      font-size: clamp(25px, 4vw, 34px);
+      letter-spacing: .05em;
+      font-weight: 650;
+    }
+    .auction-id {
+      margin-top: 7px;
+      color: #8195ad;
+      font-size: 12px;
+    }
+    .auction-status {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border: 1px solid rgba(120,186,255,.2);
+      border-radius: 6px;
+      color: #b9cce1;
+      font-size: 12px;
+    }
+    .auction-data {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px 28px;
+      margin: 24px 0;
+    }
+    .auction-data-item {
+      display: grid;
+      gap: 6px;
+    }
+    .auction-data-label {
+      color: #8499b1;
+      font-size: 12px;
+    }
+    .auction-data-value {
+      color: #e6eef8;
+      font-size: 15px;
+      font-variant-numeric: tabular-nums;
+    }
+    .auction-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(120,186,255,.12);
+    }
+    .auction-bid-form {
+      display: flex;
+      flex: 1 1 320px;
+      gap: 10px;
+    }
+    .auction-bid-input {
+      width: 150px;
+      min-width: 0;
+      min-height: 42px;
+      padding: 0 12px;
+      border: 1px solid rgba(120,186,255,.24);
+      border-radius: 8px;
+      color: #f3f6fb;
+      background: rgba(2,12,23,.6);
+      font: inherit;
+    }
+    .auction-action-button {
+      min-height: 42px;
+      padding: 0 16px;
+      border: 1px solid rgba(120,186,255,.38);
+      border-radius: 8px;
+      color: #f3f6fb;
+      background: rgba(120,186,255,.1);
+      font: inherit;
+      cursor: pointer;
+    }
+    .auction-action-button:hover {
+      background: rgba(120,186,255,.18);
+    }
+    .auction-action-button:disabled,
+    .auctions-refresh:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+    @media (max-width: 600px) {
+      .auctions-page {
+        width: min(100% - 32px, 980px);
+        padding-top: 56px;
+      }
+      .auction-card {
+        padding: 18px;
+      }
+      .auction-data {
+        gap: 16px 12px;
+      }
+      .auction-actions,
+      .auction-bid-form {
+        width: 100%;
+      }
+      .auction-bid-form {
+        flex-direction: column;
+      }
+      .auction-bid-input,
+      .auction-action-button {
+        width: 100%;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -275,8 +454,186 @@
     </div>
   </aside>
 
-  <main></main>
+  <main class="auctions-page">
+    <section aria-labelledby="auctions-page-title">
+      <p class="auctions-page-eyebrow" data-i18n="auctionsEyebrow">АУКЦИОНЫ</p>
+      <h1 class="auctions-page-title" id="auctions-page-title" data-i18n="auctionsTitle">Выберите номер и запустите аукцион</h1>
+      <p class="auctions-page-intro" data-i18n="auctionsIntro">Любой пользователь может запустить аукцион со своего кошелька. Победитель получает NFT с выбранным номерным знаком.</p>
+      <div class="auctions-toolbar">
+        <span class="auctions-toolbar-label" data-i18n="navAuctions">Аукционы</span>
+        <button class="auctions-refresh" id="auctions-refresh" type="button" data-i18n="refreshAuctions">Обновить</button>
+      </div>
+      <p class="auctions-message" id="auctions-message" role="status" aria-live="polite"></p>
+      <div class="auctions-list" id="auctions-list"></div>
+    </section>
+  </main>
   <script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js"></script>
+  <script src="registry-client.js"></script>
   <script src="script.js"></script>
+  <script>
+    (() => {
+      const list = document.getElementById("auctions-list");
+      const message = document.getElementById("auctions-message");
+      const refresh = document.getElementById("auctions-refresh");
+      const english = () => document.documentElement.lang === "en";
+      const copy = () => english() ? {
+        loading: "Loading auctions…",
+        empty: "There are no active auctions right now.",
+        error: "Could not load auctions.",
+        active: "Bidding is open",
+        mint: "NFT mint confirmation pending",
+        skip: "Closing without bids",
+        starting: "Starting bid",
+        current: "Current bid",
+        next: "Minimum next bid",
+        ends: "Ends",
+        bidPlaceholder: "Amount in TON",
+        bid: "Place bid",
+        finish: "Finish auction",
+        bidSent: "Bid request sent to your wallet. Refresh after the transaction is confirmed.",
+        finishSent: "Finish request sent to your wallet. Refresh after the transaction is confirmed.",
+        bidError: "Could not submit the bid.",
+        finishError: "Could not finish the auction."
+      } : {
+        loading: "Загружаю аукционы…",
+        empty: "Сейчас нет активных аукционов.",
+        error: "Не удалось загрузить аукционы.",
+        active: "Торги идут",
+        mint: "Подтверждается выпуск NFT",
+        skip: "Завершается без ставок",
+        starting: "Начальная ставка",
+        current: "Текущая ставка",
+        next: "Минимальная следующая ставка",
+        ends: "Окончание",
+        bidPlaceholder: "Сумма в TON",
+        bid: "Сделать ставку",
+        finish: "Завершить аукцион",
+        bidSent: "Запрос ставки отправлен в кошелёк. Обновите страницу после подтверждения транзакции.",
+        finishSent: "Запрос завершения отправлен в кошелёк. Обновите страницу после подтверждения транзакции.",
+        bidError: "Не удалось отправить ставку.",
+        finishError: "Не удалось завершить аукцион."
+      };
+      const formatTon = value => (Number(value) / 1e9).toLocaleString(english() ? "en-GB" : "ru-RU", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + " TON";
+      const formatDate = value => new Date(value * 1000).toLocaleString(english() ? "en-GB" : "ru-RU");
+      function addDataItem(parent, label, value) {
+        const item = document.createElement("div");
+        item.className = "auction-data-item";
+        const labelNode = document.createElement("span");
+        labelNode.className = "auction-data-label";
+        labelNode.textContent = label;
+        const valueNode = document.createElement("span");
+        valueNode.className = "auction-data-value";
+        valueNode.textContent = value;
+        item.append(labelNode, valueNode);
+        parent.appendChild(item);
+      }
+      function createCard(auction) {
+        const text = copy();
+        const card = document.createElement("article");
+        card.className = "auction-card";
+        const top = document.createElement("div");
+        top.className = "auction-card-top";
+        const titleWrap = document.createElement("div");
+        const plate = document.createElement("h2");
+        plate.className = "auction-plate";
+        plate.textContent = auction.plate;
+        const id = document.createElement("div");
+        id.className = "auction-id";
+        id.textContent = "NFT #" + auction.itemIndex;
+        titleWrap.append(plate, id);
+        const status = document.createElement("span");
+        status.className = "auction-status";
+        status.textContent = auction.status === 0 ? text.active : auction.status === 1 ? text.mint : text.skip;
+        top.append(titleWrap, status);
+        card.appendChild(top);
+
+        const data = document.createElement("div");
+        data.className = "auction-data";
+        const nextBid = auction.highestBid === 0n
+          ? auction.startingBid
+          : auction.highestBid + auction.minimumBidStep;
+        addDataItem(data, text.starting, formatTon(auction.startingBid));
+        addDataItem(data, text.current, auction.highestBid === 0n ? "—" : formatTon(auction.highestBid));
+        addDataItem(data, text.next, formatTon(nextBid));
+        addDataItem(data, text.ends, formatDate(auction.endTime));
+        card.appendChild(data);
+
+        if (auction.status === 0) {
+          const actions = document.createElement("div");
+          actions.className = "auction-actions";
+          if (Date.now() / 1000 < auction.endTime) {
+            const form = document.createElement("form");
+            form.className = "auction-bid-form";
+            const input = document.createElement("input");
+            input.className = "auction-bid-input";
+            input.type = "number";
+            input.min = (Number(nextBid) / 1e9).toFixed(9);
+            input.step = "0.01";
+            input.placeholder = text.bidPlaceholder;
+            input.setAttribute("aria-label", text.bidPlaceholder);
+            input.required = true;
+            const button = document.createElement("button");
+            button.className = "auction-action-button";
+            button.type = "submit";
+            button.textContent = text.bid;
+            form.append(input, button);
+            form.addEventListener("submit", async event => {
+              event.preventDefault();
+              button.disabled = true;
+              message.textContent = "";
+              try {
+                await window.tagitalSpaceRegistry.placeBid(auction.auctionId, input.value);
+                message.textContent = text.bidSent;
+              } catch (error) {
+                message.textContent = error.message || text.bidError;
+                button.disabled = false;
+              }
+            });
+            actions.appendChild(form);
+          } else {
+            const button = document.createElement("button");
+            button.className = "auction-action-button";
+            button.type = "button";
+            button.textContent = text.finish;
+            button.addEventListener("click", async () => {
+              button.disabled = true;
+              message.textContent = "";
+              try {
+                await window.tagitalSpaceRegistry.finishAuction(auction.auctionId);
+                message.textContent = text.finishSent;
+              } catch (error) {
+                message.textContent = error.message || text.finishError;
+                button.disabled = false;
+              }
+            });
+            actions.appendChild(button);
+          }
+          card.appendChild(actions);
+        }
+        return card;
+      }
+      async function loadAuctions() {
+        const text = copy();
+        refresh.disabled = true;
+        list.replaceChildren();
+        message.textContent = text.loading;
+        try {
+          if (!window.tagitalSpaceRegistry) throw new Error(text.error);
+          const auctions = await window.tagitalSpaceRegistry.listAuctions();
+          message.textContent = auctions.length ? "" : text.empty;
+          for (const auction of auctions) list.appendChild(createCard(auction));
+        } catch (error) {
+          message.textContent = error.message || text.error;
+        } finally {
+          refresh.disabled = false;
+        }
+      }
+      refresh.addEventListener("click", loadAuctions);
+      loadAuctions();
+    })();
+  </script>
 </body>
 </html>
