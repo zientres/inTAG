@@ -1234,3 +1234,185 @@ get fun `test auction manager: duplicate mint failure does not refund twice`() {
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_MINT_FAILED);
     expect(manager.getRefundCredit(unavailableWinner)).toEqual(grams("5"));
 }
+
+
+get fun `test auction manager: owner can withdraw part of treasury`() {
+    val owner = testing.treasury("treasury-withdraw-owner");
+    val collection = testing.treasury("treasury-withdraw-collection");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(1, testing.treasury("treasury-withdraw-security").address);
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: owner.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 1,
+        auctions: [],
+        refundCredits: [],
+        payoutCredits: [],
+        treasuryBalance: grams("5"),
+        lockedFunds: 0,
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(owner.address, { value: grams("5.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val withdrawal = manager.sendAny(
+        owner.address,
+        WithdrawTreasuryV1 { queryId: 1, amount: grams("2") }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(withdrawal).toHaveSuccessfulTx<WithdrawTreasuryV1>({ to: manager.address });
+    expect(withdrawal).toHaveTx<TreasuryWithdrawalTransferV1>({
+        from: manager.address,
+        to: owner.address,
+    });
+    expect(manager.getTreasuryBalance()).toEqual(grams("3"));
+}
+
+get fun `test auction manager: owner can withdraw all remaining treasury in a later transaction`() {
+    val owner = testing.treasury("treasury-full-withdraw-owner");
+    val collection = testing.treasury("treasury-full-withdraw-collection");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(1, testing.treasury("treasury-full-withdraw-security").address);
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: owner.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 1,
+        auctions: [],
+        refundCredits: [],
+        payoutCredits: [],
+        treasuryBalance: grams("5"),
+        lockedFunds: 0,
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(owner.address, { value: grams("5.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val first = manager.sendAny(
+        owner.address,
+        WithdrawTreasuryV1 { queryId: 1, amount: grams("2") }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(first).toHaveSuccessfulTx<WithdrawTreasuryV1>({ to: manager.address });
+    expect(manager.getTreasuryBalance()).toEqual(grams("3"));
+
+    val second = manager.sendAny(
+        owner.address,
+        WithdrawTreasuryV1 { queryId: 2, amount: grams("3") }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(second).toHaveSuccessfulTx<WithdrawTreasuryV1>({ to: manager.address });
+    expect(second).toHaveTx<TreasuryWithdrawalTransferV1>({
+        from: manager.address,
+        to: owner.address,
+    });
+    expect(manager.getTreasuryBalance()).toEqual(0);
+}
+
+get fun `test auction manager: treasury withdrawal cannot use funds locked for bidders`() {
+    val owner = testing.treasury("treasury-locked-owner");
+    val collection = testing.treasury("treasury-locked-collection");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(1, testing.treasury("treasury-locked-security").address);
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: owner.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 1,
+        auctions: [],
+        refundCredits: [],
+        payoutCredits: [],
+        treasuryBalance: grams("2"),
+        lockedFunds: grams("4"),
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(owner.address, { value: grams("4.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val withdrawal = manager.sendAny(
+        owner.address,
+        WithdrawTreasuryV1 { queryId: 1, amount: grams("2") }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(withdrawal).toHaveFailedTx<WithdrawTreasuryV1>({
+        from: owner.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.InsufficientManagerBalance,
+    });
+    expect(manager.getTreasuryBalance()).toEqual(grams("2"));
+}
+
+get fun `test auction manager: treasury withdrawal is owner-only`() {
+    val owner = testing.treasury("treasury-auth-owner");
+    val attacker = testing.treasury("treasury-auth-attacker");
+    val collection = testing.treasury("treasury-auth-collection");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(1, testing.treasury("treasury-auth-security").address);
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: owner.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 1,
+        auctions: [],
+        refundCredits: [],
+        payoutCredits: [],
+        treasuryBalance: grams("2"),
+        lockedFunds: 0,
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(owner.address, { value: grams("2.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val withdrawal = manager.sendAny(
+        attacker.address,
+        WithdrawTreasuryV1 { queryId: 1, amount: grams("1") }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(withdrawal).toHaveFailedTx<WithdrawTreasuryV1>({
+        from: attacker.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.NotFromOwner,
+    });
+    expect(manager.getTreasuryBalance()).toEqual(grams("2"));
+}
+
+get fun `test auction manager: bounced treasury withdrawal restores treasury accounting`() {
+    val deployer = testing.treasury("treasury-bounce-deployer");
+    val unavailableOwner = randomAddress("treasury-bounce-unavailable-owner");
+    val collection = testing.treasury("treasury-bounce-collection");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(1, testing.treasury("treasury-bounce-security").address);
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: unavailableOwner,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 0,
+        nextMintItemIndex: 0,
+        nextQueryId: 1,
+        auctions: [],
+        refundCredits: [],
+        payoutCredits: [],
+        treasuryBalance: grams("1"),
+        lockedFunds: 0,
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val withdrawal = manager.sendAny(
+        unavailableOwner,
+        WithdrawTreasuryV1 { queryId: 1, amount: grams("1") }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(withdrawal).toHaveSuccessfulTx<WithdrawTreasuryV1>({ to: manager.address });
+    expect(manager.getTreasuryBalance()).toEqual(grams("1"));
+}
