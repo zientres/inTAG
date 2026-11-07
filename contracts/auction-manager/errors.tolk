@@ -18,4 +18,7 @@ enum AuctionManagerErrors {
     NoPayoutAvailable = 517
     InvalidAddress = 518
     InvalidAuctionParameters = 519
+    InvalidTreasuryWithdrawal = 520
+    InsufficientTreasuryBalance = 521
+    InsufficientManagerBalance = 522
 }
