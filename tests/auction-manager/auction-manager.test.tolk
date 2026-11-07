@@ -41,7 +41,7 @@ get fun `test auction manager: creator can create sequential auction`() {
         creator.address,
         CreateAuctionV1 {
             queryId: 1,
-            plate: "A777AA77",
+            plate: "А777АА77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime,
@@ -69,7 +69,7 @@ get fun `test auction manager: any wallet can create an auction and duplicate pl
         firstCreator.address,
         CreateAuctionV1 {
             queryId: 2,
-            plate: "B123BB77",
+            plate: "В123ВВ77",
             startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime,
@@ -85,7 +85,7 @@ get fun `test auction manager: any wallet can create an auction and duplicate pl
         secondCreator.address,
         CreateAuctionV1 {
             queryId: 3,
-            plate: "B123BB77",
+            plate: "В123ВВ77",
             startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime,
@@ -106,7 +106,7 @@ get fun `test auction manager: rejects a bid below the starting price`() {
         creator.address,
         CreateAuctionV1 {
             queryId: 3,
-            plate: "C555CC77",
+            plate: "С555СС77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
@@ -137,7 +137,7 @@ get fun `test auction manager: rejects a bid below the minimum increment`() {
         creator.address,
         CreateAuctionV1 {
             queryId: 5,
-            plate: "D555DD77",
+            plate: "Е555ЕЕ77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
@@ -183,7 +183,7 @@ get fun `test auction manager: rejects a bid at the exact deadline`() {
         creator.address,
         CreateAuctionV1 {
             queryId: 8,
-            plate: "DEADLINE77",
+            plate: "К111КК77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: deadline,
@@ -218,7 +218,7 @@ get fun `test auction manager: allows finishing at the exact deadline`() {
         creator.address,
         CreateAuctionV1 {
             queryId: 10,
-            plate: "FINISH77",
+            plate: "М222ММ77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: deadline,
@@ -332,7 +332,7 @@ get fun `test auction manager: refunds the previous leader immediately`() {
         creator.address,
         CreateAuctionV1 {
             queryId: 20,
-            plate: "B777BB77",
+            plate: "Н777НН77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
@@ -784,7 +784,7 @@ get fun `test auction manager: payout addresses cannot change after first auctio
         creator.address,
         CreateAuctionV1 {
             queryId: 201,
-            plate: "LOCK77",
+            plate: "О333ОО77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
