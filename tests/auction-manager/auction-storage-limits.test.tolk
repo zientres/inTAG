@@ -29,7 +29,7 @@ fun setupAuctionRegistryTest(): (AuctionManager, Treasury, Treasury) {
         treasuryBalance: 0,
         lockedFunds: 0,
 
-    });
+});
     val deploy = manager.deploy(owner.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
     return (manager, creator, owner);
@@ -59,7 +59,7 @@ get fun `test auction manager: accepts a valid Russian plate format`() {
     val plate = "А777АА77";
     val result = createRegistryAuction(manager, creator, plate, 1);
 
-    expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
     expect(manager.getAuction(0)!.plate.calculateLength()).toEqual(11);
 }
 
@@ -68,7 +68,7 @@ get fun `test auction manager: accepts a three-digit region code`() {
     val plate = "А777АА777";
     val result = createRegistryAuction(manager, creator, plate, 8);
 
-    expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
     expect(manager.getAuction(0)!.plate.calculateLength()).toEqual(12);
 }
 
@@ -77,7 +77,7 @@ get fun `test auction manager: rejects non-Russian plate format`() {
     val plate = "A777AA77";
     val result = createRegistryAuction(manager, creator, plate, 2);
 
-    expect(result).toHaveFailedTx<CreateAuctionV1>({
+expect(result).toHaveFailedTx<CreateAuctionV1>({
         from: creator.address,
         to: manager.address,
         exitCode: AuctionManagerErrors.InvalidAuctionParameters,
@@ -89,7 +89,7 @@ get fun `test auction manager: rejects empty plate`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
     val result = createRegistryAuction(manager, creator, "", 3);
 
-    expect(result).toHaveFailedTx<CreateAuctionV1>({
+expect(result).toHaveFailedTx<CreateAuctionV1>({
         from: creator.address,
         to: manager.address,
         exitCode: AuctionManagerErrors.InvalidAuctionParameters,
@@ -111,7 +111,7 @@ get fun `test auction manager: rejects auctions longer than two hours`() {
         { value: grams("0.05"), bounce: true },
     );
 
-    expect(result).toHaveFailedTx<CreateAuctionV1>({
+expect(result).toHaveFailedTx<CreateAuctionV1>({
         from: creator.address,
         to: manager.address,
         exitCode: AuctionManagerErrors.InvalidAuctionParameters,
@@ -124,7 +124,7 @@ get fun `test auction manager: any wallet can create an auction and registry rep
     val plate = "А777АА77";
     val result = createRegistryAuction(manager, creator, plate, 4);
 
-    expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
     val plateHash = StringBuilder.create().append("RU|").append(plate).build().hash();
     val status = manager.getPlateStatus(plateHash);
     expect(status).toEqual(1);
@@ -137,7 +137,7 @@ get fun `test auction manager: rejects duplicate plate auctions from different w
     val first = createRegistryAuction(manager, creator, plate, 5);
     expect(first).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
 
-    val duplicate = createRegistryAuction(manager, secondCreator, plate, 6);
+val duplicate = createRegistryAuction(manager, secondCreator, plate, 6);
     expect(duplicate).toHaveFailedTx<CreateAuctionV1>({
         from: secondCreator.address,
         to: manager.address,
