@@ -44,7 +44,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     );
     expect(deployCollection).toHaveSuccessfulDeploy({ to: collection.address });
 
-    var payoutAddresses: map<uint8, address> = [];
+    val payoutAddresses: map<uint8, address> = [];
     val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
