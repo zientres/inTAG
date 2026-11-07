@@ -23,6 +23,7 @@ type AllowedMessageToAuctionManager =
     | WithdrawTreasuryV1
     | NftItemDeploymentConfirmedV12
     | NftItemDeploymentFailedV12
+    | NftItemIndexSkippedV12
 
 fun sendRefund(
     auctionId: uint64,
@@ -217,9 +218,8 @@ fun onInternalMessage(in: InMessage) {
             if (auction.highestBidder == null || auction.highestBid == 0) {
                 val skipQueryId = storage.nextQueryId;
                 storage.nextQueryId += 1;
-                auction.status = AUCTION_V1_CLOSED_NO_BIDS;
+                auction.status = AUCTION_V1_WAITING_FOR_SKIP;
                 auction.mintQueryId = skipQueryId;
-                storage.nextMintItemIndex += 1;
                 storage.auctions.set(message.auctionId, auction);
                 storage.save();
 
@@ -268,21 +268,65 @@ fun onInternalMessage(in: InMessage) {
             val auction = lookup.loadValue();
             assert (
                 auction.status == AUCTION_V1_WAITING_FOR_MINT ||
+                auction.status == AUCTION_V1_WAITING_FOR_SKIP ||
                 auction.status == AUCTION_V1_CLOSED_PAID ||
                 auction.status == AUCTION_V1_CLOSED_MINT_FAILED
             ) throw AuctionManagerErrors.InvalidAuctionState;
             assert (auction.mintQueryId != 0) throw AuctionManagerErrors.InvalidMintConfirmation;
 
-            val retry = createMessage({
-                bounce: BounceMode.RichBounce,
-                dest: storage.collectionAddress,
-                value: AUCTION_V1_MIN_CREATE_OVERHEAD,
-                body: RetryNftItemDeploymentNoticeV12 {
-                    queryId: auction.mintQueryId,
-                    itemIndex: auction.itemIndex,
-                },
-            });
-            retry.send(SEND_MODE_PAY_FEES_SEPARATELY);
+            if (auction.status == AUCTION_V1_WAITING_FOR_SKIP) {
+                val retrySkip = createMessage({
+                    bounce: BounceMode.RichBounce,
+                    dest: storage.collectionAddress,
+                    value: AUCTION_V1_MIN_CREATE_OVERHEAD,
+                    body: SkipNftItemIndexV12 {
+                        queryId: auction.mintQueryId,
+                        itemIndex: auction.itemIndex,
+                    },
+                });
+                retrySkip.send(SEND_MODE_PAY_FEES_SEPARATELY);
+            } else {
+                val retry = createMessage({
+                    bounce: BounceMode.RichBounce,
+                    dest: storage.collectionAddress,
+                    value: AUCTION_V1_MIN_CREATE_OVERHEAD,
+                    body: RetryNftItemDeploymentNoticeV12 {
+                        queryId: auction.mintQueryId,
+                        itemIndex: auction.itemIndex,
+                    },
+                });
+                retry.send(SEND_MODE_PAY_FEES_SEPARATELY);
+            }
+        }
+
+        NftItemIndexSkippedV12 => {
+            var storage = lazy AuctionManagerStorage.load();
+            assert (
+                in.senderAddress == storage.collectionAddress
+            ) throw AuctionManagerErrors.NotFromCollection;
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+
+            val auctionLookup = storage.auctions.get(message.itemIndex);
+            assert (auctionLookup.isFound) throw AuctionManagerErrors.InvalidAuctionId;
+            var auction = auctionLookup.loadValue();
+            assert (
+                auction.mintQueryId == message.queryId
+            ) throw AuctionManagerErrors.InvalidMintConfirmation;
+
+            if (auction.status == AUCTION_V1_CLOSED_NO_BIDS) {
+                return;
+            }
+            assert (
+                auction.status == AUCTION_V1_WAITING_FOR_SKIP
+            ) throw AuctionManagerErrors.InvalidAuctionState;
+            assert (
+                auction.itemIndex == storage.nextMintItemIndex
+            ) throw AuctionManagerErrors.ItemIndexOutOfSequence;
+
+            auction.status = AUCTION_V1_CLOSED_NO_BIDS;
+            storage.auctions.set(message.itemIndex, auction);
+            storage.nextMintItemIndex += 1;
+            storage.save();
         }
 
         NftItemDeploymentConfirmedV12 => {
@@ -482,22 +526,8 @@ fun onBouncedMessage(in: InMessageBounced) {
     }
 
     if (originalOpcode == 0x54474909) {
-        val skip = SkipNftItemIndexV12.fromCell(bounced.originalBody);
-        val auctionLookup = storage.auctions.get(skip.itemIndex);
-        if (!auctionLookup.isFound) {
-            return;
-        }
-        var auction = auctionLookup.loadValue();
-        if (
-            auction.status == AUCTION_V1_CLOSED_NO_BIDS && auction.mintQueryId == skip.queryId &&
-            storage.nextMintItemIndex == skip.itemIndex + 1
-        ) {
-            auction.status = AUCTION_V1_ACTIVE;
-            auction.mintQueryId = 0;
-            storage.nextMintItemIndex -= 1;
-            storage.auctions.set(skip.itemIndex, auction);
-            storage.save();
-        }
+        // Keep the auction in WAITING_FOR_SKIP. RetryMintNoticeV1 resends
+        // the same idempotent request; the collection can replay its ACK.
         return;
     }
 
