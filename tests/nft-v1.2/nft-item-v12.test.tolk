@@ -31,6 +31,7 @@ fun setupNftItemV12Test(): (NftCollectionV12, Treasury, Treasury, NftItemV12) {
         nftItemCode: build("NftItemV12"),
         royaltyParams: royaltyParams.toCell(),
         pendingDeployments: [],
+        completedSkips: [],
     });
 
     val deployCollection = collection.deploy(
