@@ -679,8 +679,10 @@ get fun get_active_auctions(): cell {
     var list = beginCell().endCell();
     var index = storage.nextItemIndex;
     var included = 0;
-    while (index > 0 && included < 20) {
+    var scanned = 0;
+    while (index > 0 && included < 20 && scanned < 100) {
         index -= 1;
+        scanned += 1;
         val lookup = storage.auctions.get(index);
         if (lookup.isFound) {
             val auction = lookup.loadValue();
