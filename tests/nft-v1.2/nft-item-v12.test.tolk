@@ -25,7 +25,7 @@ fun setupNftItemV12Test(): (NftCollectionV12, Treasury, Treasury, NftItemV12) {
         adminAddress: manager.address,
         nextItemIndex: 0,
         content: CollectionContent {
-            collectionMetadata: createEmptyCell(),
+            collectionMetadata: beginCell().endCell(),
             commonContent: "ipfs://tagitalspace/",
         }.toCell(),
         nftItemCode: build("NftItemV12"),
@@ -47,7 +47,7 @@ fun setupNftItemV12Test(): (NftCollectionV12, Treasury, Treasury, NftItemV12) {
         0,
         grams("0.02"),
         owner.address,
-        createEmptyCell(),
+        beginCell().endCell(),
         { value: grams("0.1"), bounce: true },
     );
 
