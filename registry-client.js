@@ -45,7 +45,7 @@
       hash ^= BigInt(byte);
       hash = (hash * FNV128_PRIME) & FNV128_MASK;
     }
-    return hash.toString(16).padStart(32, "0");
+    return hash.toString(16).padStart(64, "0");
   }
 
   async function lookupRussianPlate(plate) {
