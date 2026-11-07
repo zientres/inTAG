@@ -505,7 +505,29 @@
           }
           const lookup = await window.tagitalSpaceRegistry.lookupRussianPlate(plate);
           if (lookup.status === "free") {
-            result.textContent = "Номер не найден в реестре TagitalSpace Testnet. Он свободен для создания аукциона.";
+            result.textContent = "Номер свободен в реестре TagitalSpace Testnet.";
+            const createAuctionButton = document.createElement("button");
+            createAuctionButton.type = "button";
+            createAuctionButton.className = "primary-button registration-search-button";
+            createAuctionButton.style.display = "inline-flex";
+            createAuctionButton.style.marginTop = "14px";
+            createAuctionButton.textContent = document.documentElement.lang === "en" ? "Start auction" : "Начать аукцион";
+            createAuctionButton.addEventListener("click", async () => {
+              createAuctionButton.disabled = true;
+              createAuctionButton.textContent = document.documentElement.lang === "en" ? "Waiting for wallet…" : "Ожидание подтверждения в кошельке…";
+              try {
+                await window.tagitalSpaceRegistry.createRussianAuction(plate);
+                result.firstChild.textContent = document.documentElement.lang === "en"
+                  ? "Auction creation transaction sent to TON Testnet. It will appear after confirmation."
+                  : "Транзакция создания аукциона отправлена в TON Testnet. Аукцион появится после подтверждения.";
+                createAuctionButton.remove();
+              } catch (error) {
+                result.firstChild.textContent = error.message || "Не удалось отправить транзакцию создания аукциона.";
+                createAuctionButton.disabled = false;
+                createAuctionButton.textContent = document.documentElement.lang === "en" ? "Try again" : "Повторить";
+              }
+            });
+            result.appendChild(createAuctionButton);
           } else if (lookup.status === "auction") {
             result.textContent = "Для этого номера уже идёт аукцион. Откройте раздел «Аукционы».";
           } else if (lookup.status === "minted") {
