@@ -242,6 +242,7 @@ get fun `test auction manager: allows finishing at the exact deadline`() {
         to: collection.address,
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_SKIP);
+    expect(manager.getPlateStatus("RU|А111АА77".hash())).toEqual(1);
 
     val ack = manager.sendAny(
         collection.address,
