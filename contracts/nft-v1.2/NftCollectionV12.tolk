@@ -1,4 +1,3 @@
-import "@stdlib/strings"
 import "@contracts/nft-v1.1/messages"
 import "@contracts/nft-v1.1/types"
 import "@contracts/nft-v1.2/errors"
