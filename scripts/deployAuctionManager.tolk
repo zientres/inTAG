@@ -21,7 +21,7 @@ fun main() {
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        plateToAuctionId: [],
+        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
         securityFundAddress: null,
     });
 
