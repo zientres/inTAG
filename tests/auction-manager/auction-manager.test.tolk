@@ -469,8 +469,9 @@ get fun `test auction manager: distributes the winning bid only after mint confi
         manager.getPlateStatus("RU|М222ММ77".hash()),
     ).toEqual(2);
 
+    val duplicateUser = testing.treasury("paid-plate-duplicate-user");
     val duplicate = manager.sendAny(
-        testing.treasury("paid-plate-duplicate-user").address,
+        duplicateUser.address,
         CreateAuctionV1 {
             queryId: 79,
             plate: "М222ММ77",
@@ -481,6 +482,7 @@ get fun `test auction manager: distributes the winning bid only after mint confi
         { value: grams("0.05"), bounce: true },
     );
     expect(duplicate).toHaveFailedTx<CreateAuctionV1>({
+        from: duplicateUser.address,
         to: manager.address,
         exitCode: AuctionManagerErrors.AuctionAlreadyExists,
     });
