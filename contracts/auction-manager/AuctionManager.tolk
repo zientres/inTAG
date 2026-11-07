@@ -148,7 +148,8 @@ fun onInternalMessage(in: InMessage) {
                 message.startingBid > 0 && message.minimumBidStep > 0
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
             assert (
-                message.endTime > blockchain.now()
+                message.endTime > blockchain.now() &&
+                message.endTime <= blockchain.now() + AUCTION_V1_MAX_DURATION_SECONDS
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
             val plateLength = message.plate.calculateLength();
             assert (
