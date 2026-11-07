@@ -85,6 +85,29 @@ get fun `test auction manager: rejects empty plate`() {
     expect(manager.getAuction(0)).toEqual(null);
 }
 
+
+get fun `test auction manager: rejects auctions longer than 90 minutes`() {
+    val (manager, creator, _) = setupAuctionRegistryTest();
+    val result = manager.sendAny(
+        creator.address,
+        CreateAuctionV1 {
+            queryId: 7,
+            plate: "C555CC77",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() + 5401) as uint32,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+
+    expect(result).toHaveFailedTx<CreateAuctionV1>({
+        from: creator.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.InvalidAuctionParameters,
+    });
+    expect(manager.getAuction(0)).toEqual(null);
+}
+
 get fun `test auction manager: any wallet can create an auction and registry reports it`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
     val plate = "A777AA77";
