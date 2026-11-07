@@ -25,6 +25,8 @@ fun setupAuctionManagerTest(): (AuctionManager, Treasury, Treasury, Treasury, Tr
         auctions: [],
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: 0,
         payoutAddresses,
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
@@ -268,6 +270,8 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: 0,
         payoutAddresses,
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
@@ -375,6 +379,8 @@ get fun `test auction manager: distributes the winning bid only after mint confi
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("10"),
         payoutAddresses,
     });
     val deploy = manager.deploy(creator.address, { value: grams("10.2"), bounce: false });
@@ -443,6 +449,8 @@ get fun `test auction manager: refunds winner if NFT deployment fails`() {
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("4"),
         payoutAddresses,
     });
     val deploy = manager.deploy(creator.address, { value: grams("4.2"), bounce: false });
@@ -504,6 +512,8 @@ get fun `test auction manager: bounced outbid refund becomes recoverable credit`
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("1"),
         payoutAddresses,
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
@@ -560,6 +570,8 @@ get fun `test auction manager: bounced creator payout becomes recoverable credit
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("10"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
@@ -603,6 +615,8 @@ get fun `test auction manager: rejects refund claim without enough attached valu
         auctions: [],
         refundCredits,
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("1"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
@@ -642,6 +656,8 @@ get fun `test auction manager: beneficiary can claim bounced refund credit`() {
         auctions: [],
         refundCredits,
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("1"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
@@ -681,6 +697,8 @@ get fun `test auction manager: rejects payout claim without enough attached valu
         auctions: [],
         refundCredits: [],
         payoutCredits,
+        treasuryBalance: 0,
+        lockedFunds: grams("5"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
@@ -720,6 +738,8 @@ get fun `test auction manager: beneficiary can claim bounced payout credit`() {
         auctions: [],
         refundCredits: [],
         payoutCredits,
+        treasuryBalance: 0,
+        lockedFunds: grams("5"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
@@ -759,7 +779,6 @@ get fun `test auction manager: payout addresses cannot change after first auctio
         creator.address,
         SetPayoutAddressesV1 {
             queryId: 202,
-            treasuryAddress: treasury.address,
             securityFundAddress: securityFund.address,
         }.toCell(),
         { value: grams("0.05"), bounce: true },
@@ -792,6 +811,8 @@ get fun `test auction manager: bounced refund claim restores the credit`() {
         auctions: [],
         refundCredits,
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("1"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
@@ -827,6 +848,8 @@ get fun `test auction manager: bounced payout claim restores the credit`() {
         auctions: [],
         refundCredits: [],
         payoutCredits,
+        treasuryBalance: 0,
+        lockedFunds: grams("5"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
@@ -877,6 +900,8 @@ get fun `test auction manager: rejects NFT confirmation from an untrusted sender
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("5"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
@@ -934,6 +959,8 @@ get fun `test auction manager: rejects NFT confirmation with an incorrect query 
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("5"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
@@ -992,6 +1019,8 @@ get fun `test auction manager: rejects NFT failure from an untrusted sender`() {
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("5"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
@@ -1050,6 +1079,8 @@ get fun `test auction manager: rejects NFT failure with an incorrect query id`()
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("5"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
@@ -1110,6 +1141,8 @@ get fun `test auction manager: duplicate mint confirmation does not pay out twic
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("10"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
@@ -1174,6 +1207,8 @@ get fun `test auction manager: duplicate mint failure does not refund twice`() {
         auctions,
         refundCredits: [],
         payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: grams("5"),
         payoutAddresses,
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
