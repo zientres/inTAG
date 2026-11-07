@@ -70,6 +70,10 @@ fun AuctionManager.getAuctionSummary(self, auctionId: uint64): cell? {
     return net.runGetMethod(self.address, "get_auction_summary", [auctionId]);
 }
 
+fun AuctionManager.getActiveAuctions(self): cell {
+    return net.runGetMethod(self.address, "get_active_auctions", []);
+}
+
 fun AuctionManager.getPlateStatus(self, plateHash: uint256): int {
     return net.runGetMethod(self.address, "get_plate_status", [plateHash]);
 }
