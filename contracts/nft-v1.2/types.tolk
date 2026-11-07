@@ -19,7 +19,8 @@ struct NftCollectionV12Storage {
     nftItemCode: cell
     royaltyParams: Cell<RoyaltyParams>
     pendingDeployments: map<uint64, PendingNftDeploymentV12>
-    completedSkips: map<uint64, uint64>
+    lastSkippedItemIndex: uint64
+    lastSkippedQueryId: uint64
 }
 
 fun NftCollectionV12Storage.load(): NftCollectionV12Storage {
