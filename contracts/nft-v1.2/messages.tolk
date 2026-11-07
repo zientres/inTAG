@@ -49,3 +49,8 @@ struct (0x54474909) SkipNftItemIndexV12 {
     queryId: uint64
     itemIndex: uint64
 }
+
+struct (0x5447490A) NftItemIndexSkippedV12 {
+    queryId: uint64
+    itemIndex: uint64
+}
