@@ -59,8 +59,8 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
-        securityFundAddress: securityFundAddressForTest,
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        
     });
     val deployManager = manager.deploy(
         owner.address,
