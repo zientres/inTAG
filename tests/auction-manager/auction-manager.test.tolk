@@ -12,7 +12,7 @@ fun setupAuctionManagerTest(): (AuctionManager, Treasury, Treasury, Treasury, Tr
     val collection = testing.treasury("nft-collection");
     val treasury = testing.treasury("treasury");
     val securityFund = testing.treasury("security-fund");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 val manager = AuctionManager.fromStorage({
         ownerAddress: creator.address,
         collectionAddress: collection.address,
@@ -58,25 +58,45 @@ get fun `test auction manager: creator can create sequential auction`() {
     expect(auction!.status).toEqual(AUCTION_V1_ACTIVE);
 }
 
-get fun `test auction manager: rejects auction creation from non-owner`() {
+get fun `test auction manager: any wallet can create an auction and duplicate plate is rejected`() {
     val (manager, _, _, _, _) = setupAuctionManagerTest();
-    val attacker = testing.treasury("unauthorized-creator");
+    val firstCreator = testing.treasury("permissionless-first-creator");
+    val secondCreator = testing.treasury("permissionless-second-creator");
+    val endTime = (blockchain.now() + 3600) as uint32;
+
     val create = manager.sendAny(
-        attacker.address,
+        firstCreator.address,
         CreateAuctionV1 {
             queryId: 2,
             plate: "B123BB77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
-            endTime: (blockchain.now() + 3600) as uint32,
+            endTime,
         }.toCell(),
         { value: grams("0.05"), bounce: true },
     );
-    expect(create).toHaveFailedTx<CreateAuctionV1>({
-        from: attacker.address,
+    expect(create).toHaveSuccessfulTx<CreateAuctionV1>({
+        from: firstCreator.address,
         to: manager.address,
-        exitCode: AuctionManagerErrors.NotFromOwner,
     });
+
+    val duplicate = manager.sendAny(
+        secondCreator.address,
+        CreateAuctionV1 {
+            queryId: 3,
+            plate: "B123BB77",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(duplicate).toHaveFailedTx<CreateAuctionV1>({
+        from: secondCreator.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.AuctionAlreadyExists,
+    });
+    expect(manager.getAuction(0)!.itemIndex).toEqual(0);
 }
 
 get fun `test auction manager: rejects a bid below the starting price`() {
@@ -239,7 +259,7 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
     val collection = testing.treasury("empty-auction-collection");
     val treasury = testing.treasury("empty-auction-treasury");
     val securityFund = testing.treasury("empty-auction-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -355,7 +375,7 @@ get fun `test auction manager: distributes the winning bid only after mint confi
     val treasury = testing.treasury("payout-treasury");
     val securityFund = testing.treasury("payout-security");
     val nftItem = testing.treasury("minted-nft-item");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -420,7 +440,7 @@ get fun `test auction manager: refunds winner if NFT deployment fails`() {
     val bidder = testing.treasury("failed-mint-winner");
     val treasury = testing.treasury("failed-mint-treasury");
     val securityFund = testing.treasury("failed-mint-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -481,7 +501,7 @@ get fun `test auction manager: bounced outbid refund becomes recoverable credit`
     val securityFund = testing.treasury("bounce-refund-security");
     val nextBidder = testing.treasury("bounce-refund-next-bidder");
     val unavailableBidder = randomAddress("unavailable-refund-recipient");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -537,7 +557,7 @@ get fun `test auction manager: bounced creator payout becomes recoverable credit
     val winner = testing.treasury("bounce-payout-winner");
     val unavailableCreator = randomAddress("unavailable-payout-recipient");
     val nftItem = testing.treasury("bounce-payout-nft-item");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -594,7 +614,7 @@ get fun `test auction manager: rejects refund claim without enough attached valu
     val collection = testing.treasury("claim-refund-low-value-collection");
     val treasury = testing.treasury("claim-refund-low-value-treasury");
     val securityFund = testing.treasury("claim-refund-low-value-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var refundCredits: map<address, coins> = [];
     refundCredits.set(beneficiary.address, grams("1"));
     val manager = AuctionManager.fromStorage({
@@ -634,7 +654,7 @@ get fun `test auction manager: beneficiary can claim bounced refund credit`() {
     val collection = testing.treasury("claim-refund-collection");
     val treasury = testing.treasury("claim-refund-treasury");
     val securityFund = testing.treasury("claim-refund-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var refundCredits: map<address, coins> = [];
     refundCredits.set(beneficiary.address, grams("1"));
     val manager = AuctionManager.fromStorage({
@@ -674,7 +694,7 @@ get fun `test auction manager: rejects payout claim without enough attached valu
     val collection = testing.treasury("claim-payout-low-value-collection");
     val treasury = testing.treasury("claim-payout-low-value-treasury");
     val securityFund = testing.treasury("claim-payout-low-value-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var payoutCredits: map<address, coins> = [];
     payoutCredits.set(beneficiary.address, grams("5"));
     val manager = AuctionManager.fromStorage({
@@ -714,7 +734,7 @@ get fun `test auction manager: beneficiary can claim bounced payout credit`() {
     val collection = testing.treasury("claim-payout-collection");
     val treasury = testing.treasury("claim-payout-treasury");
     val securityFund = testing.treasury("claim-payout-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var payoutCredits: map<address, coins> = [];
     payoutCredits.set(beneficiary.address, grams("5"));
     val manager = AuctionManager.fromStorage({
@@ -784,7 +804,7 @@ get fun `test auction manager: bounced refund claim restores the credit`() {
     val collection = testing.treasury("claim-bounce-refund-collection");
     val treasury = testing.treasury("claim-bounce-refund-treasury");
     val securityFund = testing.treasury("claim-bounce-refund-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var refundCredits: map<address, coins> = [];
     refundCredits.set(unavailableBeneficiary, grams("1"));
     val manager = AuctionManager.fromStorage({
@@ -820,7 +840,7 @@ get fun `test auction manager: bounced payout claim restores the credit`() {
     val collection = testing.treasury("claim-bounce-payout-collection");
     val treasury = testing.treasury("claim-bounce-payout-treasury");
     val securityFund = testing.treasury("claim-bounce-payout-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var payoutCredits: map<address, coins> = [];
     payoutCredits.set(unavailableBeneficiary, grams("5"));
     val manager = AuctionManager.fromStorage({
@@ -857,7 +877,7 @@ get fun `test auction manager: rejects NFT confirmation from an untrusted sender
     val winner = testing.treasury("forged-confirm-winner");
     val treasury = testing.treasury("forged-confirm-treasury");
     val securityFund = testing.treasury("forged-confirm-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -914,7 +934,7 @@ get fun `test auction manager: rejects NFT confirmation with an incorrect query 
     val winner = testing.treasury("wrong-query-winner");
     val treasury = testing.treasury("wrong-query-treasury");
     val securityFund = testing.treasury("wrong-query-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -972,7 +992,7 @@ get fun `test auction manager: rejects NFT failure from an untrusted sender`() {
     val winner = testing.treasury("forged-failure-winner");
     val treasury = testing.treasury("forged-failure-treasury");
     val securityFund = testing.treasury("forged-failure-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -1030,7 +1050,7 @@ get fun `test auction manager: rejects NFT failure with an incorrect query id`()
     val winner = testing.treasury("wrong-failure-winner");
     val treasury = testing.treasury("wrong-failure-treasury");
     val securityFund = testing.treasury("wrong-failure-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -1090,7 +1110,7 @@ get fun `test auction manager: duplicate mint confirmation does not pay out twic
     val treasury = testing.treasury("duplicate-confirm-treasury");
     val securityFund = testing.treasury("duplicate-confirm-security");
     val nftItem = testing.treasury("duplicate-confirm-nft-item");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -1154,7 +1174,7 @@ get fun `test auction manager: duplicate mint failure does not refund twice`() {
     val unavailableWinner = randomAddress("duplicate-failure-winner");
     val treasury = testing.treasury("duplicate-failure-treasury");
     val securityFund = testing.treasury("duplicate-failure-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -1215,7 +1235,7 @@ var auctions: map<uint64, AuctionV1> = [];
 get fun `test auction manager: owner can withdraw part of treasury`() {
     val owner = testing.treasury("treasury-withdraw-owner");
     val collection = testing.treasury("treasury-withdraw-collection");
-    val securityFundAddressForTest = testing.treasury("treasury-withdraw-security").address);
+    val securityFundAddressForTest = testing.treasury("treasury-withdraw-security").address;
 val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
@@ -1253,7 +1273,7 @@ val manager = AuctionManager.fromStorage({
 get fun `test auction manager: owner can withdraw all remaining treasury in a later transaction`() {
     val owner = testing.treasury("treasury-full-withdraw-owner");
     val collection = testing.treasury("treasury-full-withdraw-collection");
-    val securityFundAddressForTest = testing.treasury("treasury-full-withdraw-security").address);
+    val securityFundAddressForTest = testing.treasury("treasury-full-withdraw-security").address;
 val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
@@ -1302,7 +1322,7 @@ val manager = AuctionManager.fromStorage({
 get fun `test auction manager: treasury withdrawal cannot use funds locked for bidders`() {
     val owner = testing.treasury("treasury-locked-owner");
     val collection = testing.treasury("treasury-locked-collection");
-    val securityFundAddressForTest = testing.treasury("treasury-locked-security").address);
+    val securityFundAddressForTest = testing.treasury("treasury-locked-security").address;
 val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
@@ -1341,7 +1361,7 @@ get fun `test auction manager: treasury withdrawal is owner-only`() {
     val owner = testing.treasury("treasury-auth-owner");
     val attacker = testing.treasury("treasury-auth-attacker");
     val collection = testing.treasury("treasury-auth-collection");
-    val securityFundAddressForTest = testing.treasury("treasury-auth-security").address);
+    val securityFundAddressForTest = testing.treasury("treasury-auth-security").address;
 val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
@@ -1380,7 +1400,7 @@ get fun `test auction manager: bounced treasury withdrawal restores treasury acc
     val deployer = testing.treasury("treasury-bounce-deployer");
     val unavailableOwner = randomAddress("treasury-bounce-unavailable-owner");
     val collection = testing.treasury("treasury-bounce-collection");
-    val securityFundAddressForTest = testing.treasury("treasury-bounce-security").address);
+    val securityFundAddressForTest = testing.treasury("treasury-bounce-security").address;
 val manager = AuctionManager.fromStorage({
         ownerAddress: unavailableOwner,
         collectionAddress: collection.address,
@@ -1418,7 +1438,7 @@ get fun `test auction manager: bounced security fund payout becomes recoverable 
     val winner = testing.treasury("bounce-security-winner");
     val unavailableSecurityFund = randomAddress("unavailable-security-fund");
     val nftItem = testing.treasury("bounce-security-nft-item");
-    val securityFundAddressForTest = unavailableSecurityFund);
+    val securityFundAddressForTest = unavailableSecurityFund;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
@@ -1475,7 +1495,7 @@ get fun `test auction manager: waits for collection skip confirmation and handle
     val collection = testing.treasury("skip-ack-collection");
     val treasury = testing.treasury("skip-ack-treasury");
     val securityFund = testing.treasury("skip-ack-security");
-    val securityFundAddressForTest = securityFund.address);
+    val securityFundAddressForTest = securityFund.address;
 var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
