@@ -1,3 +1,4 @@
+import "@stdlib/strings"
 import "@acton/emulation/network"
 import "@acton/emulation/testing"
 import "@acton/testing/expect"
@@ -260,12 +261,14 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
     val treasury = testing.treasury("empty-auction-treasury");
     val securityFund = testing.treasury("empty-auction-security");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+var plateToAuctionId: map<uint256, uint64> = [];
+    plateToAuctionId.set("RU|EMPTY00".hash(), 0);
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
-            plate: "EMPTY 00",
+            plate: "EMPTY00",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
@@ -283,7 +286,7 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions,
-        plateToAuctionId: [],
+        plateToAuctionId,
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
@@ -320,6 +323,7 @@ var auctions: map<uint64, AuctionV1> = [];
     );
     expect(ack).toHaveSuccessfulTx<NftItemIndexSkippedV12>({ to: manager.address });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_NO_BIDS);
+    expect(manager.getPlateStatus("RU|EMPTY00".hash())).toEqual(0);
 }
 
 get fun `test auction manager: refunds the previous leader immediately`() {
@@ -376,12 +380,14 @@ get fun `test auction manager: distributes the winning bid only after mint confi
     val securityFund = testing.treasury("payout-security");
     val nftItem = testing.treasury("minted-nft-item");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+var plateToAuctionId: map<uint256, uint64> = [];
+    plateToAuctionId.set("RU|WINNER77".hash(), 0);
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
-            plate: "WINNER 77",
+            plate: "WINNER77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
@@ -399,7 +405,7 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        plateToAuctionId: [],
+        plateToAuctionId,
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
@@ -432,6 +438,7 @@ var auctions: map<uint64, AuctionV1> = [];
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
     expect(manager.getTreasuryBalance()).toEqual(grams("3"));
+    expect(manager.getPlateStatus("RU|WINNER77".hash())).toEqual(2);
 }
 
 get fun `test auction manager: refunds winner if NFT deployment fails`() {
@@ -441,12 +448,14 @@ get fun `test auction manager: refunds winner if NFT deployment fails`() {
     val treasury = testing.treasury("failed-mint-treasury");
     val securityFund = testing.treasury("failed-mint-security");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+var plateToAuctionId: map<uint256, uint64> = [];
+    plateToAuctionId.set("RU|FAILED77".hash(), 0);
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
-            plate: "FAILED 77",
+            plate: "FAILED77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
@@ -464,7 +473,7 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        plateToAuctionId: [],
+        plateToAuctionId,
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
@@ -492,6 +501,7 @@ var auctions: map<uint64, AuctionV1> = [];
         to: bidder.address,
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_MINT_FAILED);
+    expect(manager.getPlateStatus("RU|FAILED77".hash())).toEqual(0);
 }
 
 get fun `test auction manager: bounced outbid refund becomes recoverable credit`() {
