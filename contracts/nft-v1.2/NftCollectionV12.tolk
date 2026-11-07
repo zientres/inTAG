@@ -343,15 +343,9 @@ get fun royalty_params(): RoyaltyParams {
 
 get fun get_nft_content(
     _itemIndex: int,
-    individualNftContent: string,
-): Cell<OffchainMetadataReply> {
-    val storage = lazy NftCollectionV12Storage.load();
-    val content = lazy storage.content.load();
-
-    var builder = StringBuilder.create();
-    builder.append(content.commonContent);
-    builder.append(individualNftContent);
-    return OffchainMetadataReply { string: builder.build() }.toCell();
+    individualNftContent: cell,
+): cell {
+    return individualNftContent;
 }
 
 get fun get_pending_nft_deployment(itemIndex: uint64): PendingNftDeploymentV12? {
