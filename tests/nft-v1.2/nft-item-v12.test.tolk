@@ -178,7 +178,7 @@ get fun `test nft v1.2 item: forwards TON to the new owner`() {
         null,
         null,
         forwardAmount,
-        PayloadInRef { value: forwardPayload },
+        PayloadInRef { value: forwardPayload as Cell<RemainingBitsAndRefs> },
         { value: grams("0.1"), bounce: true },
     );
 
