@@ -1492,3 +1492,88 @@ get fun `test auction manager: bounced security fund payout becomes recoverable 
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
     expect(manager.getPayoutCredit(unavailableSecurityFund)).toEqual(grams("2"));
 }
+
+
+get fun `test auction manager: waits for collection skip confirmation and handles duplicate ACK`() {
+    val owner = testing.treasury("skip-ack-owner");
+    val collection = testing.treasury("skip-ack-collection");
+    val treasury = testing.treasury("skip-ack-treasury");
+    val securityFund = testing.treasury("skip-ack-security");
+    var payoutAddresses: map<uint8, address> = [];
+    payoutAddresses.set(0, treasury.address);
+    payoutAddresses.set(1, securityFund.address);
+    var auctions: map<uint64, AuctionV1> = [];
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "SKIP ACK 77",
+            metadataContent: "skip-ack.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: 0,
+            highestBidder: null,
+            status: AUCTION_V1_ACTIVE,
+            mintQueryId: 0,
+        },
+    );
+    val manager = AuctionManager.fromStorage({
+        ownerAddress: owner.address,
+        collectionAddress: collection.address,
+        payoutConfigLocked: true,
+        nextItemIndex: 1,
+        nextMintItemIndex: 0,
+        nextQueryId: 10,
+        auctions,
+        refundCredits: [],
+        payoutCredits: [],
+        treasuryBalance: 0,
+        lockedFunds: 0,
+        payoutAddresses,
+    });
+    val deploy = manager.deploy(owner.address, { value: grams("0.3"), bounce: false });
+    expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
+
+    val finish = manager.sendAny(
+        owner.address,
+        FinishAuctionV1 { queryId: 1, auctionId: 0 }.toCell(),
+        { value: grams("0.2"), bounce: true },
+    );
+    expect(finish).toHaveSuccessfulTx<FinishAuctionV1>({ to: manager.address });
+    expect(finish).toHaveTx<SkipNftItemIndexV12>({
+        from: manager.address,
+        to: collection.address,
+        body: SkipNftItemIndexV12 { queryId: 10, itemIndex: 0 }.toCell(),
+    });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_SKIP);
+
+    val retry = manager.sendAny(
+        owner.address,
+        RetryMintNoticeV1 { queryId: 2, auctionId: 0 }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(retry).toHaveSuccessfulTx<RetryMintNoticeV1>({ to: manager.address });
+    expect(retry).toHaveTx<SkipNftItemIndexV12>({
+        from: manager.address,
+        to: collection.address,
+        body: SkipNftItemIndexV12 { queryId: 10, itemIndex: 0 }.toCell(),
+    });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_SKIP);
+
+    val ack = manager.sendAny(
+        collection.address,
+        NftItemIndexSkippedV12 { queryId: 10, itemIndex: 0 }.toCell(),
+        { value: grams("0.03"), bounce: true },
+    );
+    expect(ack).toHaveSuccessfulTx<NftItemIndexSkippedV12>({ to: manager.address });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_NO_BIDS);
+
+    val replay = manager.sendAny(
+        collection.address,
+        NftItemIndexSkippedV12 { queryId: 10, itemIndex: 0 }.toCell(),
+        { value: grams("0.03"), bounce: true },
+    );
+    expect(replay).toHaveSuccessfulTx<NftItemIndexSkippedV12>({ to: manager.address });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_NO_BIDS);
+}
