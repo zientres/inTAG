@@ -3,9 +3,14 @@
 
   const CONFIG_URL = new URL("contracts/testnet.config.json", document.baseURI);
   const TONCENTER_URL = "https://testnet.toncenter.com/api/v2/runGetMethod";
-  const FNV128_OFFSET = 0x6c62272e07bb014262b821756295c58dn;
-  const FNV128_PRIME = 0x0000000001000000000000000000013bn;
-  const FNV128_MASK = (1n << 128n) - 1n;
+  let tonCorePromise = null;
+
+  function loadTonCore() {
+    if (!tonCorePromise) {
+      tonCorePromise = import("https://esm.sh/@ton/core@0.59.0");
+    }
+    return tonCorePromise;
+  }
   const AUCTION_MANAGER_CREATE_OPCODE = 0x54474101;
   const AUCTION_CREATE_AMOUNT = "50000000";
   const STARTING_BID = 1000000000n;
@@ -31,13 +36,9 @@
 
   async function hashPlate(country, plate) {
     const canonical = country + "|" + canonicalRussianPlate(plate);
-    const bytes = new TextEncoder().encode(canonical);
-    let hash = FNV128_OFFSET;
-    for (const byte of bytes) {
-      hash ^= BigInt(byte);
-      hash = (hash * FNV128_PRIME) & FNV128_MASK;
-    }
-    return hash.toString(16).padStart(64, "0");
+    const { beginCell } = await loadTonCore();
+    const hash = beginCell().storeStringTail(canonical).endCell().hash();
+    return Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
   }
 
   async function lookupRussianPlate(plate) {
@@ -88,7 +89,7 @@
       throw new Error("Номер имеет неверный формат.");
     }
 
-    const { beginCell } = await import("https://esm.sh/@ton/core@0.59.0");
+    const { beginCell } = await loadTonCore();
     const random = new Uint32Array(2);
     crypto.getRandomValues(random);
     let queryId = (BigInt(random[0]) << 32n) | BigInt(random[1]);
