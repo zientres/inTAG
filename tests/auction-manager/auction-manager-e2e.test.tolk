@@ -96,7 +96,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
         owner.address,
         CreateAuctionV1 {
             queryId: 3,
-            plate: "A777AA77",
+            plate: "А777АА77",
             startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime,
