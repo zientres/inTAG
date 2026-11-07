@@ -28,6 +28,10 @@ struct AuctionV1 {
     mintQueryId: uint64
 }
 
+struct AuctionManagerPlateRegistry {
+    plateToAuctionId: map<uint256, uint64>
+}
+
 struct AuctionManagerStorage {
     ownerAddress: address
     collectionAddress: address
@@ -40,7 +44,7 @@ struct AuctionManagerStorage {
     payoutCredits: map<address, coins>
     treasuryBalance: coins
     lockedFunds: coins
-    plateToAuctionId: map<uint256, uint64>
+    plateRegistry: Cell<AuctionManagerPlateRegistry>
     securityFundAddress: address?
 }
 
