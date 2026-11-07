@@ -262,13 +262,13 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
     val securityFund = testing.treasury("empty-auction-security");
     val securityFundAddressForTest = securityFund.address;
 var plateToAuctionId: map<uint256, uint64> = [];
-    plateToAuctionId.set("RU|EMPTY00".hash(), 0);
+    plateToAuctionId.set("RU|А111АА77".hash(), 0);
     var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
-            plate: "EMPTY00",
+            plate: "А111АА77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
@@ -323,7 +323,23 @@ var plateToAuctionId: map<uint256, uint64> = [];
     );
     expect(ack).toHaveSuccessfulTx<NftItemIndexSkippedV12>({ to: manager.address });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_NO_BIDS);
-    expect(manager.getPlateStatus("RU|EMPTY00".hash())).toEqual(0);
+    expect(manager.getPlateStatus("RU|А111АА77".hash())).toEqual(0);
+
+    val relistUser = testing.treasury("empty-auction-relist-user");
+    val relist = manager.sendAny(
+        relistUser.address,
+        CreateAuctionV1 {
+            queryId: 102,
+            plate: "А111АА77",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() + 3600) as uint32,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(relist).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+    expect(manager.getAuction(1)!.itemIndex).toEqual(1);
+    expect(manager.getPlateStatus("RU|А111АА77".hash())).toEqual(1);
 }
 
 get fun `test auction manager: refunds the previous leader immediately`() {
@@ -381,13 +397,13 @@ get fun `test auction manager: distributes the winning bid only after mint confi
     val nftItem = testing.treasury("minted-nft-item");
     val securityFundAddressForTest = securityFund.address;
 var plateToAuctionId: map<uint256, uint64> = [];
-    plateToAuctionId.set("RU|WINNER77".hash(), 0);
+    plateToAuctionId.set("RU|М222ММ77".hash(), 0);
     var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
-            plate: "WINNER77",
+            plate: "М222ММ77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
@@ -438,7 +454,23 @@ var plateToAuctionId: map<uint256, uint64> = [];
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
     expect(manager.getTreasuryBalance()).toEqual(grams("3"));
-    expect(manager.getPlateStatus("RU|WINNER77".hash())).toEqual(2);
+    expect(manager.getPlateStatus("RU|М222ММ77".hash())).toEqual(2);
+
+    val duplicate = manager.sendAny(
+        testing.treasury("paid-plate-duplicate-user").address,
+        CreateAuctionV1 {
+            queryId: 79,
+            plate: "М222ММ77",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() + 3600) as uint32,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(duplicate).toHaveFailedTx<CreateAuctionV1>({
+        to: manager.address,
+        exitCode: AuctionManagerErrors.AuctionAlreadyExists,
+    });
 }
 
 get fun `test auction manager: refunds winner if NFT deployment fails`() {
@@ -449,13 +481,13 @@ get fun `test auction manager: refunds winner if NFT deployment fails`() {
     val securityFund = testing.treasury("failed-mint-security");
     val securityFundAddressForTest = securityFund.address;
 var plateToAuctionId: map<uint256, uint64> = [];
-    plateToAuctionId.set("RU|FAILED77".hash(), 0);
+    plateToAuctionId.set("RU|С333СС77".hash(), 0);
     var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
-            plate: "FAILED77",
+            plate: "С333СС77",
                         startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
@@ -501,7 +533,7 @@ var plateToAuctionId: map<uint256, uint64> = [];
         to: bidder.address,
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_MINT_FAILED);
-    expect(manager.getPlateStatus("RU|FAILED77".hash())).toEqual(0);
+    expect(manager.getPlateStatus("RU|С333СС77".hash())).toEqual(0);
 }
 
 get fun `test auction manager: bounced outbid refund becomes recoverable credit`() {
