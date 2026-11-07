@@ -62,6 +62,10 @@ fun AuctionManager.getAuction(self, auctionId: uint64): AuctionV1? {
     return net.runGetMethod(self.address, "get_auction", [auctionId]);
 }
 
+fun AuctionManager.getPlateStatus(self, plateHash: uint256): int {
+    return net.runGetMethod(self.address, "get_plate_status", [plateHash]);
+}
+
 fun AuctionManager.getRefundCredit(self, beneficiary: address): coins {
     return net.runGetMethod(self.address, "get_refund_credit", [beneficiary]);
 }
