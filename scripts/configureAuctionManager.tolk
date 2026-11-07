@@ -9,18 +9,15 @@ fun main() {
     val manager = AuctionManager.fromAddress(
         promptAddress("Enter Auction Manager Testnet address"),
     );
-    val treasury = promptAddress("Enter Treasury wallet address");
     val securityFund = promptAddress("Enter development and security fund wallet address");
 
     val result = manager.sendSetPayoutAddressesV1(
         owner.address,
         1,
-        treasury,
         securityFund,
         { value: grams("0.05"), bounce: true },
     );
     result.waitForFirstTransaction();
     println("PAYOUT_CONFIGURATION_SUBMITTED");
-    println("TREASURY_ADDRESS={}", treasury);
     println("SECURITY_FUND_ADDRESS={}", securityFund);
 }
