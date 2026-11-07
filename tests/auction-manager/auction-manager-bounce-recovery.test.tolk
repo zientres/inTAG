@@ -11,7 +11,7 @@ get fun `test auction manager: bounced NFT deployment reopens auction for retry`
     val finisher = testing.treasury("bounce-deploy-finisher");
     val unavailableCollection = randomAddress("bounce-deploy-unavailable-collection");
 
-    var auctions: map<uint64, AuctionV1> = [];
+var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
@@ -27,7 +27,7 @@ get fun `test auction manager: bounced NFT deployment reopens auction for retry`
         },
     );
 
-    val manager = AuctionManager.fromStorage({
+val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: unavailableCollection,
         payoutConfigLocked: false,
@@ -44,11 +44,11 @@ get fun `test auction manager: bounced NFT deployment reopens auction for retry`
         treasuryBalance: 0,
         lockedFunds: grams("1"),
 
-    });
+});
     val deploy = manager.deploy(owner.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
 
-    val finish = manager.sendAny(
+val finish = manager.sendAny(
         finisher.address,
         FinishAuctionV1 {
             queryId: 1,
@@ -66,7 +66,7 @@ get fun `test auction manager: bounced empty-index skip restores auction sequenc
     val finisher = testing.treasury("bounce-skip-finisher");
     val unavailableCollection = randomAddress("bounce-skip-unavailable-collection");
 
-    var auctions: map<uint64, AuctionV1> = [];
+var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
@@ -82,7 +82,7 @@ get fun `test auction manager: bounced empty-index skip restores auction sequenc
         },
     );
 
-    val manager = AuctionManager.fromStorage({
+val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: unavailableCollection,
         payoutConfigLocked: false,
@@ -99,11 +99,11 @@ get fun `test auction manager: bounced empty-index skip restores auction sequenc
         treasuryBalance: 0,
         lockedFunds: 0,
 
-    });
+});
     val deploy = manager.deploy(owner.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
 
-    val finish = manager.sendAny(
+val finish = manager.sendAny(
         finisher.address,
         FinishAuctionV1 {
             queryId: 2,
