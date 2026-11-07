@@ -67,6 +67,20 @@ fun notifyManagerOfFailedDeployment(
     notification.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
 }
 
+fun notifyManagerOfSkippedIndex(
+    managerAddress: address,
+    queryId: uint64,
+    itemIndex: uint64,
+) {
+    val notification = createMessage({
+        bounce: BounceMode.RichBounce,
+        dest: managerAddress,
+        value: 0,
+        body: NftItemIndexSkippedV12 { queryId, itemIndex },
+    });
+    notification.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
+}
+
 fun onInternalMessage(in: InMessage) {
     val message = lazy AllowedMessageToNftCollectionV12.fromSlice(in.body);
 
@@ -114,12 +128,34 @@ fun onInternalMessage(in: InMessage) {
             var storage = lazy NftCollectionV12Storage.load();
             assert (in.senderAddress == storage.adminAddress) throw NftV12Errors.NotFromAdmin;
             assert (message.queryId != 0) throw NftV12Errors.InvalidDeploymentState;
+
+            val completedLookup = storage.completedSkips.get(message.itemIndex);
+            if (completedLookup.isFound) {
+                assert (
+                    completedLookup.loadValue() == message.queryId
+                ) throw NftV12Errors.InvalidDeploymentState;
+                notifyManagerOfSkippedIndex(
+                    storage.adminAddress,
+                    message.queryId,
+                    message.itemIndex,
+                );
+                return;
+            }
+
             assert (message.itemIndex == storage.nextItemIndex) throw NftV12Errors.InvalidItemIndex;
             assert (
                 !storage.pendingDeployments.exists(message.itemIndex)
             ) throw NftV12Errors.PendingDeploymentAlreadyExists;
+
+            storage.completedSkips.set(message.itemIndex, message.queryId);
             storage.nextItemIndex += 1;
             storage.save();
+
+            notifyManagerOfSkippedIndex(
+                storage.adminAddress,
+                message.queryId,
+                message.itemIndex,
+            );
         }
 
         NftItemInitializedV12 => {
