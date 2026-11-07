@@ -35,12 +35,12 @@ get fun `test auction manager: bounced NFT deployment reopens auction for retry`
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: null }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        securityFundAddress: null,
+        
     });
     val deploy = manager.deploy(owner.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -87,12 +87,12 @@ get fun `test auction manager: bounced empty-index skip restores auction sequenc
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: null }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        securityFundAddress: null,
+        
     });
     val deploy = manager.deploy(owner.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
