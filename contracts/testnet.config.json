@@ -2,7 +2,7 @@
   "network": "testnet",
   "creator": "0QAlaQjrvRz8GCm2IJ1QXA6rNGSyyYfH6uNPT0RzKja6VsLi",
   "treasury": null,
-  "development_security_fund": null,
+  "development_security_fund": "0QAAbU6OX_tVpAmPWKoeYYBLBmiArGyvndhYirJkX9Csm5pk",
   "primary_auction_distribution": {
     "creator_percent": 50,
     "treasury_percent": 30,
