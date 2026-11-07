@@ -36,9 +36,13 @@
 
   async function hashPlate(country, plate) {
     const canonical = country + "|" + canonicalRussianPlate(plate);
-    const { beginCell } = await loadTonCore();
-    const hash = beginCell().storeStringTail(canonical).endCell().hash();
-    return Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
+    const digest = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(canonical)
+    );
+    return Array.from(new Uint8Array(digest), byte =>
+      byte.toString(16).padStart(2, "0")
+    ).join("");
   }
 
   async function lookupRussianPlate(plate) {
