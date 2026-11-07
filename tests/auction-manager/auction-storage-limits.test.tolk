@@ -124,7 +124,7 @@ get fun `test auction manager: any wallet can create an auction and registry rep
 
     expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
     val plateHash = StringBuilder.create().append("RU|").append(plate).build().hash();
-    val status = net.runGetMethod(manager.address, "get_plate_status", [plateHash]);
+    val status = manager.getPlateStatus(plateHash);
     expect(status).toEqual(1);
 }
 
