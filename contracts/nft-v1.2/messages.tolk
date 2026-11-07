@@ -15,7 +15,7 @@ struct (0x54474903) DeployNftV12 {
     itemIndex: uint64
     attachTonAmount: coins
     ownerAddress: address
-    content: string
+    content: cell
 }
 
 struct (0x54474904) NftItemDeploymentConfirmedV12 {
