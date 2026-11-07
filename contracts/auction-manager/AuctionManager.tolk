@@ -94,10 +94,10 @@ fun isValidRussianPlate(plate: string): bool {
     }
 
     var value = plate.beginParse();
-    if (!isAllowedRussianPlateLetter(value)) {
+    if (!isAllowedRussianPlateLetter(mutate value)) {
         return false;
     }
-    if (!isRussianPlateDigit(value) || !isRussianPlateDigit(value) || !isRussianPlateDigit(value)) {
+    if (!isRussianPlateDigit(mutate value) || !isRussianPlateDigit(value) || !isRussianPlateDigit(value)) {
         return false;
     }
     if (!isAllowedRussianPlateLetter(value) || !isAllowedRussianPlateLetter(value)) {
@@ -209,7 +209,8 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
             val plateKey = StringBuilder.create().append("RU|").append(message.plate).build().hash();
-            val plateLookup = storage.plateToAuctionId.get(plateKey);
+            var plateRegistry = storage.plateRegistry.load();
+            val plateLookup = plateRegistry.plateToAuctionId.get(plateKey);
             assert (!plateLookup.isFound) throw AuctionManagerErrors.AuctionAlreadyExists;
 
             val auctionId = storage.nextItemIndex;
@@ -225,7 +226,8 @@ fun onInternalMessage(in: InMessage) {
                 mintQueryId: 0,
             };
             storage.auctions.set(auctionId, auction);
-            storage.plateToAuctionId.set(plateKey, auctionId);
+            plateRegistry.plateToAuctionId.set(plateKey, auctionId);
+            storage.plateRegistry = plateRegistry.toCell();
             storage.nextItemIndex += 1;
             storage.payoutConfigLocked = true;
             storage.save();
@@ -395,7 +397,9 @@ fun onInternalMessage(in: InMessage) {
 
             auction.status = AUCTION_V1_CLOSED_NO_BIDS;
             val plateKey = StringBuilder.create().append("RU|").append(auction.plate).build().hash();
-            storage.plateToAuctionId.delete(plateKey);
+            var plateRegistry = storage.plateRegistry.load();
+            plateRegistry.plateToAuctionId.delete(plateKey);
+            storage.plateRegistry = plateRegistry.toCell();
             storage.auctions.set(message.itemIndex, auction);
             storage.nextMintItemIndex += 1;
             storage.save();
