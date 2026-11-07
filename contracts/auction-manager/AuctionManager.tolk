@@ -68,6 +68,28 @@ fun sendMintAck(collectionAddress: address, queryId: uint64, itemIndex: uint64) 
     ackMessage.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
 }
 
+fun buildOnchainPlateMetadata(plate: string): cell {
+    val name = StringBuilder.create().append("TagitalSpace — ").append(plate).build();
+    val description = StringBuilder.create()
+        .append("Digital license plate collectible from TagitalSpace. Russian plate: ")
+        .append(plate)
+        .build();
+    val image = StringBuilder.create()
+        .append("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1200'%20height='720'%20viewBox='0%200%201200%20720'%3E%3Crect%20width='1200'%20height='720'%20fill='%23071426'/%3E%3Crect%20x='80'%20y='180'%20width='1040'%20height='360'%20rx='24'%20fill='white'/%3E%3Ctext%20x='600'%20y='390'%20text-anchor='middle'%20font-family='Arial'%20font-size='96'%20font-weight='700'%20fill='%23071426'>")
+        .append(plate)
+        .append("</text>%3Ctext%20x='600'%20y='610'%20text-anchor='middle'%20font-family='Arial'%20font-size='28'%20letter-spacing='6'%20fill='%23a8b8cc'>TAGITALSPACE%3C/text%3E%3C/svg%3E")
+        .build();
+
+    var dict: map<uint256, string_prefixed0x> = [];
+    dict.set("name".sha256(), name.prefixWith00());
+    dict.set("description".sha256(), description.prefixWith00());
+    dict.set("image".sha256(), image.prefixWith00());
+    return beginCell()
+        .storeUint(0, 8)
+        .storeDict(dict.toLowLevelDict())
+        .endCell();
+}
+
 fun addRefundCredit(mutate storage: AuctionManagerStorage, beneficiary: address, amount: coins) {
     val lookup = storage.refundCredits.get(beneficiary);
     var previous: coins = 0;
@@ -109,25 +131,19 @@ fun onInternalMessage(in: InMessage) {
             assert (
                 securityFund != storage.ownerAddress
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            storage.payoutAddresses.set(1, securityFund);
+            storage.securityFundAddress = securityFund;
             storage.save();
         }
 
         CreateAuctionV1 => {
             var storage = lazy AuctionManagerStorage.load();
-            assert (
-                in.senderAddress == storage.ownerAddress
-            ) throw AuctionManagerErrors.NotFromOwner;
             assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             assert (
-                storage.payoutAddresses.exists(1)
+                storage.securityFundAddress != null
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
             assert (
                 in.valueCoins >= AUCTION_V1_MIN_CREATE_OVERHEAD
             ) throw AuctionManagerErrors.InsufficientAttachedValue;
-            assert (
-                message.itemIndex == storage.nextItemIndex
-            ) throw AuctionManagerErrors.ItemIndexOutOfSequence;
             assert (
                 message.startingBid > 0 && message.minimumBidStep > 0
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
@@ -135,18 +151,18 @@ fun onInternalMessage(in: InMessage) {
                 message.endTime > blockchain.now()
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
             val plateLength = message.plate.calculateLength();
-            val metadataContentLength = message.metadataContent.calculateLength();
             assert (
-                plateLength > 0 && plateLength <= AUCTION_V1_MAX_PLATE_BYTES &&
-                metadataContentLength > 0 &&
-                metadataContentLength <= AUCTION_V1_MAX_METADATA_CONTENT_BYTES
+                plateLength > 0 && plateLength <= AUCTION_V1_MAX_PLATE_BYTES
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
+
+            val plateKey = StringBuilder.create().append("RU|").append(message.plate).build().hash();
+            val plateLookup = storage.plateToAuctionId.get(plateKey);
+            assert (!plateLookup.isFound) throw AuctionManagerErrors.AuctionAlreadyExists;
 
             val auctionId = storage.nextItemIndex;
             val auction: AuctionV1 = {
                 itemIndex: message.itemIndex,
                 plate: message.plate,
-                metadataContent: message.metadataContent,
                 startingBid: message.startingBid,
                 minimumBidStep: message.minimumBidStep,
                 endTime: message.endTime,
@@ -156,6 +172,7 @@ fun onInternalMessage(in: InMessage) {
                 mintQueryId: 0,
             };
             storage.auctions.set(auctionId, auction);
+            storage.plateToAuctionId.set(plateKey, auctionId);
             storage.nextItemIndex += 1;
             storage.payoutConfigLocked = true;
             storage.save();
@@ -251,7 +268,7 @@ fun onInternalMessage(in: InMessage) {
                     itemIndex: auction.itemIndex,
                     attachTonAmount: AUCTION_V1_ITEM_DEPLOY_VALUE,
                     ownerAddress: auction.highestBidder,
-                    content: auction.metadataContent,
+                    content: buildOnchainPlateMetadata(auction.plate),
                 },
             });
             deploy.send(SEND_MODE_PAY_FEES_SEPARATELY);
@@ -324,6 +341,8 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.ItemIndexOutOfSequence;
 
             auction.status = AUCTION_V1_CLOSED_NO_BIDS;
+            val plateKey = StringBuilder.create().append("RU|").append(auction.plate).build().hash();
+            storage.plateToAuctionId.delete(plateKey);
             storage.auctions.set(message.itemIndex, auction);
             storage.nextMintItemIndex += 1;
             storage.save();
@@ -355,9 +374,8 @@ fun onInternalMessage(in: InMessage) {
                 auction.highestBidder != null && auction.highestBid > 0
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
-            val securityLookup = storage.payoutAddresses.get(1);
-            assert (securityLookup.isFound) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            val securityFund = securityLookup.loadValue();
+            assert (storage.securityFundAddress != null) throw AuctionManagerErrors.InvalidPayoutConfiguration;
+            val securityFund = storage.securityFundAddress;
 
             auction.status = AUCTION_V1_CLOSED_PAID;
             storage.auctions.set(message.itemIndex, auction);
@@ -402,6 +420,8 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
+            val plateKey = StringBuilder.create().append("RU|").append(auction.plate).build().hash();
+            storage.plateToAuctionId.delete(plateKey);
             storage.lockedFunds = (storage.lockedFunds - auction.highestBid) as coins;
             storage.auctions.set(message.itemIndex, auction);
             storage.nextMintItemIndex += 1;
@@ -556,6 +576,23 @@ get fun get_auction(auctionId: uint64): AuctionV1? {
         return null;
     }
     return lookup.loadValue();
+}
+
+get fun get_plate_status(plateHash: uint256): int {
+    val storage = lazy AuctionManagerStorage.load();
+    val plateLookup = storage.plateToAuctionId.get(plateHash);
+    if (!plateLookup.isFound) {
+        return 0;
+    }
+    val auctionLookup = storage.auctions.get(plateLookup.loadValue());
+    if (!auctionLookup.isFound) {
+        return 0;
+    }
+    val auction = auctionLookup.loadValue();
+    if (auction.status == AUCTION_V1_CLOSED_PAID) {
+        return 2;
+    }
+    return 1;
 }
 
 get fun get_refund_credit(beneficiary: address): coins {
