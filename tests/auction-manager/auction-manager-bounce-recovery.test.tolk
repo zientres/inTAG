@@ -110,6 +110,24 @@ get fun `test auction manager: bounced empty-index skip restores auction sequenc
         { value: grams("0.2"), bounce: true },
     );
     expect(finish).toHaveSuccessfulTx<FinishAuctionV1>({ to: manager.address });
-    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_ACTIVE);
-    expect(manager.getAuction(0)!.mintQueryId).toEqual(0);
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_SKIP);
+    expect(manager.getAuction(0)!.mintQueryId).toEqual(1);
+
+    val retry = manager.sendAny(
+        finisher.address,
+        RetryMintNoticeV1 {
+            queryId: 3,
+            auctionId: 0,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(retry).toHaveSuccessfulTx<RetryMintNoticeV1>({ to: manager.address });
+    expect(retry).toHaveTx<SkipNftItemIndexV12>({
+        from: manager.address,
+        to: unavailableCollection,
+        body: SkipNftItemIndexV12 {
+            queryId: 1,
+            itemIndex: 0,
+        }.toCell(),
+    });
 }
