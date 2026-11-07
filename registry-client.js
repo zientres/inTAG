@@ -26,7 +26,7 @@
   }
 
   function canonicalRussianPlate(plate) {
-    return String(plate).replace(/\\s+/g, "").toUpperCase();
+    return String(plate).replace(/\s+/g, "").toUpperCase();
   }
 
   async function hashPlate(country, plate) {
