@@ -28,8 +28,9 @@ struct AuctionV1 {
     mintQueryId: uint64
 }
 
-struct AuctionManagerPlateRegistry {
+struct AuctionManagerExtra {
     plateToAuctionId: map<uint256, uint64>
+    securityFundAddress: address?
 }
 
 struct AuctionManagerStorage {
@@ -44,8 +45,7 @@ struct AuctionManagerStorage {
     payoutCredits: map<address, coins>
     treasuryBalance: coins
     lockedFunds: coins
-    plateRegistry: Cell<AuctionManagerPlateRegistry>
-    securityFundAddress: address?
+    extra: Cell<AuctionManagerExtra>
 }
 
 fun AuctionManagerStorage.load(): AuctionManagerStorage {
