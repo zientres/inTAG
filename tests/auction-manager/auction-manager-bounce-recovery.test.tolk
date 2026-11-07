@@ -4,6 +4,7 @@ import "@acton/testing/expect"
 import "@wrappers/AuctionManager.gen"
 import "@contracts/auction-manager/messages"
 import "@contracts/auction-manager/types"
+import "@contracts/nft-v1.2/messages"
 
 get fun `test auction manager: bounced NFT deployment reopens auction for retry`() {
     val owner = testing.treasury("bounce-deploy-owner");
