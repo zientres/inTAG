@@ -20,6 +20,7 @@ type AllowedMessageToAuctionManager =
     | ClaimRefundV1
     | ClaimPayoutV1
     | SetPayoutAddressesV1
+    | WithdrawTreasuryV1
     | NftItemDeploymentConfirmedV12
     | NftItemDeploymentFailedV12
 
@@ -73,6 +74,7 @@ fun addRefundCredit(mutate storage: AuctionManagerStorage, beneficiary: address,
         previous = lookup.loadValue();
     }
     storage.refundCredits.set(beneficiary, (previous + amount) as coins);
+    storage.lockedFunds = (storage.lockedFunds + amount) as coins;
 }
 
 fun addPayoutCredit(mutate storage: AuctionManagerStorage, beneficiary: address, amount: coins) {
@@ -82,6 +84,7 @@ fun addPayoutCredit(mutate storage: AuctionManagerStorage, beneficiary: address,
         previous = lookup.loadValue();
     }
     storage.payoutCredits.set(beneficiary, (previous + amount) as coins);
+    storage.lockedFunds = (storage.lockedFunds + amount) as coins;
 }
 
 fun onInternalMessage(in: InMessage) {
@@ -98,18 +101,13 @@ fun onInternalMessage(in: InMessage) {
                 !storage.payoutConfigLocked
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
             assert (
-                message.treasuryAddress != null && message.securityFundAddress != null
+                message.securityFundAddress != null
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            val treasury = message.treasuryAddress;
             val securityFund = message.securityFundAddress;
+            assert (isValidManagerAddress(securityFund)) throw AuctionManagerErrors.InvalidAddress;
             assert (
-                isValidManagerAddress(treasury) && isValidManagerAddress(securityFund)
-            ) throw AuctionManagerErrors.InvalidAddress;
-            assert (
-                treasury != securityFund && treasury != storage.ownerAddress &&
                 securityFund != storage.ownerAddress
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            storage.payoutAddresses.set(0, treasury);
             storage.payoutAddresses.set(1, securityFund);
             storage.save();
         }
@@ -187,6 +185,7 @@ fun onInternalMessage(in: InMessage) {
             auction.highestBid = message.bidAmount;
             auction.highestBidder = in.senderAddress;
             storage.auctions.set(message.auctionId, auction);
+            storage.lockedFunds = (storage.lockedFunds + message.bidAmount - previousBid) as coins;
             storage.save();
 
             if (previousBidder != null && previousBid > 0) {
@@ -312,12 +311,8 @@ fun onInternalMessage(in: InMessage) {
                 auction.highestBidder != null && auction.highestBid > 0
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
-            val treasuryLookup = storage.payoutAddresses.get(0);
             val securityLookup = storage.payoutAddresses.get(1);
-            assert (
-                treasuryLookup.isFound && securityLookup.isFound
-            ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            val treasury = treasuryLookup.loadValue();
+            assert (securityLookup.isFound) throw AuctionManagerErrors.InvalidPayoutConfiguration;
             val securityFund = securityLookup.loadValue();
 
             auction.status = AUCTION_V1_CLOSED_PAID;
@@ -328,15 +323,12 @@ fun onInternalMessage(in: InMessage) {
             val treasuryShare = (auction.highestBid * 30 / 100) as coins;
             val securityShare = (auction.highestBid * 20 / 100) as coins;
             val creatorShare = (auction.highestBid - treasuryShare - securityShare) as coins;
+            storage.lockedFunds = (storage.lockedFunds - auction.highestBid) as coins;
+            storage.treasuryBalance = (storage.treasuryBalance + treasuryShare) as coins;
             var queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
             sendPayout(message.itemIndex, storage.ownerAddress, creatorShare, queryId);
-
-            queryId = storage.nextQueryId;
-            storage.nextQueryId += 1;
-            storage.save();
-            sendPayout(message.itemIndex, treasury, treasuryShare, queryId);
 
             queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
@@ -366,6 +358,7 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
+            storage.lockedFunds = (storage.lockedFunds - auction.highestBid) as coins;
             storage.auctions.set(message.itemIndex, auction);
             storage.nextMintItemIndex += 1;
             storage.save();
@@ -395,10 +388,45 @@ fun onInternalMessage(in: InMessage) {
             val amount = lookup.loadValue();
             assert (amount > 0) throw AuctionManagerErrors.NoRefundAvailable;
             storage.refundCredits.delete(in.senderAddress);
+            storage.lockedFunds = (storage.lockedFunds - amount) as coins;
             val queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
             sendRefund(0, in.senderAddress, amount, queryId);
+        }
+
+        WithdrawTreasuryV1 => {
+            var storage = lazy AuctionManagerStorage.load();
+            assert (in.senderAddress == storage.ownerAddress) throw AuctionManagerErrors.NotFromOwner;
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            assert (message.amount > 0) throw AuctionManagerErrors.InvalidTreasuryWithdrawal;
+            assert (
+                in.valueCoins >= AUCTION_V1_MIN_WITHDRAW_OVERHEAD
+            ) throw AuctionManagerErrors.InsufficientAttachedValue;
+            assert (
+                message.amount <= storage.treasuryBalance
+            ) throw AuctionManagerErrors.InsufficientTreasuryBalance;
+            val requiredBalance = (
+                storage.lockedFunds + message.amount + AUCTION_V1_MIN_OPERATIONAL_RESERVE
+            ) as coins;
+            assert (
+                contract.getOriginalBalance() >= requiredBalance
+            ) throw AuctionManagerErrors.InsufficientManagerBalance;
+
+            storage.treasuryBalance = (storage.treasuryBalance - message.amount) as coins;
+            val transferQueryId = storage.nextQueryId;
+            storage.nextQueryId += 1;
+            storage.save();
+            val withdrawal = createMessage({
+                bounce: BounceMode.RichBounce,
+                dest: storage.ownerAddress,
+                value: message.amount,
+                body: TreasuryWithdrawalTransferV1 {
+                    queryId: transferQueryId,
+                    amount: message.amount,
+                },
+            });
+            withdrawal.send(SEND_MODE_PAY_FEES_SEPARATELY);
         }
 
         ClaimPayoutV1 => {
@@ -412,6 +440,7 @@ fun onInternalMessage(in: InMessage) {
             val amount = lookup.loadValue();
             assert (amount > 0) throw AuctionManagerErrors.NoPayoutAvailable;
             storage.payoutCredits.delete(in.senderAddress);
+            storage.lockedFunds = (storage.lockedFunds - amount) as coins;
             val queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
@@ -440,6 +469,13 @@ fun onBouncedMessage(in: InMessageBounced) {
     if (originalOpcode == 0x54474108) {
         val transfer = PayoutTransferV1.fromCell(bounced.originalBody);
         addPayoutCredit(mutate storage, transfer.beneficiary, transfer.amount);
+        storage.save();
+        return;
+    }
+
+    if (originalOpcode == 0x5447410C) {
+        val transfer = TreasuryWithdrawalTransferV1.fromCell(bounced.originalBody);
+        storage.treasuryBalance = (storage.treasuryBalance + transfer.amount) as coins;
         storage.save();
         return;
     }
@@ -498,6 +534,11 @@ get fun get_refund_credit(beneficiary: address): coins {
         return 0;
     }
     return lookup.loadValue();
+}
+
+get fun get_treasury_balance(): coins {
+    val storage = lazy AuctionManagerStorage.load();
+    return storage.treasuryBalance;
 }
 
 get fun get_payout_credit(beneficiary: address): coins {
