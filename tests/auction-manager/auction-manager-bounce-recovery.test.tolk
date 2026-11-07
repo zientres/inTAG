@@ -2,8 +2,8 @@ import "@acton/emulation/network"
 import "@acton/emulation/testing"
 import "@acton/testing/expect"
 import "@wrappers/AuctionManager.gen"
-import "@contracts/auction-manager/types"
 import "@contracts/auction-manager/messages"
+import "@contracts/auction-manager/types"
 import "@contracts/nft-v1.2/messages"
 
 get fun `test auction manager: bounced NFT deployment reopens auction for retry`() {
@@ -13,18 +13,21 @@ get fun `test auction manager: bounced NFT deployment reopens auction for retry`
     val unavailableCollection = randomAddress("bounce-deploy-unavailable-collection");
 
     var auctions: map<uint64, AuctionV1> = [];
-    auctions.set(0, {
-        itemIndex: 0,
-        plate: "BOUNCE DEPLOY",
-        metadataContent: "bounce-deploy.json",
-        startingBid: grams("1"),
-        minimumBidStep: grams("0.1"),
-        endTime: (blockchain.now() - 1) as uint32,
-        highestBid: grams("1"),
-        highestBidder: bidder.address,
-        status: AUCTION_V1_ACTIVE,
-        mintQueryId: 0,
-    });
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "BOUNCE DEPLOY",
+            metadataContent: "bounce-deploy.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: grams("1"),
+            highestBidder: bidder.address,
+            status: AUCTION_V1_ACTIVE,
+            mintQueryId: 0,
+        },
+    );
 
     val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
@@ -45,7 +48,10 @@ get fun `test auction manager: bounced NFT deployment reopens auction for retry`
 
     val finish = manager.sendAny(
         finisher.address,
-        FinishAuctionV1 { queryId: 1, auctionId: 0 }.toCell(),
+        FinishAuctionV1 {
+            queryId: 1,
+            auctionId: 0,
+        }.toCell(),
         { value: grams("0.2"), bounce: true },
     );
     expect(finish).toHaveSuccessfulTx<FinishAuctionV1>({ to: manager.address });
@@ -59,18 +65,21 @@ get fun `test auction manager: bounced empty-index skip restores auction sequenc
     val unavailableCollection = randomAddress("bounce-skip-unavailable-collection");
 
     var auctions: map<uint64, AuctionV1> = [];
-    auctions.set(0, {
-        itemIndex: 0,
-        plate: "BOUNCE SKIP",
-        metadataContent: "bounce-skip.json",
-        startingBid: grams("1"),
-        minimumBidStep: grams("0.1"),
-        endTime: (blockchain.now() - 1) as uint32,
-        highestBid: 0,
-        highestBidder: null,
-        status: AUCTION_V1_ACTIVE,
-        mintQueryId: 0,
-    });
+    auctions.set(
+        0,
+        {
+            itemIndex: 0,
+            plate: "BOUNCE SKIP",
+            metadataContent: "bounce-skip.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: (blockchain.now() - 1) as uint32,
+            highestBid: 0,
+            highestBidder: null,
+            status: AUCTION_V1_ACTIVE,
+            mintQueryId: 0,
+        },
+    );
 
     val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
@@ -91,7 +100,10 @@ get fun `test auction manager: bounced empty-index skip restores auction sequenc
 
     val finish = manager.sendAny(
         finisher.address,
-        FinishAuctionV1 { queryId: 2, auctionId: 0 }.toCell(),
+        FinishAuctionV1 {
+            queryId: 2,
+            auctionId: 0,
+        }.toCell(),
         { value: grams("0.2"), bounce: true },
     );
     expect(finish).toHaveSuccessfulTx<FinishAuctionV1>({ to: manager.address });
