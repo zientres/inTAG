@@ -44,8 +44,16 @@ struct NftItemV12Storage {
     itemIndex: uint64
     collectionAddress: address
     ownerAddress: address
-    content: string
+    content: cell
     initQueryId: uint64
+}
+
+struct NftDataReplyV12 {
+    isInitialized: bool
+    itemIndex: int
+    collectionAddress: address
+    ownerAddress: address? = null
+    content: cell? = null
 }
 
 struct NftItemV12StorageNotInitialized {
