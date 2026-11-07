@@ -20,7 +20,7 @@ fun setupAuctionRegistryTest(): (AuctionManager, Treasury, Treasury) {
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        plateToAuctionId: [],
+        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
