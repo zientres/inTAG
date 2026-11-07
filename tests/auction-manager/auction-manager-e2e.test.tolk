@@ -37,6 +37,8 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
         nftItemCode: build("NftItemV12"),
         royaltyParams: royaltyParams.toCell(),
         pendingDeployments: [],
+        lastSkippedItemIndex: 0,
+        lastSkippedQueryId: 0,
     });
     val deployCollection = collection.deploy(
         owner.address,
