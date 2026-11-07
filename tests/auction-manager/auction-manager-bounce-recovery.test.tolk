@@ -17,8 +17,7 @@ get fun `test auction manager: bounced NFT deployment reopens auction for retry`
         {
             itemIndex: 0,
             plate: "BOUNCE DEPLOY",
-            metadataContent: "bounce-deploy.json",
-            startingBid: grams("1"),
+                        startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("1"),
@@ -36,11 +35,13 @@ get fun `test auction manager: bounced NFT deployment reopens auction for retry`
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions,
+        plateToAuctionId: [],
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        payoutAddresses: [],
+        plateToAuctionId: [],
+        securityFundAddress: null,
     });
     val deploy = manager.deploy(owner.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -69,8 +70,7 @@ get fun `test auction manager: bounced empty-index skip restores auction sequenc
         {
             itemIndex: 0,
             plate: "BOUNCE SKIP",
-            metadataContent: "bounce-skip.json",
-            startingBid: grams("1"),
+                        startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: 0,
@@ -88,11 +88,13 @@ get fun `test auction manager: bounced empty-index skip restores auction sequenc
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions,
+        plateToAuctionId: [],
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        payoutAddresses: [],
+        plateToAuctionId: [],
+        securityFundAddress: null,
     });
     val deploy = manager.deploy(owner.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
