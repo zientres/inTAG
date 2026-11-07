@@ -47,7 +47,7 @@ fun setupNftItemV12Test(): (NftCollectionV12, Treasury, Treasury, NftItemV12) {
         0,
         grams("0.02"),
         owner.address,
-        "0.json",
+        createEmptyCell(),
         { value: grams("0.1"), bounce: true },
     );
 
