@@ -217,12 +217,12 @@ fun onInternalMessage(in: InMessage) {
                 isValidRussianPlate(message.plate)
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
-            val plateKey = StringBuilder
+            val canonicalPlate = StringBuilder
                 .create()
                 .append("RU|")
                 .append(message.plate)
-                .build()
-                .sha256();
+                .build();
+            val plateKey = beginCell().storeStringTail(canonicalPlate).endCell().hash();
             val plateLookup = extra.plateToAuctionId.get(plateKey);
             assert (!plateLookup.isFound) throw AuctionManagerErrors.AuctionAlreadyExists;
 
@@ -409,12 +409,12 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.ItemIndexOutOfSequence;
 
             auction.status = AUCTION_V1_CLOSED_NO_BIDS;
-            val plateKey = StringBuilder
+            val canonicalPlate = StringBuilder
                 .create()
                 .append("RU|")
                 .append(auction.plate)
-                .build()
-                .sha256();
+                .build();
+            val plateKey = beginCell().storeStringTail(canonicalPlate).endCell().hash();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
             storage.extra = extra.toCell();
@@ -498,12 +498,12 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
-            val plateKey = StringBuilder
+            val canonicalPlate = StringBuilder
                 .create()
                 .append("RU|")
                 .append(auction.plate)
-                .build()
-                .sha256();
+                .build();
+            val plateKey = beginCell().storeStringTail(canonicalPlate).endCell().hash();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
             storage.extra = extra.toCell();
