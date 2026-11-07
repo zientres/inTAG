@@ -756,7 +756,7 @@ get fun `test auction manager: beneficiary can claim bounced payout credit`() {
 }
 
 get fun `test auction manager: payout addresses cannot change after first auction`() {
-    val (manager, creator, _, treasury, securityFund) = setupAuctionManagerTest();
+    val (manager, creator, _, _, securityFund) = setupAuctionManagerTest();
     val create = manager.sendAny(
         creator.address,
         CreateAuctionV1 {
