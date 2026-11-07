@@ -29,7 +29,8 @@ fun setupNftCollectionV12Test(): (NftCollectionV12, Treasury, Treasury) {
         nftItemCode: build("NftItemV12"),
         royaltyParams: royaltyParams.toCell(),
         pendingDeployments: [],
-        completedSkips: [],
+        lastSkippedItemIndex: 0,
+        lastSkippedQueryId: 0,
     });
 
     val deploy = collection.deploy(manager.address, { value: grams("0.2"), bounce: false });
