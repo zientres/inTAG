@@ -149,10 +149,10 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     expect(nftData.itemIndex).toEqual(0);
     expect(nftData.ownerAddress!).toEqual(bidder.address);
     expect(nftData.collectionAddress).toEqual(collection.address);
-    val metadataSlice = nftData.content!.beginParse();
+    var metadataSlice = nftData.content!.beginParse();
     expect(metadataSlice.loadUint(8)).toEqual(0);
     val collectionMetadata = collection.getNftContent(0, nftData.content!);
-    val collectionMetadataSlice = collectionMetadata.beginParse();
+    var collectionMetadataSlice = collectionMetadata.beginParse();
     expect(collectionMetadataSlice.loadUint(8)).toEqual(0);
 
     expect(finish).toHaveSuccessfulTx<DeployNftV12>({
