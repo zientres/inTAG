@@ -498,7 +498,12 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
-            val plateKey = StringBuilder.create().append("RU|").append(auction.plate).build().hash();
+            val plateKey = StringBuilder
+                .create()
+                .append("RU|")
+                .append(auction.plate)
+                .build()
+                .hash();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
             storage.extra = extra.toCell();
