@@ -152,15 +152,7 @@
     return queryId === 0n ? 1n : queryId;
   }
 
-  async function getAuctionSummary(auctionId) {
-    const stack = await runGetMethod("get_auction_summary", [["num", "0x" + BigInt(auctionId).toString(16)]]);
-    const item = stack[0];
-    if (!item || item[0] !== "cell" || !item[1]) return null;
-    const cellBoc = typeof item[1] === "string" ? item[1] : item[1].bytes;
-    if (!cellBoc) throw new Error("TON Testnet вернул некорректные данные аукциона.");
-
-    const { Cell } = await loadTonCore();
-    const summary = Cell.fromBase64(cellBoc);
+  async function decodeAuctionSummary(summary) {
     const slice = summary.beginParse();
     const itemIndex = Number(slice.loadUintBig(64));
     const plateCell = slice.loadRef();
@@ -172,24 +164,37 @@
     const endTime = slice.loadUint(32);
     const highestBid = slice.loadCoins();
     const status = slice.loadUint(8);
+    return { auctionId: itemIndex, itemIndex, plate, startingBid, minimumBidStep, endTime, highestBid, status };
+  }
 
-    return { auctionId: Number(auctionId), itemIndex, plate, startingBid, minimumBidStep, endTime, highestBid, status };
+  async function getAuctionSummary(auctionId) {
+    const stack = await runGetMethod("get_auction_summary", [["num", "0x" + BigInt(auctionId).toString(16)]]);
+    const item = stack[0];
+    if (!item || item[0] !== "cell" || !item[1]) return null;
+    const cellBoc = typeof item[1] === "string" ? item[1] : item[1].bytes;
+    if (!cellBoc) throw new Error("TON Testnet вернул некорректные данные аукциона.");
+    const { Cell } = await loadTonCore();
+    return decodeAuctionSummary(Cell.fromBase64(cellBoc));
   }
 
   async function listAuctions() {
-    const stack = await runGetMethod("get_next_item_index");
-    const total = Number(BigInt(stack[0][1]));
-    const first = Math.max(0, total - 100);
+    const stack = await runGetMethod("get_active_auctions");
+    const item = stack[0];
+    if (!item || item[0] !== "cell" || !item[1]) return [];
+    const cellBoc = typeof item[1] === "string" ? item[1] : item[1].bytes;
+    if (!cellBoc) throw new Error("TON Testnet вернул некорректный список аукционов.");
+    const { Cell } = await loadTonCore();
     const auctions = [];
-    for (let offset = first; offset < total; offset += 5) {
-      const batch = [];
-      for (let id = offset; id < Math.min(total, offset + 5); id++) {
-        batch.push(getAuctionSummary(id));
+    let current = Cell.fromBase64(cellBoc);
+    while (current) {
+      const node = current.beginParse();
+      if (node.remainingRefs === 0) break;
+      if (node.remainingRefs !== 2) {
+        throw new Error("Реестр вернул некорректный список аукционов.");
       }
-      const summaries = await Promise.all(batch);
-      for (const auction of summaries) {
-        if (auction && [0, 1, 5].includes(auction.status)) auctions.push(auction);
-      }
+      const summary = node.loadRef();
+      current = node.loadRef();
+      auctions.push(await decodeAuctionSummary(summary));
     }
     return auctions.sort((a, b) => a.endTime - b.endTime);
   }
