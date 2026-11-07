@@ -97,16 +97,16 @@ fun isValidRussianPlate(plate: string): bool {
     if (!isAllowedRussianPlateLetter(mutate value)) {
         return false;
     }
-    if (!isRussianPlateDigit(mutate value) || !isRussianPlateDigit(value) || !isRussianPlateDigit(value)) {
+    if (!isRussianPlateDigit(mutate value) || !isRussianPlateDigit(mutate value) || !isRussianPlateDigit(mutate value)) {
         return false;
     }
-    if (!isAllowedRussianPlateLetter(value) || !isAllowedRussianPlateLetter(value)) {
+    if (!isAllowedRussianPlateLetter(mutate value) || !isAllowedRussianPlateLetter(mutate value)) {
         return false;
     }
-    if (!isRussianPlateDigit(value) || !isRussianPlateDigit(value)) {
+    if (!isRussianPlateDigit(mutate value) || !isRussianPlateDigit(mutate value)) {
         return false;
     }
-    if (byteLength == 12 && !isRussianPlateDigit(value)) {
+    if (byteLength == 12 && !isRussianPlateDigit(mutate value)) {
         return false;
     }
     return value.isEmpty();
@@ -478,7 +478,9 @@ fun onInternalMessage(in: InMessage) {
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
             val plateKey = StringBuilder.create().append("RU|").append(auction.plate).build().hash();
-            storage.plateToAuctionId.delete(plateKey);
+            var plateRegistry = storage.plateRegistry.load();
+            plateRegistry.plateToAuctionId.delete(plateKey);
+            storage.plateRegistry = plateRegistry.toCell();
             storage.lockedFunds = (storage.lockedFunds - auction.highestBid) as coins;
             storage.auctions.set(message.itemIndex, auction);
             storage.nextMintItemIndex += 1;
@@ -637,7 +639,8 @@ get fun get_auction(auctionId: uint64): AuctionV1? {
 
 get fun get_plate_status(plateHash: uint256): int {
     val storage = lazy AuctionManagerStorage.load();
-    val plateLookup = storage.plateToAuctionId.get(plateHash);
+    val plateRegistry = lazy storage.plateRegistry.load();
+    val plateLookup = plateRegistry.plateToAuctionId.get(plateHash);
     if (!plateLookup.isFound) {
         return 0;
     }
