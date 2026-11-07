@@ -405,13 +405,10 @@ get fun `test auction manager: distributes the winning bid only after mint confi
     });
     expect(confirmation).toHaveTx<PayoutTransferV1>({
         from: manager.address,
-        to: treasury.address,
-    });
-    expect(confirmation).toHaveTx<PayoutTransferV1>({
-        from: manager.address,
         to: securityFund.address,
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
+    expect(manager.getTreasuryBalance()).toEqual(grams("3"));
 }
 
 get fun `test auction manager: refunds winner if NFT deployment fails`() {
