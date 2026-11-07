@@ -92,8 +92,9 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     });
 
     val endTime = (testing.getNow() + 10) as uint32;
+    val auctionCreator = testing.treasury("permissionless-auction-creator");
     val createAuction = manager.sendAny(
-        owner.address,
+        auctionCreator.address,
         CreateAuctionV1 {
             queryId: 3,
             plate: "А777АА77",
@@ -104,7 +105,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
         { value: grams("0.05"), bounce: true },
     );
     expect(createAuction).toHaveSuccessfulTx<CreateAuctionV1>({
-        from: owner.address,
+        from: auctionCreator.address,
         to: manager.address,
     });
 
