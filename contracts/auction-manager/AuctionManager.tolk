@@ -118,6 +118,11 @@ fun buildOnchainPlateMetadata(plate: string): cell {
         .append("Digital license plate collectible from TagitalSpace. Russian plate: ")
         .append(plate)
         .build();
+    val attributes = StringBuilder.create()
+        .append("[{\"trait_type\":\"Country\",\"value\":\"Russia\"},{\"trait_type\":\"Plate\",\"value\":\"")
+        .append(plate)
+        .append("\"}]")
+        .build();
     val imageData = StringBuilder.create()
         .append("<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='720' viewBox='0 0 1200 720'><rect width='1200' height='720' fill='#071426'/><rect x='80' y='180' width='1040' height='360' rx='24' fill='white'/><text x='600' y='390' text-anchor='middle' font-family='Arial' font-size='96' font-weight='700' fill='#071426'>")
         .append(plate)
@@ -127,6 +132,7 @@ fun buildOnchainPlateMetadata(plate: string): cell {
     var dict: map<uint256, string_prefixed0x> = [];
     dict.set("name".sha256(), name.prefixWith00());
     dict.set("description".sha256(), description.prefixWith00());
+    dict.set("attributes".sha256(), attributes.prefixWith00());
     dict.set("image".sha256(), "https://zientres.github.io/inTAG/logo.png".prefixWith00());
     dict.set("image_data".sha256(), imageData.prefixWith00());
     return beginCell()
