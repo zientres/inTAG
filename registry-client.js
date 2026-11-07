@@ -156,9 +156,11 @@
     const stack = await runGetMethod("get_auction_summary", [["num", "0x" + BigInt(auctionId).toString(16)]]);
     const item = stack[0];
     if (!item || item[0] !== "cell" || !item[1]) return null;
+    const cellBoc = typeof item[1] === "string" ? item[1] : item[1].bytes;
+    if (!cellBoc) throw new Error("TON Testnet вернул некорректные данные аукциона.");
 
     const { Cell } = await loadTonCore();
-    const summary = Cell.fromBase64(item[1]);
+    const summary = Cell.fromBase64(cellBoc);
     const slice = summary.beginParse();
     const itemIndex = Number(slice.loadUintBig(64));
     const plateCell = slice.loadRef();
