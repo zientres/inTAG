@@ -66,6 +66,10 @@ fun AuctionManager.getRefundCredit(self, beneficiary: address): coins {
     return net.runGetMethod(self.address, "get_refund_credit", [beneficiary]);
 }
 
+fun AuctionManager.getTreasuryBalance(self): coins {
+    return net.runGetMethod(self.address, "get_treasury_balance", []);
+}
+
 fun AuctionManager.getPayoutCredit(self, beneficiary: address): coins {
     return net.runGetMethod(self.address, "get_payout_credit", [beneficiary]);
 }
@@ -74,7 +78,6 @@ fun AuctionManager.sendSetPayoutAddressesV1(
     self,
     from: address,
     queryId: uint64,
-    treasuryAddress: address,
     securityFundAddress: address,
     config: SendParams = {},
 ): SendResultList {
@@ -82,7 +85,23 @@ fun AuctionManager.sendSetPayoutAddressesV1(
         bounce: config.bounce,
         value: config.value,
         dest: self.address,
-        body: SetPayoutAddressesV1 { queryId, treasuryAddress, securityFundAddress },
+        body: SetPayoutAddressesV1 { queryId, securityFundAddress },
+    });
+    return net.send(from, genericMsg);
+}
+
+fun AuctionManager.sendWithdrawTreasuryV1(
+    self,
+    from: address,
+    queryId: uint64,
+    amount: coins,
+    config: SendParams = {},
+): SendResultList {
+    val genericMsg = createMessage({
+        bounce: config.bounce,
+        value: config.value,
+        dest: self.address,
+        body: WithdrawTreasuryV1 { queryId, amount },
     });
     return net.send(from, genericMsg);
 }
