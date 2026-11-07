@@ -42,7 +42,7 @@ get fun `test nft v1.2: confirms item initialization before manager notification
     val (collection, manager, owner) = setupNftCollectionV12Test();
     val queryId = 12001;
     val itemIndex = 0;
-    val content = "0.json";
+    val content = createEmptyCell();
 
     val deploy = collection.sendDeployNftV12(
         manager.address,
@@ -108,7 +108,7 @@ get fun `test nft v1.2: allows manager to retry an unacknowledged notice`() {
         itemIndex,
         grams("0.02"),
         owner.address,
-        "retry.json",
+        createEmptyCell(),
         { value: grams("0.1"), bounce: true },
     );
 
@@ -138,7 +138,7 @@ get fun `test nft v1.2: rejects deployment from non-admin`() {
         0,
         grams("0.02"),
         owner.address,
-        "unauthorized.json",
+        createEmptyCell(),
         { value: grams("0.1"), bounce: true },
     );
 
@@ -182,7 +182,7 @@ get fun `test nft v1.2: only manager can acknowledge deployment`() {
         itemIndex,
         grams("0.02"),
         owner.address,
-        "ack.json",
+        createEmptyCell(),
         { value: grams("0.1"), bounce: true },
     );
 
@@ -209,7 +209,7 @@ get fun `test nft v1.2: rejects zero deployment query id`() {
         0,
         grams("0.02"),
         owner.address,
-        "zero-query-id.json",
+        createEmptyCell(),
         { value: grams("0.1"), bounce: true },
     );
 
