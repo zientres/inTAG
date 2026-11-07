@@ -119,7 +119,7 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.NotFromOwner;
             assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             assert (
-                storage.payoutAddresses.exists(0) && storage.payoutAddresses.exists(1)
+                storage.payoutAddresses.exists(1)
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
             assert (
                 in.valueCoins >= AUCTION_V1_MIN_CREATE_OVERHEAD
