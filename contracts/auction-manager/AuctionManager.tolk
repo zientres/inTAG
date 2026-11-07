@@ -397,7 +397,9 @@ fun onInternalMessage(in: InMessage) {
 
         WithdrawTreasuryV1 => {
             var storage = lazy AuctionManagerStorage.load();
-            assert (in.senderAddress == storage.ownerAddress) throw AuctionManagerErrors.NotFromOwner;
+            assert (
+                in.senderAddress == storage.ownerAddress
+            ) throw AuctionManagerErrors.NotFromOwner;
             assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
             assert (message.amount > 0) throw AuctionManagerErrors.InvalidTreasuryWithdrawal;
             assert (
@@ -406,9 +408,8 @@ fun onInternalMessage(in: InMessage) {
             assert (
                 message.amount <= storage.treasuryBalance
             ) throw AuctionManagerErrors.InsufficientTreasuryBalance;
-            val requiredBalance = (
-                storage.lockedFunds + message.amount + AUCTION_V1_MIN_OPERATIONAL_RESERVE
-            ) as coins;
+            val requiredBalance = (storage.lockedFunds + message.amount +
+                AUCTION_V1_MIN_OPERATIONAL_RESERVE) as coins;
             assert (
                 contract.getOriginalBalance() >= requiredBalance
             ) throw AuctionManagerErrors.InsufficientManagerBalance;
