@@ -237,7 +237,10 @@ get fun `test nft v1.2: admin can skip an unused item index`() {
     expect(result).toHaveTx<NftItemIndexSkippedV12>({
         from: collection.address,
         to: manager.address,
-        body: NftItemIndexSkippedV12 { queryId: 14001, itemIndex: 0 }.toCell(),
+        body: NftItemIndexSkippedV12 {
+            queryId: 14001,
+            itemIndex: 0,
+        }.toCell(),
     });
     expect(collection.getCollectionData().nextItemIndex).toEqual(1);
 
@@ -256,7 +259,10 @@ get fun `test nft v1.2: admin can skip an unused item index`() {
     expect(retry).toHaveTx<NftItemIndexSkippedV12>({
         from: collection.address,
         to: manager.address,
-        body: NftItemIndexSkippedV12 { queryId: 14001, itemIndex: 0 }.toCell(),
+        body: NftItemIndexSkippedV12 {
+            queryId: 14001,
+            itemIndex: 0,
+        }.toCell(),
     });
     expect(collection.getCollectionData().nextItemIndex).toEqual(1);
 }
