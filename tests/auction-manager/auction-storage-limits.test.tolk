@@ -95,7 +95,7 @@ get fun `test auction manager: rejects empty plate`() {
 }
 
 
-get fun `test auction manager: rejects auctions longer than 90 minutes`() {
+get fun `test auction manager: rejects auctions longer than two hours`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
     val result = manager.sendAny(
         creator.address,
@@ -104,7 +104,7 @@ get fun `test auction manager: rejects auctions longer than 90 minutes`() {
             plate: "С555СС77",
             startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
-            endTime: (blockchain.now() + 5401) as uint32,
+            endTime: (blockchain.now() + 7201) as uint32,
         }.toCell(),
         { value: grams("0.05"), bounce: true },
     );
