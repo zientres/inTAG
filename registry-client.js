@@ -37,7 +37,7 @@
   async function hashPlate(country, plate) {
     const canonical = country + "|" + canonicalRussianPlate(plate);
     const { beginCell } = await loadTonCore();
-    const hash = beginCell().storeStringTail(canonical).endCell().hash();
+    const hash = beginCell().storeStringRefTail(canonical).endCell().hash();
     return Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
   }
 
@@ -100,7 +100,7 @@
     const payload = beginCell()
       .storeUint(AUCTION_MANAGER_CREATE_OPCODE, 32)
       .storeUint(queryId, 64)
-      .storeStringTail(canonicalPlate)
+      .storeStringRefTail(canonicalPlate)
       .storeCoins(STARTING_BID)
       .storeCoins(MINIMUM_BID_STEP)
       .storeUint(endTime, 32)
