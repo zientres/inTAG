@@ -69,6 +69,8 @@ fun makeNftCollectionV12Storage(
             royaltyAddress: admin,
         }.toCell(),
         pendingDeployments: [],
+        lastSkippedItemIndex: 0,
+        lastSkippedQueryId: 0,
     };
 }
 
