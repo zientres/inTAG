@@ -60,6 +60,15 @@ get fun `test auction manager: accepts a valid Russian plate format`() {
     expect(manager.getAuction(0)!.plate.calculateLength()).toEqual(11);
 }
 
+get fun `test auction manager: accepts a three-digit region code`() {
+    val (manager, creator, _) = setupAuctionRegistryTest();
+    val plate = "А777АА777";
+    val result = createRegistryAuction(manager, creator, plate, 8);
+
+    expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+    expect(manager.getAuction(0)!.plate.calculateLength()).toEqual(12);
+}
+
 get fun `test auction manager: rejects non-Russian plate format`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
     val plate = "А777АА77";
