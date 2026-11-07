@@ -20,12 +20,15 @@ fun setupAuctionRegistryTest(): (AuctionManager, Treasury, Treasury) {
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFund.address }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFund.address,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        
+
     });
     val deploy = manager.deploy(owner.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
