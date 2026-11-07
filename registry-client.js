@@ -58,7 +58,7 @@
     if (
       !data.ok ||
       !result ||
-      result.exit_code !== 0 ||
+      Number(result.exit_code) !== 0 ||
       !Array.isArray(result.stack) ||
       !result.stack.length
     ) {
