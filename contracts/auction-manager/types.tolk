@@ -19,7 +19,6 @@ const AUCTION_V1_MIN_OPERATIONAL_RESERVE = 200000000
 struct AuctionV1 {
     itemIndex: uint64
     plate: string
-    metadataContent: string
     startingBid: coins
     minimumBidStep: coins
     endTime: uint32
@@ -41,7 +40,8 @@ struct AuctionManagerStorage {
     payoutCredits: map<address, coins>
     treasuryBalance: coins
     lockedFunds: coins
-    payoutAddresses: map<uint8, address>
+    plateToAuctionId: map<uint256, uint64>
+    securityFundAddress: address?
 }
 
 fun AuctionManagerStorage.load(): AuctionManagerStorage {
