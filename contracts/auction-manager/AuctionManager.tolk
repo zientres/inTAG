@@ -71,12 +71,15 @@ fun sendMintAck(collectionAddress: address, queryId: uint64, itemIndex: uint64) 
 fun isAllowedRussianPlateLetter(mutate value: slice): bool {
     val first = value.loadUint(8);
     val second = value.loadUint(8);
-    return first == 0xD0 && (
-        second == 0x90 || second == 0x92 || second == 0x95 ||
-        second == 0x9A || second == 0x9C || second == 0x9D ||
-        second == 0x9E || second == 0xA0 || second == 0xA1 ||
-        second == 0xA2 || second == 0xA3 || second == 0xA5
-    );
+    return first == 0xD0 &&
+        (second == 0x90 || second == 0x92 || second == 0x95 || second == 0x9A || second == 0x9C ||
+            second == 0x9D ||
+            second == 0x9E ||
+            second == 0xA0 ||
+            second == 0xA1 ||
+            second == 0xA2 ||
+            second == 0xA3 ||
+            second == 0xA5);
 }
 
 fun isRussianPlateDigit(mutate value: slice): bool {
@@ -97,7 +100,10 @@ fun isValidRussianPlate(plate: string): bool {
     if (!isAllowedRussianPlateLetter(mutate value)) {
         return false;
     }
-    if (!isRussianPlateDigit(mutate value) || !isRussianPlateDigit(mutate value) || !isRussianPlateDigit(mutate value)) {
+    if (
+        !isRussianPlateDigit(mutate value) || !isRussianPlateDigit(mutate value) ||
+        !isRussianPlateDigit(mutate value)
+    ) {
         return false;
     }
     if (!isAllowedRussianPlateLetter(mutate value) || !isAllowedRussianPlateLetter(mutate value)) {
@@ -114,16 +120,19 @@ fun isValidRussianPlate(plate: string): bool {
 
 fun buildOnchainPlateMetadata(plate: string): cell {
     val name = StringBuilder.create().append("TagitalSpace — ").append(plate).build();
-    val description = StringBuilder.create()
+    val description = StringBuilder
+        .create()
         .append("Digital license plate collectible from TagitalSpace. Russian plate: ")
         .append(plate)
         .build();
-    val attributes = StringBuilder.create()
+    val attributes = StringBuilder
+        .create()
         .append("[{\"trait_type\":\"Country\",\"value\":\"Russia\"},{\"trait_type\":\"Plate\",\"value\":\"")
         .append(plate)
         .append("\"}]")
         .build();
-    val imageData = StringBuilder.create()
+    val imageData = StringBuilder
+        .create()
         .append("<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='720' viewBox='0 0 1200 720'><rect width='1200' height='720' fill='#071426'/><rect x='80' y='180' width='1040' height='360' rx='24' fill='white'/><text x='600' y='390' text-anchor='middle' font-family='Arial' font-size='96' font-weight='700' fill='#071426'>")
         .append(plate)
         .append("</text><text x='600' y='610' text-anchor='middle' font-family='Arial' font-size='28' letter-spacing='6' fill='#a8b8cc'>TAGITALSPACE</text></svg>")
@@ -135,10 +144,7 @@ fun buildOnchainPlateMetadata(plate: string): cell {
     dict.set("attributes".sha256(), attributes.prefixWith00());
     dict.set("image".sha256(), "https://zientres.github.io/inTAG/logo.png".prefixWith00());
     dict.set("image_data".sha256(), imageData.prefixWith00());
-    return beginCell()
-        .storeUint(0, 8)
-        .storeDict(dict.toLowLevelDict())
-        .endCell();
+    return beginCell().storeUint(0, 8).storeDict(dict.toLowLevelDict()).endCell();
 }
 
 fun addRefundCredit(mutate storage: AuctionManagerStorage, beneficiary: address, amount: coins) {
@@ -211,7 +217,12 @@ fun onInternalMessage(in: InMessage) {
                 isValidRussianPlate(message.plate)
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
-            val plateKey = StringBuilder.create().append("RU|").append(message.plate).build().hash();
+            val plateKey = StringBuilder
+                .create()
+                .append("RU|")
+                .append(message.plate)
+                .build()
+                .hash();
             val plateLookup = extra.plateToAuctionId.get(plateKey);
             assert (!plateLookup.isFound) throw AuctionManagerErrors.AuctionAlreadyExists;
 
@@ -398,7 +409,12 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.ItemIndexOutOfSequence;
 
             auction.status = AUCTION_V1_CLOSED_NO_BIDS;
-            val plateKey = StringBuilder.create().append("RU|").append(auction.plate).build().hash();
+            val plateKey = StringBuilder
+                .create()
+                .append("RU|")
+                .append(auction.plate)
+                .build()
+                .hash();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
             storage.extra = extra.toCell();
@@ -434,7 +450,9 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
             val extra = storage.extra.load();
-            assert (extra.securityFundAddress != null) throw AuctionManagerErrors.InvalidPayoutConfiguration;
+            assert (
+                extra.securityFundAddress != null
+            ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
             val securityFund = extra.securityFundAddress;
 
             auction.status = AUCTION_V1_CLOSED_PAID;
