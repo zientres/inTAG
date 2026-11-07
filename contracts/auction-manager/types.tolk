@@ -12,6 +12,8 @@ const AUCTION_V1_COLLECTION_DEPLOY_VALUE = 100000000
 const AUCTION_V1_ITEM_DEPLOY_VALUE = 20000000
 const AUCTION_V1_MAX_PLATE_BYTES = 64
 const AUCTION_V1_MAX_METADATA_CONTENT_BYTES = 256
+const AUCTION_V1_MIN_WITHDRAW_OVERHEAD = 50000000
+const AUCTION_V1_MIN_OPERATIONAL_RESERVE = 200000000
 
 struct AuctionV1 {
     itemIndex: uint64
@@ -36,6 +38,8 @@ struct AuctionManagerStorage {
     auctions: map<uint64, AuctionV1>
     refundCredits: map<address, coins>
     payoutCredits: map<address, coins>
+    treasuryBalance: coins
+    lockedFunds: coins
     payoutAddresses: map<uint8, address>
 }
 
