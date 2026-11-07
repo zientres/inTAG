@@ -100,7 +100,7 @@
     const payload = beginCell()
       .storeUint(AUCTION_MANAGER_CREATE_OPCODE, 32)
       .storeUint(queryId, 64)
-      .storeRef(beginCell().storeStringTail(canonicalPlate).endCell())
+      .storeStringTail(canonicalPlate)
       .storeCoins(STARTING_BID)
       .storeCoins(MINIMUM_BID_STEP)
       .storeUint(endTime, 32)
