@@ -9,8 +9,6 @@ import "@wrappers/NftItemV12.gen"
 
 import "@contracts/auction-manager/messages"
 import "@contracts/auction-manager/types"
-import "@contracts/nft-v1.1/messages"
-import "@contracts/nft-v1.1/types"
 import "@contracts/nft-v1.2/messages"
 import "@contracts/nft-v1.2/types"
 
