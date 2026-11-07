@@ -222,7 +222,7 @@ fun onInternalMessage(in: InMessage) {
                 .append("RU|")
                 .append(message.plate)
                 .build()
-                .hash();
+                .sha256();
             val plateLookup = extra.plateToAuctionId.get(plateKey);
             assert (!plateLookup.isFound) throw AuctionManagerErrors.AuctionAlreadyExists;
 
@@ -414,7 +414,7 @@ fun onInternalMessage(in: InMessage) {
                 .append("RU|")
                 .append(auction.plate)
                 .build()
-                .hash();
+                .sha256();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
             storage.extra = extra.toCell();
@@ -503,7 +503,7 @@ fun onInternalMessage(in: InMessage) {
                 .append("RU|")
                 .append(auction.plate)
                 .build()
-                .hash();
+                .sha256();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
             storage.extra = extra.toCell();
