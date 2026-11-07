@@ -651,6 +651,29 @@ get fun get_auction(auctionId: uint64): AuctionV1? {
     return lookup.loadValue();
 }
 
+get fun get_next_item_index(): uint64 {
+    val storage = lazy AuctionManagerStorage.load();
+    return storage.nextItemIndex;
+}
+
+get fun get_auction_summary(auctionId: uint64): cell? {
+    val storage = lazy AuctionManagerStorage.load();
+    val lookup = storage.auctions.get(auctionId);
+    if (!lookup.isFound) {
+        return null;
+    }
+    val auction = lookup.loadValue();
+    return beginCell()
+        .storeUint(auction.itemIndex, 64)
+        .storeString(auction.plate)
+        .storeCoins(auction.startingBid)
+        .storeCoins(auction.minimumBidStep)
+        .storeUint(auction.endTime, 32)
+        .storeCoins(auction.highestBid)
+        .storeUint(auction.status, 8)
+        .endCell();
+}
+
 get fun get_plate_status(plateHash: uint256): int {
     val storage = lazy AuctionManagerStorage.load();
     val extra = lazy storage.extra.load();
