@@ -1604,7 +1604,6 @@ get fun `test auction manager: bounced security fund payout becomes recoverable 
     expect(manager.getPayoutCredit(unavailableSecurityFund)).toEqual(grams("2"));
 }
 
-
 get fun `test auction manager: waits for collection skip confirmation and handles duplicate ACK`() {
     val owner = testing.treasury("skip-ack-owner");
     val collection = testing.treasury("skip-ack-collection");
@@ -1678,7 +1677,10 @@ get fun `test auction manager: waits for collection skip confirmation and handle
     expect(retry).toHaveTx<SkipNftItemIndexV12>({
         from: manager.address,
         to: collection.address,
-        body: SkipNftItemIndexV12 { queryId: 10, itemIndex: 0 }.toCell(),
+        body: SkipNftItemIndexV12 {
+            queryId: 10,
+            itemIndex: 0,
+        }.toCell(),
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_SKIP);
 
@@ -1695,7 +1697,10 @@ get fun `test auction manager: waits for collection skip confirmation and handle
 
     val replay = manager.sendAny(
         collection.address,
-        NftItemIndexSkippedV12 { queryId: 10, itemIndex: 0 }.toCell(),
+        NftItemIndexSkippedV12 {
+            queryId: 10,
+            itemIndex: 0,
+        }.toCell(),
         { value: grams("0.03"), bounce: true },
     );
     expect(replay).toHaveSuccessfulTx<NftItemIndexSkippedV12>({ to: manager.address });
