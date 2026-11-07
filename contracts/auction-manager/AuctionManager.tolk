@@ -443,7 +443,7 @@ fun onInternalMessage(in: InMessage) {
             var queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
             storage.save();
-            sendPayout(message.itemIndex, storage.ownerAddress, creatorShare, queryId);
+            sendPayout(message.itemIndex, storage.ownerAddress, ownerShare, queryId);
 
             queryId = storage.nextQueryId;
             storage.nextQueryId += 1;
