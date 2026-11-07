@@ -2,7 +2,7 @@ struct (0x54474901) NftItemInitAtDeploymentV12 {
     queryId: uint64
     itemIndex: uint64
     ownerAddress: address
-    content: string
+    content: cell
 }
 
 struct (0x54474902) NftItemInitializedV12 {
