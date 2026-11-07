@@ -243,7 +243,9 @@ get fun `test auction manager: allows finishing at the exact deadline`() {
         to: collection.address,
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_SKIP);
-    expect(manager.getPlateStatus(beginCell().storeString("RU|А111АА77").endCell().hash())).toEqual(1);
+    expect(
+        manager.getPlateStatus(beginCell().storeString("RU|А111АА77").endCell().hash()),
+    ).toEqual(1);
 
     val ack = manager.sendAny(
         collection.address,
@@ -326,7 +328,9 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
     );
     expect(ack).toHaveSuccessfulTx<NftItemIndexSkippedV12>({ to: manager.address });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_NO_BIDS);
-    expect(manager.getPlateStatus(beginCell().storeString("RU|А111АА77").endCell().hash())).toEqual(0);
+    expect(
+        manager.getPlateStatus(beginCell().storeString("RU|А111АА77").endCell().hash()),
+    ).toEqual(0);
 
     val relistUser = testing.treasury("empty-auction-relist-user");
     val relist = manager.sendAny(
@@ -342,7 +346,9 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
     );
     expect(relist).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
     expect(manager.getAuction(1)!.itemIndex).toEqual(1);
-    expect(manager.getPlateStatus(beginCell().storeString("RU|А111АА77").endCell().hash())).toEqual(1);
+    expect(
+        manager.getPlateStatus(beginCell().storeString("RU|А111АА77").endCell().hash()),
+    ).toEqual(1);
 }
 
 get fun `test auction manager: refunds the previous leader immediately`() {
@@ -458,7 +464,9 @@ get fun `test auction manager: distributes the winning bid only after mint confi
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
     expect(manager.getTreasuryBalance()).toEqual(grams("3"));
-    expect(manager.getPlateStatus(beginCell().storeString("RU|М222ММ77").endCell().hash())).toEqual(2);
+    expect(
+        manager.getPlateStatus(beginCell().storeString("RU|М222ММ77").endCell().hash()),
+    ).toEqual(2);
 
     val duplicate = manager.sendAny(
         testing.treasury("paid-plate-duplicate-user").address,
@@ -538,7 +546,9 @@ get fun `test auction manager: refunds winner if NFT deployment fails`() {
         to: bidder.address,
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_MINT_FAILED);
-    expect(manager.getPlateStatus(beginCell().storeString("RU|С333СС77").endCell().hash())).toEqual(0);
+    expect(
+        manager.getPlateStatus(beginCell().storeString("RU|С333СС77").endCell().hash()),
+    ).toEqual(0);
 }
 
 get fun `test auction manager: bounced outbid refund becomes recoverable credit`() {
