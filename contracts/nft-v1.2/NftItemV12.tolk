@@ -1,7 +1,6 @@
 import "@contracts/nft-v1.1/errors"
 import "@contracts/nft-v1.1/fees-management"
 import "@contracts/nft-v1.1/messages"
-import "@contracts/nft-v1.1/types"
 import "@contracts/nft-v1.2/messages"
 import "@contracts/nft-v1.2/types"
 
