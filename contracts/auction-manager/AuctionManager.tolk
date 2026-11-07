@@ -119,7 +119,7 @@ fun buildOnchainPlateMetadata(plate: string): cell {
         .append(plate)
         .build();
     val image = StringBuilder.create()
-        .append("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1200'%20height='720'%20viewBox='0%200%201200%20720'%3E%3Crect%20width='1200'%20height='720'%20fill='%23071426'/%3E%3Crect%20x='80'%20y='180'%20width='1040'%20height='360'%20rx='24'%20fill='white'/%3E%3Ctext%20x='600'%20y='390'%20text-anchor='middle'%20font-family='Arial'%20font-size='96'%20font-weight='700'%20fill='%23071426'>")
+        .append("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1200'%20height='720'%20viewBox='0%200%201200%20720'%3E%3Crect%20width='1200'%20height='720'%20fill='%23071426'/%3E%3Crect%20x='80'%20y='180'%20width='1040'%20height='360'%20rx='24'%20fill='white'/%3E%3Ctext%20x='600'%20y='390'%20text-anchor='middle'%20font-family='Arial'%20font-size='96'%20font-weight='700'%20fill='%23071426'>")
         .append(plate)
         .append("%3C/text%3E%3Ctext%20x='600'%20y='610'%20text-anchor='middle'%20font-family='Arial'%20font-size='28'%20letter-spacing='6'%20fill='%23a8b8cc'>TAGITALSPACE%3C/text%3E%3C/svg%3E")
         .build();
