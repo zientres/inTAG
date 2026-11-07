@@ -212,7 +212,7 @@
 
   async function placeBid(auctionId, amountTon) {
     const amount = String(amountTon).trim();
-    if (!/^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,9})?$/.test(amount)) {
+    if (!/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,9})?$/.test(amount)) {
       throw new Error("Введите сумму ставки в TON, максимум 9 знаков после запятой.");
     }
     const [whole, fraction = ""] = amount.split(".");
