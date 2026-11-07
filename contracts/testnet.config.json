@@ -15,11 +15,11 @@
   },
   "deployment": {
     "enabled": false,
-    "reason": "NFT collection source, reference tests, and Testnet deployment script are prepared. Enable deployment only after Acton build/tests pass and collection metadata URLs are supplied."
+    "reason": "NFT collection source and Testnet deployment scripts are prepared. Enable deployment only after Acton build/tests pass and the collection name, description, and logo URL are reviewed."
   },
   "auction_manager": null,
   "collection": null,
-  "note": "Set auction_manager only after the Testnet Auction Manager contract is deployed and its get_plate_status(uint256) getter is verified.",
+  "note": "Set auction_manager after deploying the permissionless Auction Manager with the matching NFT Collection v1.2. The get_plate_status(uint256) getter is implemented for the Russian plate registry.",
   "collection_admin_before_auction_manager": "creator",
   "royalty_recipient": "creator"
 }
