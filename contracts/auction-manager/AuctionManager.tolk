@@ -68,6 +68,50 @@ fun sendMintAck(collectionAddress: address, queryId: uint64, itemIndex: uint64) 
     ackMessage.send(SEND_MODE_CARRY_ALL_REMAINING_MESSAGE_VALUE);
 }
 
+fun isAllowedRussianPlateLetter(mutate value: slice): bool {
+    val first = value.loadUint(8);
+    val second = value.loadUint(8);
+    return first == 0xD0 && (
+        second == 0x90 || second == 0x92 || second == 0x95 ||
+        second == 0x9A || second == 0x9C || second == 0x9D ||
+        second == 0x9E || second == 0xA0 || second == 0xA1 ||
+        second == 0xA2 || second == 0xA3 || second == 0xA5
+    );
+}
+
+fun isRussianPlateDigit(mutate value: slice): bool {
+    val digit = value.loadUint(8);
+    return digit >= 0x30 && digit <= 0x39;
+}
+
+fun isValidRussianPlate(plate: string): bool {
+    if (plate.depth() != 0) {
+        return false;
+    }
+    val byteLength = plate.calculateLength();
+    if (byteLength != 11 && byteLength != 12) {
+        return false;
+    }
+
+    var value = plate.beginParse();
+    if (!isAllowedRussianPlateLetter(value)) {
+        return false;
+    }
+    if (!isRussianPlateDigit(value) || !isRussianPlateDigit(value) || !isRussianPlateDigit(value)) {
+        return false;
+    }
+    if (!isAllowedRussianPlateLetter(value) || !isAllowedRussianPlateLetter(value)) {
+        return false;
+    }
+    if (!isRussianPlateDigit(value) || !isRussianPlateDigit(value)) {
+        return false;
+    }
+    if (byteLength == 12 && !isRussianPlateDigit(value)) {
+        return false;
+    }
+    return value.remainingBitsCount() == 0 && value.remainingRefsCount() == 0;
+}
+
 fun buildOnchainPlateMetadata(plate: string): cell {
     val name = StringBuilder.create().append("TagitalSpace — ").append(plate).build();
     val description = StringBuilder.create()
@@ -153,7 +197,8 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
             val plateLength = message.plate.calculateLength();
             assert (
-                plateLength > 0 && plateLength <= AUCTION_V1_MAX_PLATE_BYTES
+                plateLength > 0 && plateLength <= AUCTION_V1_MAX_PLATE_BYTES &&
+                isValidRussianPlate(message.plate)
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
             val plateKey = StringBuilder.create().append("RU|").append(message.plate).build().hash();
