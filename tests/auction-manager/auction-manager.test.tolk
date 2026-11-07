@@ -1235,7 +1235,6 @@ get fun `test auction manager: duplicate mint failure does not refund twice`() {
     expect(manager.getRefundCredit(unavailableWinner)).toEqual(grams("5"));
 }
 
-
 get fun `test auction manager: owner can withdraw part of treasury`() {
     val owner = testing.treasury("treasury-withdraw-owner");
     val collection = testing.treasury("treasury-withdraw-collection");
@@ -1260,7 +1259,10 @@ get fun `test auction manager: owner can withdraw part of treasury`() {
 
     val withdrawal = manager.sendAny(
         owner.address,
-        WithdrawTreasuryV1 { queryId: 1, amount: grams("2") }.toCell(),
+        WithdrawTreasuryV1 {
+            queryId: 1,
+            amount: grams("2"),
+        }.toCell(),
         { value: grams("0.05"), bounce: true },
     );
     expect(withdrawal).toHaveSuccessfulTx<WithdrawTreasuryV1>({ to: manager.address });
@@ -1295,7 +1297,10 @@ get fun `test auction manager: owner can withdraw all remaining treasury in a la
 
     val first = manager.sendAny(
         owner.address,
-        WithdrawTreasuryV1 { queryId: 1, amount: grams("2") }.toCell(),
+        WithdrawTreasuryV1 {
+            queryId: 1,
+            amount: grams("2"),
+        }.toCell(),
         { value: grams("0.05"), bounce: true },
     );
     expect(first).toHaveSuccessfulTx<WithdrawTreasuryV1>({ to: manager.address });
@@ -1303,7 +1308,10 @@ get fun `test auction manager: owner can withdraw all remaining treasury in a la
 
     val second = manager.sendAny(
         owner.address,
-        WithdrawTreasuryV1 { queryId: 2, amount: grams("3") }.toCell(),
+        WithdrawTreasuryV1 {
+            queryId: 2,
+            amount: grams("3"),
+        }.toCell(),
         { value: grams("0.05"), bounce: true },
     );
     expect(second).toHaveSuccessfulTx<WithdrawTreasuryV1>({ to: manager.address });
@@ -1338,7 +1346,10 @@ get fun `test auction manager: treasury withdrawal cannot use funds locked for b
 
     val withdrawal = manager.sendAny(
         owner.address,
-        WithdrawTreasuryV1 { queryId: 1, amount: grams("2") }.toCell(),
+        WithdrawTreasuryV1 {
+            queryId: 1,
+            amount: grams("2"),
+        }.toCell(),
         { value: grams("0.05"), bounce: true },
     );
     expect(withdrawal).toHaveFailedTx<WithdrawTreasuryV1>({
@@ -1374,7 +1385,10 @@ get fun `test auction manager: treasury withdrawal is owner-only`() {
 
     val withdrawal = manager.sendAny(
         attacker.address,
-        WithdrawTreasuryV1 { queryId: 1, amount: grams("1") }.toCell(),
+        WithdrawTreasuryV1 {
+            queryId: 1,
+            amount: grams("1"),
+        }.toCell(),
         { value: grams("0.05"), bounce: true },
     );
     expect(withdrawal).toHaveFailedTx<WithdrawTreasuryV1>({
@@ -1410,7 +1424,10 @@ get fun `test auction manager: bounced treasury withdrawal restores treasury acc
 
     val withdrawal = manager.sendAny(
         unavailableOwner,
-        WithdrawTreasuryV1 { queryId: 1, amount: grams("1") }.toCell(),
+        WithdrawTreasuryV1 {
+            queryId: 1,
+            amount: grams("1"),
+        }.toCell(),
         { value: grams("0.05"), bounce: true },
     );
     expect(withdrawal).toHaveSuccessfulTx<WithdrawTreasuryV1>({ to: manager.address });
