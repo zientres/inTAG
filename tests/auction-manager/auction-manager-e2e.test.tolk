@@ -20,7 +20,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     val securityFund = testing.treasury("e2e-auction-security");
     val finisher = testing.treasury("e2e-auction-finisher");
 
-    // Deploy collection first; its admin is changed to AuctionManager after
+// Deploy collection first; its admin is changed to AuctionManager after
     // the manager address has been derived from the collection address.
     val royaltyParams = RoyaltyParams {
         numerator: 2,
@@ -46,7 +46,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     );
     expect(deployCollection).toHaveSuccessfulDeploy({ to: collection.address });
 
-    val securityFundAddressForTest: address? = null;
+val securityFundAddressForTest: address? = null;
     val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
@@ -64,14 +64,14 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
             securityFundAddress: securityFundAddressForTest,
         }.toCell(),
 
-    });
+});
     val deployManager = manager.deploy(
         owner.address,
         { value: grams("0.2"), bounce: false },
     );
     expect(deployManager).toHaveSuccessfulDeploy({ to: manager.address });
 
-    val changeAdmin = collection.sendChangeCollectionAdmin(
+val changeAdmin = collection.sendChangeCollectionAdmin(
         owner.address,
         1,
         manager.address,
@@ -83,7 +83,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     });
     expect(collection.getCollectionData().adminAddress).toEqual(manager.address);
 
-    val configurePayout = manager.sendSetPayoutAddressesV1(
+val configurePayout = manager.sendSetPayoutAddressesV1(
         owner.address,
         2,
         securityFund.address,
@@ -94,7 +94,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
         to: manager.address,
     });
 
-    val endTime = (testing.getNow() + 10) as uint32;
+val endTime = (testing.getNow() + 10) as uint32;
     val auctionCreator = testing.treasury("permissionless-auction-creator");
     val createAuction = manager.sendAny(
         auctionCreator.address,
@@ -112,7 +112,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
         to: manager.address,
     });
 
-    val bid = manager.sendAny(
+val bid = manager.sendAny(
         bidder.address,
         PlaceBidV1 {
             queryId: 4,
@@ -128,7 +128,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     expect(manager.getAuction(0)!.highestBid).toEqual(grams("10"));
     expect(manager.getAuction(0)!.highestBidder!).toEqual(bidder.address);
 
-    testing.setNow(endTime);
+testing.setNow(endTime);
     val finish = manager.sendAny(
         finisher.address,
         FinishAuctionV1 {
@@ -143,7 +143,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
 
-    val nftAddress = collection.getNftAddressByIndex(0);
+val nftAddress = collection.getNftAddressByIndex(0);
     val nftItem = NftItemV12.fromAddress(nftAddress);
     val nftData = nftItem.getNftData();
     expect(nftData.isInitialized).toBeTrue();
@@ -156,7 +156,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     val collectionMetadataSlice = collectionMetadata.beginParse();
     expect(collectionMetadataSlice.loadUint(8)).toEqual(0);
 
-    expect(finish).toHaveSuccessfulTx<DeployNftV12>({
+expect(finish).toHaveSuccessfulTx<DeployNftV12>({
         from: manager.address,
         to: collection.address,
     });
@@ -181,7 +181,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
         to: collection.address,
     });
 
-    expect(manager.getTreasuryBalance()).toEqual(grams("3"));
+expect(manager.getTreasuryBalance()).toEqual(grams("3"));
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_PAID);
     expect(collection.getPendingNftDeployment(0)).toBeNull();
 }
