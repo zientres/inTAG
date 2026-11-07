@@ -61,8 +61,12 @@ Getter возвращает:
 acton fmt
 acton build
 acton check --output-format github
-acton test tests/nft-v1.2
-acton test tests/auction-manager
+acton test tests/nft-v1.2/nft-collection-v12.test.tolk
+acton test tests/nft-v1.2/nft-item-v12.test.tolk
+acton test tests/auction-manager/auction-manager.test.tolk
+acton test tests/auction-manager/auction-manager-e2e.test.tolk
+acton test tests/auction-manager/auction-manager-bounce-recovery.test.tolk
+acton test tests/auction-manager/auction-storage-limits.test.tolk
 ```
 
 Первоначальная последовательность развёртывания:
