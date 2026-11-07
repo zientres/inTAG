@@ -21,7 +21,10 @@ fun main() {
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: null }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: null,
+        }.toCell(),
     });
 
     val result = manager.deploy(
