@@ -71,7 +71,7 @@ get fun `test auction manager: accepts a three-digit region code`() {
 
 get fun `test auction manager: rejects non-Russian plate format`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
-    val plate = "А777АА77";
+    val plate = "A777AA77";
     val result = createRegistryAuction(manager, creator, plate, 2);
 
     expect(result).toHaveFailedTx<CreateAuctionV1>({
@@ -119,7 +119,7 @@ get fun `test auction manager: rejects auctions longer than two hours`() {
 
 get fun `test auction manager: any wallet can create an auction and registry reports it`() {
     val (manager, creator, _) = setupAuctionRegistryTest();
-    val plate = "A777AA77";
+    val plate = "А777АА77";
     val result = createRegistryAuction(manager, creator, plate, 4);
 
     expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
