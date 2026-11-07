@@ -7,46 +7,42 @@ import "@contracts/auction-manager/errors"
 import "@contracts/auction-manager/messages"
 import "@contracts/auction-manager/types"
 
-fun setupAuctionStorageLimitsTest(): (AuctionManager, Treasury) {
-    val creator = testing.treasury("storage-limit-creator");
-    val collection = testing.treasury("storage-limit-collection");
-    val treasury = testing.treasury("storage-limit-treasury");
-    val securityFund = testing.treasury("storage-limit-security");
-    var payoutAddresses: map<uint8, address> = [];
-    payoutAddresses.set(0, treasury.address);
-    payoutAddresses.set(1, securityFund.address);
+fun setupAuctionRegistryTest(): (AuctionManager, Treasury, Treasury) {
+    val owner = testing.treasury("registry-owner");
+    val creator = testing.treasury("registry-user");
+    val collection = testing.treasury("registry-collection");
+    val securityFund = testing.treasury("registry-security");
     val manager = AuctionManager.fromStorage({
-        ownerAddress: creator.address,
+        ownerAddress: owner.address,
         collectionAddress: collection.address,
         payoutConfigLocked: false,
         nextItemIndex: 0,
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
+        plateToAuctionId: [],
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        payoutAddresses,
+        securityFundAddress: securityFund.address,
     });
-    val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
+    val deploy = manager.deploy(owner.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
-    return (manager, creator);
+    return (manager, creator, owner);
 }
 
-fun createAuctionWithContent(
+fun createRegistryAuction(
     manager: AuctionManager,
     creator: Treasury,
     plate: string,
-    metadataContent: string,
+    queryId: uint64,
 ): SendResultList {
     return manager.sendAny(
         creator.address,
         CreateAuctionV1 {
-            queryId: 1,
-            itemIndex: 0,
+            queryId,
             plate,
-            metadataContent,
             startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
@@ -55,45 +51,19 @@ fun createAuctionWithContent(
     );
 }
 
-get fun `test auction manager: accepts maximum configured content lengths`() {
-    val (manager, creator) = setupAuctionStorageLimitsTest();
-    val result = createAuctionWithContent(
-        manager,
-        creator,
-        "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
-        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
-    );
+get fun `test auction manager: accepts maximum configured plate length`() {
+    val (manager, creator, _) = setupAuctionRegistryTest();
+    val plate = "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP";
+    val result = createRegistryAuction(manager, creator, plate, 1);
 
     expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
     expect(manager.getAuction(0)!.plate.calculateLength()).toEqual(64);
-    expect(manager.getAuction(0)!.metadataContent.calculateLength()).toEqual(256);
 }
 
 get fun `test auction manager: rejects plate longer than 64 bytes`() {
-    val (manager, creator) = setupAuctionStorageLimitsTest();
-    val result = createAuctionWithContent(
-        manager,
-        creator,
-        "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
-        "0.json",
-    );
-
-    expect(result).toHaveFailedTx<CreateAuctionV1>({
-        from: creator.address,
-        to: manager.address,
-        exitCode: AuctionManagerErrors.InvalidAuctionParameters,
-    });
-    expect(manager.getAuction(0)).toEqual(null);
-}
-
-get fun `test auction manager: rejects metadata path longer than 256 bytes`() {
-    val (manager, creator) = setupAuctionStorageLimitsTest();
-    val result = createAuctionWithContent(
-        manager,
-        creator,
-        "A777AA 77",
-        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
-    );
+    val (manager, creator, _) = setupAuctionRegistryTest();
+    val plate = "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP";
+    val result = createRegistryAuction(manager, creator, plate, 2);
 
     expect(result).toHaveFailedTx<CreateAuctionV1>({
         from: creator.address,
@@ -104,8 +74,8 @@ get fun `test auction manager: rejects metadata path longer than 256 bytes`() {
 }
 
 get fun `test auction manager: rejects empty plate`() {
-    val (manager, creator) = setupAuctionStorageLimitsTest();
-    val result = createAuctionWithContent(manager, creator, "", "0.json");
+    val (manager, creator, _) = setupAuctionRegistryTest();
+    val result = createRegistryAuction(manager, creator, "", 3);
 
     expect(result).toHaveFailedTx<CreateAuctionV1>({
         from: creator.address,
@@ -115,14 +85,28 @@ get fun `test auction manager: rejects empty plate`() {
     expect(manager.getAuction(0)).toEqual(null);
 }
 
-get fun `test auction manager: rejects empty metadata path`() {
-    val (manager, creator) = setupAuctionStorageLimitsTest();
-    val result = createAuctionWithContent(manager, creator, "A777AA 77", "");
+get fun `test auction manager: any wallet can create an auction and registry reports it`() {
+    val (manager, creator, _) = setupAuctionRegistryTest();
+    val plate = "A777AA77";
+    val result = createRegistryAuction(manager, creator, plate, 4);
 
-    expect(result).toHaveFailedTx<CreateAuctionV1>({
-        from: creator.address,
+    expect(result).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+    val plateHash = StringBuilder.create().append("RU|").append(plate).build().hash();
+    val status = net.runGetMethod(manager.address, "get_plate_status", [plateHash]);
+    expect(status).toEqual(1);
+}
+
+get fun `test auction manager: rejects duplicate plate auctions from different wallets`() {
+    val (manager, creator, _) = setupAuctionRegistryTest();
+    val secondCreator = testing.treasury("registry-second-user");
+    val plate = "B123BB77";
+    val first = createRegistryAuction(manager, creator, plate, 5);
+    expect(first).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+
+    val duplicate = createRegistryAuction(manager, secondCreator, plate, 6);
+    expect(duplicate).toHaveFailedTx<CreateAuctionV1>({
+        from: secondCreator.address,
         to: manager.address,
-        exitCode: AuctionManagerErrors.InvalidAuctionParameters,
+        exitCode: AuctionManagerErrors.AuctionAlreadyExists,
     });
-    expect(manager.getAuction(0)).toEqual(null);
 }
