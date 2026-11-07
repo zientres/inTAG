@@ -46,7 +46,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
     );
     expect(deployCollection).toHaveSuccessfulDeploy({ to: collection.address });
 
-    val payoutAddresses: map<uint8, address> = [];
+    val securityFundAddressForTest: address? = null;
     val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
@@ -59,7 +59,8 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        payoutAddresses,
+        plateToAuctionId: [],
+        securityFundAddress: securityFundAddressForTest,
     });
     val deployManager = manager.deploy(
         owner.address,
@@ -95,9 +96,7 @@ get fun `test TagitalSpace auction: full auction, NFT mint confirmation and 30-5
         owner.address,
         CreateAuctionV1 {
             queryId: 3,
-            itemIndex: 0,
             plate: "A777AA 77",
-            metadataContent: "0.json",
             startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime,
