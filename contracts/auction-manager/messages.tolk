@@ -29,8 +29,17 @@ struct (0x54474105) ClaimPayoutV1 {
 
 struct (0x54474106) SetPayoutAddressesV1 {
     queryId: uint64
-    treasuryAddress: address?
     securityFundAddress: address?
+}
+
+struct (0x5447410B) WithdrawTreasuryV1 {
+    queryId: uint64
+    amount: coins
+}
+
+struct (0x5447410C) TreasuryWithdrawalTransferV1 {
+    queryId: uint64
+    amount: coins
 }
 
 struct (0x54474107) RefundTransferV1 {
