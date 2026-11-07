@@ -182,15 +182,18 @@ fun onInternalMessage(in: InMessage) {
             assert (
                 securityFund != storage.ownerAddress
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            storage.securityFundAddress = securityFund;
+            var extra = storage.extra.load();
+            extra.securityFundAddress = securityFund;
+            storage.extra = extra.toCell();
             storage.save();
         }
 
         CreateAuctionV1 => {
             var storage = lazy AuctionManagerStorage.load();
             assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            var extra = storage.extra.load();
             assert (
-                storage.securityFundAddress != null
+                extra.securityFundAddress != null
             ) throw AuctionManagerErrors.InvalidPayoutConfiguration;
             assert (
                 in.valueCoins >= AUCTION_V1_MIN_CREATE_OVERHEAD
@@ -209,8 +212,7 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
             val plateKey = StringBuilder.create().append("RU|").append(message.plate).build().hash();
-            var plateRegistry = storage.plateRegistry.load();
-            val plateLookup = plateRegistry.plateToAuctionId.get(plateKey);
+            val plateLookup = extra.plateToAuctionId.get(plateKey);
             assert (!plateLookup.isFound) throw AuctionManagerErrors.AuctionAlreadyExists;
 
             val auctionId = storage.nextItemIndex;
@@ -226,8 +228,8 @@ fun onInternalMessage(in: InMessage) {
                 mintQueryId: 0,
             };
             storage.auctions.set(auctionId, auction);
-            plateRegistry.plateToAuctionId.set(plateKey, auctionId);
-            storage.plateRegistry = plateRegistry.toCell();
+            extra.plateToAuctionId.set(plateKey, auctionId);
+            storage.extra = extra.toCell();
             storage.nextItemIndex += 1;
             storage.payoutConfigLocked = true;
             storage.save();
@@ -397,9 +399,9 @@ fun onInternalMessage(in: InMessage) {
 
             auction.status = AUCTION_V1_CLOSED_NO_BIDS;
             val plateKey = StringBuilder.create().append("RU|").append(auction.plate).build().hash();
-            var plateRegistry = storage.plateRegistry.load();
-            plateRegistry.plateToAuctionId.delete(plateKey);
-            storage.plateRegistry = plateRegistry.toCell();
+            var extra = storage.extra.load();
+            extra.plateToAuctionId.delete(plateKey);
+            storage.extra = extra.toCell();
             storage.auctions.set(message.itemIndex, auction);
             storage.nextMintItemIndex += 1;
             storage.save();
@@ -431,8 +433,9 @@ fun onInternalMessage(in: InMessage) {
                 auction.highestBidder != null && auction.highestBid > 0
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
-            assert (storage.securityFundAddress != null) throw AuctionManagerErrors.InvalidPayoutConfiguration;
-            val securityFund = storage.securityFundAddress;
+            val extra = storage.extra.load();
+            assert (extra.securityFundAddress != null) throw AuctionManagerErrors.InvalidPayoutConfiguration;
+            val securityFund = extra.securityFundAddress;
 
             auction.status = AUCTION_V1_CLOSED_PAID;
             storage.auctions.set(message.itemIndex, auction);
@@ -478,9 +481,9 @@ fun onInternalMessage(in: InMessage) {
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
             val plateKey = StringBuilder.create().append("RU|").append(auction.plate).build().hash();
-            var plateRegistry = storage.plateRegistry.load();
-            plateRegistry.plateToAuctionId.delete(plateKey);
-            storage.plateRegistry = plateRegistry.toCell();
+            var extra = storage.extra.load();
+            extra.plateToAuctionId.delete(plateKey);
+            storage.extra = extra.toCell();
             storage.lockedFunds = (storage.lockedFunds - auction.highestBid) as coins;
             storage.auctions.set(message.itemIndex, auction);
             storage.nextMintItemIndex += 1;
@@ -639,8 +642,8 @@ get fun get_auction(auctionId: uint64): AuctionV1? {
 
 get fun get_plate_status(plateHash: uint256): int {
     val storage = lazy AuctionManagerStorage.load();
-    val plateRegistry = lazy storage.plateRegistry.load();
-    val plateLookup = plateRegistry.plateToAuctionId.get(plateHash);
+    val extra = lazy storage.extra.load();
+    val plateLookup = extra.plateToAuctionId.get(plateHash);
     if (!plateLookup.isFound) {
         return 0;
     }
