@@ -217,11 +217,7 @@ fun onInternalMessage(in: InMessage) {
                 isValidRussianPlate(message.plate)
             ) throw AuctionManagerErrors.InvalidAuctionParameters;
 
-            val canonicalPlate = StringBuilder
-                .create()
-                .append("RU|")
-                .append(message.plate)
-                .build();
+            val canonicalPlate = StringBuilder.create().append("RU|").append(message.plate).build();
             val plateKey = beginCell().storeString(canonicalPlate).endCell().hash();
             val plateLookup = extra.plateToAuctionId.get(plateKey);
             assert (!plateLookup.isFound) throw AuctionManagerErrors.AuctionAlreadyExists;
@@ -409,11 +405,7 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.ItemIndexOutOfSequence;
 
             auction.status = AUCTION_V1_CLOSED_NO_BIDS;
-            val canonicalPlate = StringBuilder
-                .create()
-                .append("RU|")
-                .append(auction.plate)
-                .build();
+            val canonicalPlate = StringBuilder.create().append("RU|").append(auction.plate).build();
             val plateKey = beginCell().storeString(canonicalPlate).endCell().hash();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
@@ -498,11 +490,7 @@ fun onInternalMessage(in: InMessage) {
             ) throw AuctionManagerErrors.InvalidAuctionState;
 
             auction.status = AUCTION_V1_CLOSED_MINT_FAILED;
-            val canonicalPlate = StringBuilder
-                .create()
-                .append("RU|")
-                .append(auction.plate)
-                .build();
+            val canonicalPlate = StringBuilder.create().append("RU|").append(auction.plate).build();
             val plateKey = beginCell().storeString(canonicalPlate).endCell().hash();
             var extra = storage.extra.load();
             extra.plateToAuctionId.delete(plateKey);
