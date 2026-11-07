@@ -162,6 +162,78 @@ get fun `test auction manager: rejects a bid below the minimum increment`() {
     expect(manager.getAuction(0)!.highestBidder!).toEqual(firstBidder.address);
 }
 
+get fun `test auction manager: rejects a bid at the exact deadline`() {
+    val (manager, creator, _, _, _) = setupAuctionManagerTest();
+    val deadline = (testing.getNow() + 10) as uint32;
+    val create = manager.sendAny(
+        creator.address,
+        CreateAuctionV1 {
+            queryId: 8,
+            itemIndex: 0,
+            plate: "DEADLINE 77",
+            metadataContent: "deadline.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: deadline,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(create).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+
+    testing.setNow(deadline);
+    val bidder = testing.treasury("deadline-bidder");
+    val bid = manager.sendAny(
+        bidder.address,
+        PlaceBidV1 {
+            queryId: 9,
+            auctionId: 0,
+            bidAmount: grams("1"),
+        }.toCell(),
+        { value: grams("1.2"), bounce: true },
+    );
+    expect(bid).toHaveFailedTx<PlaceBidV1>({
+        from: bidder.address,
+        to: manager.address,
+        exitCode: AuctionManagerErrors.BidAfterDeadline,
+    });
+    expect(manager.getAuction(0)!.highestBid).toEqual(0);
+}
+
+get fun `test auction manager: allows finishing at the exact deadline`() {
+    val (manager, creator, collection, _, _) = setupAuctionManagerTest();
+    val deadline = (testing.getNow() + 10) as uint32;
+    val create = manager.sendAny(
+        creator.address,
+        CreateAuctionV1 {
+            queryId: 10,
+            itemIndex: 0,
+            plate: "FINISH 77",
+            metadataContent: "finish.json",
+            startingBid: grams("1"),
+            minimumBidStep: grams("0.1"),
+            endTime: deadline,
+        }.toCell(),
+        { value: grams("0.05"), bounce: true },
+    );
+    expect(create).toHaveSuccessfulTx<CreateAuctionV1>({ to: manager.address });
+
+    testing.setNow(deadline);
+    val finish = manager.sendAny(
+        testing.treasury("deadline-finisher").address,
+        FinishAuctionV1 {
+            queryId: 11,
+            auctionId: 0,
+        }.toCell(),
+        { value: grams("0.2"), bounce: true },
+    );
+    expect(finish).toHaveSuccessfulTx<FinishAuctionV1>({ to: manager.address });
+    expect(finish).toHaveTx<SkipNftItemIndexV12>({
+        from: manager.address,
+        to: collection.address,
+    });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_NO_BIDS);
+}
+
 get fun `test auction manager: closes an empty auction by skipping its collection index`() {
     val creator = testing.treasury("empty-auction-creator");
     val collection = testing.treasury("empty-auction-collection");
