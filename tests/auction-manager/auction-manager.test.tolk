@@ -22,12 +22,12 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -287,12 +287,12 @@ var plateToAuctionId: map<uint256, uint64> = [];
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId, securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -422,12 +422,12 @@ var plateToAuctionId: map<uint256, uint64> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId, securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("10"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(creator.address, { value: grams("10.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -506,12 +506,12 @@ var plateToAuctionId: map<uint256, uint64> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId, securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("4"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(creator.address, { value: grams("4.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -568,12 +568,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -624,12 +624,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("10"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -668,12 +668,12 @@ var refundCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 290,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits,
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -708,12 +708,12 @@ var refundCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 300,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits,
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -748,12 +748,12 @@ var payoutCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 390,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits,
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -788,12 +788,12 @@ var payoutCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 400,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits,
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -858,12 +858,12 @@ var refundCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 500,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits,
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -894,12 +894,12 @@ var payoutCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 600,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits,
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -944,12 +944,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 701,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1001,12 +1001,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 711,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1059,12 +1059,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 721,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1117,12 +1117,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 731,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1177,12 +1177,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 741,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("10"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1241,12 +1241,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 751,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1287,12 +1287,12 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("5"),
         lockedFunds: 0,
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(owner.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1325,12 +1325,12 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("5"),
         lockedFunds: 0,
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(owner.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1374,12 +1374,12 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("2"),
         lockedFunds: grams("4"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(owner.address, { value: grams("4.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1413,12 +1413,12 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("2"),
         lockedFunds: 0,
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(owner.address, { value: grams("2.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1452,12 +1452,12 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("1"),
         lockedFunds: 0,
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1505,12 +1505,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("10"),
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1562,12 +1562,12 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 10,
         auctions,
-        plateRegistry: AuctionManagerPlateRegistry { plateToAuctionId: [] }.toCell(),
+        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        securityFundAddress: securityFundAddressForTest,
+        
     });
     val deploy = manager.deploy(owner.address, { value: grams("0.3"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
