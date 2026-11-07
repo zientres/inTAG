@@ -233,6 +233,17 @@ get fun `test auction manager: allows finishing at the exact deadline`() {
         from: manager.address,
         to: collection.address,
     });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_SKIP);
+
+    val ack = manager.sendAny(
+        collection.address,
+        NftItemIndexSkippedV12 {
+            queryId: 1,
+            itemIndex: 0,
+        }.toCell(),
+        { value: grams("0.03"), bounce: true },
+    );
+    expect(ack).toHaveSuccessfulTx<NftItemIndexSkippedV12>({ to: manager.address });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_NO_BIDS);
 }
 
@@ -292,6 +303,17 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
         from: manager.address,
         to: collection.address,
     });
+    expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_SKIP);
+
+    val ack = manager.sendAny(
+        collection.address,
+        NftItemIndexSkippedV12 {
+            queryId: 1,
+            itemIndex: 0,
+        }.toCell(),
+        { value: grams("0.03"), bounce: true },
+    );
+    expect(ack).toHaveSuccessfulTx<NftItemIndexSkippedV12>({ to: manager.address });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_CLOSED_NO_BIDS);
 }
 
