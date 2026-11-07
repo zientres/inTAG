@@ -3,6 +3,9 @@
 
   const CONFIG_URL = new URL("contracts/testnet.config.json", document.baseURI);
   const TONCENTER_URL = "https://testnet.toncenter.com/api/v2/runGetMethod";
+  const FNV128_OFFSET = 0x6c62272e07bb014262b821756295c58dn;
+  const FNV128_PRIME = 0x0000000001000000000000000000013bn;
+  const FNV128_MASK = (1n << 128n) - 1n;
   let tonCorePromise = null;
 
   function loadTonCore() {
@@ -36,9 +39,13 @@
 
   async function hashPlate(country, plate) {
     const canonical = country + "|" + canonicalRussianPlate(plate);
-    const { beginCell } = await loadTonCore();
-    const hash = beginCell().storeStringRefTail(canonical).endCell().hash();
-    return Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
+    const bytes = new TextEncoder().encode(canonical);
+    let hash = FNV128_OFFSET;
+    for (const byte of bytes) {
+      hash ^= BigInt(byte);
+      hash = (hash * FNV128_PRIME) & FNV128_MASK;
+    }
+    return hash.toString(16).padStart(32, "0");
   }
 
   async function lookupRussianPlate(plate) {
