@@ -68,7 +68,7 @@ fun NftCollectionV12.sendDeployNftV12(
     itemIndex: uint64,
     attachTonAmount: coins,
     ownerAddress: address,
-    content: string,
+    content: cell,
     config: SendParams = {},
 ): SendResultList {
     val genericMsg = createMessage({
@@ -158,8 +158,8 @@ fun NftCollectionV12.royaltyParams(self): RoyaltyParams {
 fun NftCollectionV12.getNftContent(
     self,
     itemIndex: int,
-    individualNftContent: string,
-): Cell<OffchainMetadataReply> {
+    individualNftContent: cell,
+): cell {
     return net.runGetMethod(self.address, "get_nft_content", [itemIndex, individualNftContent]);
 }
 
