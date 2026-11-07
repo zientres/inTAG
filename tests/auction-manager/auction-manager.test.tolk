@@ -14,7 +14,7 @@ fun setupAuctionManagerTest(): (AuctionManager, Treasury, Treasury, Treasury, Tr
     val treasury = testing.treasury("treasury");
     val securityFund = testing.treasury("security-fund");
     val securityFundAddressForTest = securityFund.address;
-val manager = AuctionManager.fromStorage({
+    val manager = AuctionManager.fromStorage({
         ownerAddress: creator.address,
         collectionAddress: collection.address,
         payoutConfigLocked: false,
@@ -22,12 +22,15 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        
+
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -42,7 +45,7 @@ get fun `test auction manager: creator can create sequential auction`() {
         CreateAuctionV1 {
             queryId: 1,
             plate: "А777АА77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime,
         }.toCell(),
@@ -107,7 +110,7 @@ get fun `test auction manager: rejects a bid below the starting price`() {
         CreateAuctionV1 {
             queryId: 3,
             plate: "С555СС77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
         }.toCell(),
@@ -138,7 +141,7 @@ get fun `test auction manager: rejects a bid below the minimum increment`() {
         CreateAuctionV1 {
             queryId: 5,
             plate: "Е555ЕЕ77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
         }.toCell(),
@@ -184,7 +187,7 @@ get fun `test auction manager: rejects a bid at the exact deadline`() {
         CreateAuctionV1 {
             queryId: 8,
             plate: "К111КК77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: deadline,
         }.toCell(),
@@ -219,7 +222,7 @@ get fun `test auction manager: allows finishing at the exact deadline`() {
         CreateAuctionV1 {
             queryId: 10,
             plate: "М222ММ77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: deadline,
         }.toCell(),
@@ -262,7 +265,7 @@ get fun `test auction manager: closes an empty auction by skipping its collectio
     val treasury = testing.treasury("empty-auction-treasury");
     val securityFund = testing.treasury("empty-auction-security");
     val securityFundAddressForTest = securityFund.address;
-var plateToAuctionId: map<uint256, uint64> = [];
+    var plateToAuctionId: map<uint256, uint64> = [];
     plateToAuctionId.set("RU|А111АА77".hash(), 0);
     var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
@@ -270,7 +273,7 @@ var plateToAuctionId: map<uint256, uint64> = [];
         {
             itemIndex: 0,
             plate: "А111АА77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: 0,
@@ -287,12 +290,15 @@ var plateToAuctionId: map<uint256, uint64> = [];
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId, securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId,
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        
+
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -350,7 +356,7 @@ get fun `test auction manager: refunds the previous leader immediately`() {
         CreateAuctionV1 {
             queryId: 20,
             plate: "Н777НН77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
         }.toCell(),
@@ -397,7 +403,7 @@ get fun `test auction manager: distributes the winning bid only after mint confi
     val securityFund = testing.treasury("payout-security");
     val nftItem = testing.treasury("minted-nft-item");
     val securityFundAddressForTest = securityFund.address;
-var plateToAuctionId: map<uint256, uint64> = [];
+    var plateToAuctionId: map<uint256, uint64> = [];
     plateToAuctionId.set("RU|М222ММ77".hash(), 0);
     var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
@@ -405,7 +411,7 @@ var plateToAuctionId: map<uint256, uint64> = [];
         {
             itemIndex: 0,
             plate: "М222ММ77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("10"),
@@ -422,12 +428,15 @@ var plateToAuctionId: map<uint256, uint64> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId, securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId,
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("10"),
-        
+
     });
     val deploy = manager.deploy(creator.address, { value: grams("10.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -481,7 +490,7 @@ get fun `test auction manager: refunds winner if NFT deployment fails`() {
     val treasury = testing.treasury("failed-mint-treasury");
     val securityFund = testing.treasury("failed-mint-security");
     val securityFundAddressForTest = securityFund.address;
-var plateToAuctionId: map<uint256, uint64> = [];
+    var plateToAuctionId: map<uint256, uint64> = [];
     plateToAuctionId.set("RU|С333СС77".hash(), 0);
     var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
@@ -489,7 +498,7 @@ var plateToAuctionId: map<uint256, uint64> = [];
         {
             itemIndex: 0,
             plate: "С333СС77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("4"),
@@ -506,12 +515,15 @@ var plateToAuctionId: map<uint256, uint64> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId, securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId,
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("4"),
-        
+
     });
     val deploy = manager.deploy(creator.address, { value: grams("4.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -545,13 +557,13 @@ get fun `test auction manager: bounced outbid refund becomes recoverable credit`
     val nextBidder = testing.treasury("bounce-refund-next-bidder");
     val unavailableBidder = randomAddress("unavailable-refund-recipient");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "BOUNCE 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
             highestBid: grams("1"),
@@ -568,12 +580,15 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        
+
     });
     val deploy = manager.deploy(creator.address, { value: grams("0.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -601,13 +616,13 @@ get fun `test auction manager: bounced creator payout becomes recoverable credit
     val unavailableCreator = randomAddress("unavailable-payout-recipient");
     val nftItem = testing.treasury("bounce-payout-nft-item");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "PAYOUT 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("10"),
@@ -624,12 +639,15 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("10"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -658,7 +676,7 @@ get fun `test auction manager: rejects refund claim without enough attached valu
     val treasury = testing.treasury("claim-refund-low-value-treasury");
     val securityFund = testing.treasury("claim-refund-low-value-security");
     val securityFundAddressForTest = securityFund.address;
-var refundCredits: map<address, coins> = [];
+    var refundCredits: map<address, coins> = [];
     refundCredits.set(beneficiary.address, grams("1"));
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
@@ -668,12 +686,15 @@ var refundCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 290,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits,
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -698,7 +719,7 @@ get fun `test auction manager: beneficiary can claim bounced refund credit`() {
     val treasury = testing.treasury("claim-refund-treasury");
     val securityFund = testing.treasury("claim-refund-security");
     val securityFundAddressForTest = securityFund.address;
-var refundCredits: map<address, coins> = [];
+    var refundCredits: map<address, coins> = [];
     refundCredits.set(beneficiary.address, grams("1"));
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
@@ -708,12 +729,15 @@ var refundCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 300,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits,
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -738,7 +762,7 @@ get fun `test auction manager: rejects payout claim without enough attached valu
     val treasury = testing.treasury("claim-payout-low-value-treasury");
     val securityFund = testing.treasury("claim-payout-low-value-security");
     val securityFundAddressForTest = securityFund.address;
-var payoutCredits: map<address, coins> = [];
+    var payoutCredits: map<address, coins> = [];
     payoutCredits.set(beneficiary.address, grams("5"));
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
@@ -748,12 +772,15 @@ var payoutCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 390,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits,
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -778,7 +805,7 @@ get fun `test auction manager: beneficiary can claim bounced payout credit`() {
     val treasury = testing.treasury("claim-payout-treasury");
     val securityFund = testing.treasury("claim-payout-security");
     val securityFundAddressForTest = securityFund.address;
-var payoutCredits: map<address, coins> = [];
+    var payoutCredits: map<address, coins> = [];
     payoutCredits.set(beneficiary.address, grams("5"));
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
@@ -788,12 +815,15 @@ var payoutCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 400,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits,
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -818,7 +848,7 @@ get fun `test auction manager: payout addresses cannot change after first auctio
         CreateAuctionV1 {
             queryId: 201,
             plate: "О333ОО77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() + 3600) as uint32,
         }.toCell(),
@@ -848,7 +878,7 @@ get fun `test auction manager: bounced refund claim restores the credit`() {
     val treasury = testing.treasury("claim-bounce-refund-treasury");
     val securityFund = testing.treasury("claim-bounce-refund-security");
     val securityFundAddressForTest = securityFund.address;
-var refundCredits: map<address, coins> = [];
+    var refundCredits: map<address, coins> = [];
     refundCredits.set(unavailableBeneficiary, grams("1"));
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
@@ -858,12 +888,15 @@ var refundCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 500,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits,
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("1"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -884,7 +917,7 @@ get fun `test auction manager: bounced payout claim restores the credit`() {
     val treasury = testing.treasury("claim-bounce-payout-treasury");
     val securityFund = testing.treasury("claim-bounce-payout-security");
     val securityFundAddressForTest = securityFund.address;
-var payoutCredits: map<address, coins> = [];
+    var payoutCredits: map<address, coins> = [];
     payoutCredits.set(unavailableBeneficiary, grams("5"));
     val manager = AuctionManager.fromStorage({
         ownerAddress: deployer.address,
@@ -894,12 +927,15 @@ var payoutCredits: map<address, coins> = [];
         nextMintItemIndex: 0,
         nextQueryId: 600,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits,
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -921,13 +957,13 @@ get fun `test auction manager: rejects NFT confirmation from an untrusted sender
     val treasury = testing.treasury("forged-confirm-treasury");
     val securityFund = testing.treasury("forged-confirm-security");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "FORGED 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("5"),
@@ -944,12 +980,15 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 701,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -978,13 +1017,13 @@ get fun `test auction manager: rejects NFT confirmation with an incorrect query 
     val treasury = testing.treasury("wrong-query-treasury");
     val securityFund = testing.treasury("wrong-query-security");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "QUERY 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("5"),
@@ -1001,12 +1040,15 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 711,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1036,13 +1078,13 @@ get fun `test auction manager: rejects NFT failure from an untrusted sender`() {
     val treasury = testing.treasury("forged-failure-treasury");
     val securityFund = testing.treasury("forged-failure-security");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "FORGED FAIL 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("5"),
@@ -1059,12 +1101,15 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 721,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1094,13 +1139,13 @@ get fun `test auction manager: rejects NFT failure with an incorrect query id`()
     val treasury = testing.treasury("wrong-failure-treasury");
     val securityFund = testing.treasury("wrong-failure-security");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "WRONG FAIL 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("5"),
@@ -1117,12 +1162,15 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 731,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1154,13 +1202,13 @@ get fun `test auction manager: duplicate mint confirmation does not pay out twic
     val securityFund = testing.treasury("duplicate-confirm-security");
     val nftItem = testing.treasury("duplicate-confirm-nft-item");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "DUPLICATE 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("10"),
@@ -1177,12 +1225,15 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 741,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("10"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1218,13 +1269,13 @@ get fun `test auction manager: duplicate mint failure does not refund twice`() {
     val treasury = testing.treasury("duplicate-failure-treasury");
     val securityFund = testing.treasury("duplicate-failure-security");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "DUPLICATE FAIL 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("5"),
@@ -1241,12 +1292,15 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 751,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("5"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1279,7 +1333,7 @@ get fun `test auction manager: owner can withdraw part of treasury`() {
     val owner = testing.treasury("treasury-withdraw-owner");
     val collection = testing.treasury("treasury-withdraw-collection");
     val securityFundAddressForTest = testing.treasury("treasury-withdraw-security").address;
-val manager = AuctionManager.fromStorage({
+    val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
         payoutConfigLocked: true,
@@ -1287,12 +1341,15 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("5"),
         lockedFunds: 0,
-        
+
     });
     val deploy = manager.deploy(owner.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1317,7 +1374,7 @@ get fun `test auction manager: owner can withdraw all remaining treasury in a la
     val owner = testing.treasury("treasury-full-withdraw-owner");
     val collection = testing.treasury("treasury-full-withdraw-collection");
     val securityFundAddressForTest = testing.treasury("treasury-full-withdraw-security").address;
-val manager = AuctionManager.fromStorage({
+    val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
         payoutConfigLocked: true,
@@ -1325,12 +1382,15 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("5"),
         lockedFunds: 0,
-        
+
     });
     val deploy = manager.deploy(owner.address, { value: grams("5.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1366,7 +1426,7 @@ get fun `test auction manager: treasury withdrawal cannot use funds locked for b
     val owner = testing.treasury("treasury-locked-owner");
     val collection = testing.treasury("treasury-locked-collection");
     val securityFundAddressForTest = testing.treasury("treasury-locked-security").address;
-val manager = AuctionManager.fromStorage({
+    val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
         payoutConfigLocked: true,
@@ -1374,12 +1434,15 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("2"),
         lockedFunds: grams("4"),
-        
+
     });
     val deploy = manager.deploy(owner.address, { value: grams("4.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1405,7 +1468,7 @@ get fun `test auction manager: treasury withdrawal is owner-only`() {
     val attacker = testing.treasury("treasury-auth-attacker");
     val collection = testing.treasury("treasury-auth-collection");
     val securityFundAddressForTest = testing.treasury("treasury-auth-security").address;
-val manager = AuctionManager.fromStorage({
+    val manager = AuctionManager.fromStorage({
         ownerAddress: owner.address,
         collectionAddress: collection.address,
         payoutConfigLocked: true,
@@ -1413,12 +1476,15 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("2"),
         lockedFunds: 0,
-        
+
     });
     val deploy = manager.deploy(owner.address, { value: grams("2.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1444,7 +1510,7 @@ get fun `test auction manager: bounced treasury withdrawal restores treasury acc
     val unavailableOwner = randomAddress("treasury-bounce-unavailable-owner");
     val collection = testing.treasury("treasury-bounce-collection");
     val securityFundAddressForTest = testing.treasury("treasury-bounce-security").address;
-val manager = AuctionManager.fromStorage({
+    val manager = AuctionManager.fromStorage({
         ownerAddress: unavailableOwner,
         collectionAddress: collection.address,
         payoutConfigLocked: true,
@@ -1452,12 +1518,15 @@ val manager = AuctionManager.fromStorage({
         nextMintItemIndex: 0,
         nextQueryId: 1,
         auctions: [],
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: grams("1"),
         lockedFunds: 0,
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("1.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1482,13 +1551,13 @@ get fun `test auction manager: bounced security fund payout becomes recoverable 
     val unavailableSecurityFund = randomAddress("unavailable-security-fund");
     val nftItem = testing.treasury("bounce-security-nft-item");
     val securityFundAddressForTest = unavailableSecurityFund;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "SECURITY PAYOUT 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: grams("10"),
@@ -1505,12 +1574,15 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 100,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: grams("10"),
-        
+
     });
     val deploy = manager.deploy(deployer.address, { value: grams("10.2"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
@@ -1539,13 +1611,13 @@ get fun `test auction manager: waits for collection skip confirmation and handle
     val treasury = testing.treasury("skip-ack-treasury");
     val securityFund = testing.treasury("skip-ack-security");
     val securityFundAddressForTest = securityFund.address;
-var auctions: map<uint64, AuctionV1> = [];
+    var auctions: map<uint64, AuctionV1> = [];
     auctions.set(
         0,
         {
             itemIndex: 0,
             plate: "SKIP ACK 77",
-                        startingBid: grams("1"),
+            startingBid: grams("1"),
             minimumBidStep: grams("0.1"),
             endTime: (blockchain.now() - 1) as uint32,
             highestBid: 0,
@@ -1562,32 +1634,44 @@ var auctions: map<uint64, AuctionV1> = [];
         nextMintItemIndex: 0,
         nextQueryId: 10,
         auctions,
-        extra: AuctionManagerExtra { plateToAuctionId: [], securityFundAddress: securityFundAddressForTest }.toCell(),
+        extra: AuctionManagerExtra {
+            plateToAuctionId: [],
+            securityFundAddress: securityFundAddressForTest,
+        }.toCell(),
         refundCredits: [],
         payoutCredits: [],
         treasuryBalance: 0,
         lockedFunds: 0,
-        
+
     });
     val deploy = manager.deploy(owner.address, { value: grams("0.3"), bounce: false });
     expect(deploy).toHaveSuccessfulDeploy({ to: manager.address });
 
     val finish = manager.sendAny(
         owner.address,
-        FinishAuctionV1 { queryId: 1, auctionId: 0 }.toCell(),
+        FinishAuctionV1 {
+            queryId: 1,
+            auctionId: 0,
+        }.toCell(),
         { value: grams("0.2"), bounce: true },
     );
     expect(finish).toHaveSuccessfulTx<FinishAuctionV1>({ to: manager.address });
     expect(finish).toHaveTx<SkipNftItemIndexV12>({
         from: manager.address,
         to: collection.address,
-        body: SkipNftItemIndexV12 { queryId: 10, itemIndex: 0 }.toCell(),
+        body: SkipNftItemIndexV12 {
+            queryId: 10,
+            itemIndex: 0,
+        }.toCell(),
     });
     expect(manager.getAuction(0)!.status).toEqual(AUCTION_V1_WAITING_FOR_SKIP);
 
     val retry = manager.sendAny(
         owner.address,
-        RetryMintNoticeV1 { queryId: 2, auctionId: 0 }.toCell(),
+        RetryMintNoticeV1 {
+            queryId: 2,
+            auctionId: 0,
+        }.toCell(),
         { value: grams("0.05"), bounce: true },
     );
     expect(retry).toHaveSuccessfulTx<RetryMintNoticeV1>({ to: manager.address });
@@ -1600,7 +1684,10 @@ var auctions: map<uint64, AuctionV1> = [];
 
     val ack = manager.sendAny(
         collection.address,
-        NftItemIndexSkippedV12 { queryId: 10, itemIndex: 0 }.toCell(),
+        NftItemIndexSkippedV12 {
+            queryId: 10,
+            itemIndex: 0,
+        }.toCell(),
         { value: grams("0.03"), bounce: true },
     );
     expect(ack).toHaveSuccessfulTx<NftItemIndexSkippedV12>({ to: manager.address });
