@@ -109,7 +109,7 @@ fun isValidRussianPlate(plate: string): bool {
     if (byteLength == 12 && !isRussianPlateDigit(value)) {
         return false;
     }
-    return value.remainingBitsCount() == 0 && value.remainingRefsCount() == 0;
+    return value.isEmpty();
 }
 
 fun buildOnchainPlateMetadata(plate: string): cell {
