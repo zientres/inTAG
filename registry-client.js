@@ -54,11 +54,18 @@
     });
     if (!response.ok) throw new Error("TON Testnet API вернул HTTP " + response.status + ".");
     const data = await response.json();
-    if (!data.ok || !Array.isArray(data.stack) || !data.stack.length) {
+    const result = data.result;
+    if (
+      !data.ok ||
+      !result ||
+      result.exit_code !== 0 ||
+      !Array.isArray(result.stack) ||
+      !result.stack.length
+    ) {
       throw new Error("Не удалось получить статус номера из смарт-контракта.");
     }
 
-    const rawStatus = data.stack[0][1]?.[1] ?? data.stack[0][1];
+    const rawStatus = result.stack[0][1];
     const statusCode = BigInt(rawStatus);
     if (statusCode === 0n) return { status: "free" };
     if (statusCode === 1n) return { status: "auction" };
