@@ -118,16 +118,17 @@ fun buildOnchainPlateMetadata(plate: string): cell {
         .append("Digital license plate collectible from TagitalSpace. Russian plate: ")
         .append(plate)
         .build();
-    val image = StringBuilder.create()
-        .append("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1200'%20height='720'%20viewBox='0%200%201200%20720'%3E%3Crect%20width='1200'%20height='720'%20fill='%23071426'/%3E%3Crect%20x='80'%20y='180'%20width='1040'%20height='360'%20rx='24'%20fill='white'/%3E%3Ctext%20x='600'%20y='390'%20text-anchor='middle'%20font-family='Arial'%20font-size='96'%20font-weight='700'%20fill='%23071426'>")
+    val imageData = StringBuilder.create()
+        .append("<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='720' viewBox='0 0 1200 720'><rect width='1200' height='720' fill='#071426'/><rect x='80' y='180' width='1040' height='360' rx='24' fill='white'/><text x='600' y='390' text-anchor='middle' font-family='Arial' font-size='96' font-weight='700' fill='#071426'>")
         .append(plate)
-        .append("%3C/text%3E%3Ctext%20x='600'%20y='610'%20text-anchor='middle'%20font-family='Arial'%20font-size='28'%20letter-spacing='6'%20fill='%23a8b8cc'>TAGITALSPACE%3C/text%3E%3C/svg%3E")
+        .append("</text><text x='600' y='610' text-anchor='middle' font-family='Arial' font-size='28' letter-spacing='6' fill='#a8b8cc'>TAGITALSPACE</text></svg>")
         .build();
 
     var dict: map<uint256, string_prefixed0x> = [];
     dict.set("name".sha256(), name.prefixWith00());
     dict.set("description".sha256(), description.prefixWith00());
-    dict.set("image".sha256(), image.prefixWith00());
+    dict.set("image".sha256(), "https://zientres.github.io/inTAG/logo.png".prefixWith00());
+    dict.set("image_data".sha256(), imageData.prefixWith00());
     return beginCell()
         .storeUint(0, 8)
         .storeDict(dict.toLowLevelDict())
