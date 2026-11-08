@@ -17,9 +17,9 @@
     "enabled": false,
     "reason": "NFT collection source and Testnet deployment scripts are prepared. Enable deployment only after Acton build/tests pass and the collection name, description, and logo URL are reviewed."
   },
-  "auction_manager": null,
-  "collection": null,
-  "note": "Set auction_manager after deploying the permissionless Auction Manager with the matching NFT Collection v1.2. The get_plate_status(uint256) getter is implemented for the Russian plate registry.",
+  "auction_manager": "kQD6NzXC1MeHqb8d4JienBNFM2nIEHdBumffmxKzHkg9HCot",
+  "collection": "kQAZqLKnL4m6D8b0h1Ib0tCQV075e-SFu3iJQy7TEZNMpmy7",
+  "note": "TagitalSpace NFT Collection v1.2 and Auction Manager are deployed on TON Testnet. Plate status is read from the Auction Manager get_plate_status(uint256) getter.",
   "collection_admin_before_auction_manager": "creator",
   "royalty_recipient": "creator"
 }
