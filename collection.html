@@ -397,7 +397,7 @@
 
   <script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js"></script>
   <script src="registry-client.js"></script>
-  <script src="script.js?v=equal-cells-clean-start"></script>
+  <script src="script.js?v=registry-live-testnet"></script>
   <script>
     (() => {
       const form = document.getElementById("registration-search");
@@ -612,7 +612,7 @@
           addResultText(card, "registry-result-detail",
             localized("Первая ставка — 1 TON. После запуска аукцион продлится 90 минут.", "The opening bid is 1 TON. The auction runs for 90 minutes after it starts."));
           const note = addResultText(card, "registry-result-note",
-            localized("Потребуются два подтверждения в Keeper: создание аукциона и первая ставка 1 TON.", "Keeper will ask for two approvals: auction creation and the 1 TON opening bid."));
+            localized("Keeper запросит 0.05 TON для создания аукциона, затем 1.1 TON для первой ставки 1 TON (включая 0.1 TON операционного запаса контракта). Сетевые комиссии оплачиваются отдельно.", "Keeper will request 0.05 TON to create the auction, then 1.1 TON for the 1 TON opening bid (including 0.1 TON of contract operating reserve). Network fees are separate."));
           const button = document.createElement("button");
           button.type = "button";
           button.className = "primary-button registry-action-button";
@@ -658,6 +658,8 @@
                 : localized("Ставок пока нет. Первая ставка — от " + formatTon(nextBid) + " TON.",
                     "No bids yet. The opening bid starts at " + formatTon(nextBid) + " TON."));
             if (remaining > 0) {
+              addResultText(card, "registry-result-note",
+                localized("К сумме ставки дополнительно прикладывается 0.1 TON операционного запаса контракта; комиссия сети отдельно.", "An additional 0.1 TON contract operating reserve is attached to the bid; network fees are separate."));
               const bidInput = document.createElement("input");
               bidInput.className = "registry-bid-input";
               bidInput.type = "text";
