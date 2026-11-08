@@ -764,6 +764,27 @@
         });
       });
     })();
+
+    (() => {
+      const catalog = document.getElementById("collections-catalog");
+      const russiaCollection = document.getElementById("russia-collection");
+      const openRussia = document.getElementById("open-russia-collection");
+      const backToCollections = document.getElementById("back-to-collections");
+
+      if (!catalog || !russiaCollection || !openRussia || !backToCollections) return;
+
+      openRussia.addEventListener("click", () => {
+        catalog.hidden = true;
+        russiaCollection.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      backToCollections.addEventListener("click", () => {
+        russiaCollection.hidden = true;
+        catalog.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    })();
   </script>
 </body>
 </html>
