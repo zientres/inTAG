@@ -82,6 +82,73 @@
     return { status: "unknown" };
   }
 
+  function logTonConnectFailure(stage, error, transaction) {
+    const tonConnect = window.tagitalSpaceTonConnect;
+    const wallet = tonConnect?.wallet;
+    const details = {
+      stage,
+      errorName: error?.name,
+      errorMessage: error?.message || String(error),
+      errorCode: error?.code,
+      errorData: error?.data,
+      errorCause: error?.cause ? {
+        name: error.cause.name,
+        message: error.cause.message,
+        code: error.cause.code,
+        data: error.cause.data
+      } : undefined,
+      sdkErrorCodes: error?.constructor?.name,
+      connected: Boolean(tonConnect?.connected),
+      network: wallet?.account?.chain,
+      walletApp: wallet?.device?.appName,
+      walletVersion: wallet?.device?.appVersion,
+      provider: wallet?.provider,
+      transaction: transaction ? {
+        validUntil: transaction.validUntil,
+        messageCount: transaction.messages?.length,
+        messages: transaction.messages?.map(message => ({
+          address: message.address,
+          amount: message.amount,
+          hasPayload: Boolean(message.payload)
+        }))
+      } : undefined
+    };
+
+    console.group("[TagitalSpace] TON Connect transaction failed");
+    console.error("Diagnostic details:", details);
+    console.error("Original TON Connect error:", error);
+    console.error("Original error JSON:", (() => {
+      try {
+        return JSON.stringify(error, Object.getOwnPropertyNames(error), 2);
+      } catch {
+        return String(error);
+      }
+    })());
+    console.groupEnd();
+  }
+
+  async function sendTransactionWithDiagnostics(stage, tonConnect, transaction) {
+    console.info("[TagitalSpace] Sending TON Connect transaction:", {
+      stage,
+      network: tonConnect?.wallet?.account?.chain,
+      walletApp: tonConnect?.wallet?.device?.appName,
+      provider: tonConnect?.wallet?.provider,
+      messageCount: transaction.messages?.length,
+      destination: transaction.messages?.[0]?.address,
+      amount: transaction.messages?.[0]?.amount,
+      validUntil: transaction.validUntil
+    });
+
+    try {
+      const result = await tonConnect.sendTransaction(transaction);
+      console.info("[TagitalSpace] TON Connect transaction request returned successfully:", stage);
+      return result;
+    } catch (error) {
+      logTonConnectFailure(stage, error, transaction);
+      throw error;
+    }
+  }
+
   async function createRussianAuction(plate) {
     const config = await loadTestnetConfig();
     const tonConnect = window.tagitalSpaceTonConnect;
@@ -114,14 +181,19 @@
       .storeUint(endTime, 32)
       .endCell();
 
-    const result = await tonConnect.sendTransaction({
+    const transaction = {
       validUntil: now + 600,
       messages: [{
         address: config.auction_manager,
         amount: AUCTION_CREATE_AMOUNT,
         payload: payload.toBoc().toString("base64")
       }]
-    });
+    };
+    const result = await sendTransactionWithDiagnostics(
+      "create-russian-auction",
+      tonConnect,
+      transaction
+    );
 
     return { endTime, boc: result.boc };
   }
@@ -249,14 +321,19 @@
       throw new Error("Для участия в аукционе подключите кошелёк к TON Testnet.");
     }
     const now = Math.floor(Date.now() / 1000);
-    return tonConnect.sendTransaction({
+    const transaction = {
       validUntil: now + 600,
       messages: [{
         address: config.auction_manager,
         amount: attachedAmount.toString(),
         payload: body.toBoc().toString("base64")
       }]
-    });
+    };
+    return sendTransactionWithDiagnostics(
+      "auction-manager-message",
+      tonConnect,
+      transaction
+    );
   }
 
   async function placeBid(auctionId, amountTon) {
