@@ -232,6 +232,7 @@
 
     try {
       await placeBid(auction.auctionId, "1");
+      await waitForBid(auction.auctionId, STARTING_BID);
     } catch (error) {
       error.auctionCreated = true;
       throw error;
@@ -275,6 +276,26 @@
       .storeCoins(bidAmount)
       .endCell();
     return sendManagerMessage(body, bidAmount + 100000000n);
+  }
+
+  async function waitForBid(auctionId, expectedBid, timeoutMs = 60000) {
+    const deadline = Date.now() + timeoutMs;
+    let lastError = null;
+    while (Date.now() < deadline) {
+      try {
+        const auction = await getAuctionSummary(auctionId);
+        if (auction && auction.highestBid >= expectedBid) return auction;
+      } catch (error) {
+        lastError = error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 2500));
+    }
+    const error = new Error(
+      "Первая ставка отправлена, но её подтверждение пока не появилось в сети. Проверьте статус номера повторным поиском."
+    );
+    error.cause = lastError;
+    error.bidSubmitted = true;
+    throw error;
   }
 
   async function finishAuction(auctionId) {
