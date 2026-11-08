@@ -2,7 +2,7 @@
   "network": "testnet",
   "creator": "0QAlaQjrvRz8GCm2IJ1QXA6rNGSyyYfH6uNPT0RzKja6VsLi",
   "treasury": null,
-  "development_security_fund": null,
+  "development_security_fund": "0QAAbU6OX_tVpAmPWKoeYYBLBmiArGyvndhYirJkX9Csm5pk",
   "primary_auction_distribution": {
     "creator_percent": 50,
     "treasury_percent": 30,
@@ -15,11 +15,11 @@
   },
   "deployment": {
     "enabled": false,
-    "reason": "NFT collection source, reference tests, and Testnet deployment script are prepared. Enable deployment only after Acton build/tests pass and collection metadata URLs are supplied."
+    "reason": "NFT collection source and Testnet deployment scripts are prepared. Enable deployment only after Acton build/tests pass and the collection name, description, and logo URL are reviewed."
   },
-  "auction_manager": null,
-  "collection": null,
-  "note": "Set auction_manager only after the Testnet Auction Manager contract is deployed and its get_plate_status(uint256) getter is verified.",
+  "auction_manager": "kQD6NzXC1MeHqb8d4JienBNFM2nIEHdBumffmxKzHkg9HCot",
+  "collection": "kQAZqLKnL4m6D8b0h1Ib0tCQV075e-SFu3iJQy7TEZNMpmy7",
+  "note": "TagitalSpace NFT Collection v1.2 and Auction Manager are deployed on TON Testnet. Plate status is read from the Auction Manager get_plate_status(uint256) getter.",
   "collection_admin_before_auction_manager": "creator",
   "royalty_recipient": "creator"
 }
