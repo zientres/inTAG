@@ -396,7 +396,7 @@
   </main>
 
   <script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js"></script>
-  <script src="registry-client.js"></script>
+  <script src="registry-client.js?v=registry-live-testnet"></script>
   <script src="script.js?v=registry-live-testnet"></script>
   <script>
     (() => {
@@ -505,6 +505,9 @@
       input.addEventListener("keydown", event => {
         if (event.key === "Backspace" && plate.length) {
           event.preventDefault();
+          clearResultTimer();
+          result.hidden = true;
+          result.replaceChildren();
           plate = plate.slice(0, -1);
           invalidLetter = false;
           render();
@@ -512,9 +515,6 @@
       });
 
       let resultTimer = null;
-      let lastLookup = null;
-      let lastSearchedPlate = "";
-
       function clearResultTimer() {
         if (resultTimer !== null) {
           clearInterval(resultTimer);
@@ -543,8 +543,6 @@
 
       function renderLookup(searchedPlate, lookup, notice = "") {
         clearResultTimer();
-        lastLookup = lookup;
-        lastSearchedPlate = searchedPlate;
         result.replaceChildren();
         result.hidden = false;
 
