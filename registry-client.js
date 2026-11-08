@@ -3,9 +3,6 @@
 
   const CONFIG_URL = new URL("contracts/testnet.config.json", document.baseURI);
   const TONCENTER_URL = "https://testnet.toncenter.com/api/v2/runGetMethod";
-  const FNV128_OFFSET = 0x6c62272e07bb014262b821756295c58dn;
-  const FNV128_PRIME = 0x0000000001000000000000000000013bn;
-  const FNV128_MASK = (1n << 128n) - 1n;
   let tonCorePromise = null;
 
   function loadTonCore() {
@@ -40,17 +37,16 @@
   async function hashPlate(country, plate) {
     const canonical = country + "|" + canonicalRussianPlate(plate);
     const bytes = new TextEncoder().encode(canonical);
-    let hash = FNV128_OFFSET;
-    for (const byte of bytes) {
-      hash ^= BigInt(byte);
-      hash = (hash * FNV128_PRIME) & FNV128_MASK;
-    }
-    return hash.toString(16).padStart(64, "0");
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest), byte =>
+      byte.toString(16).padStart(2, "0")
+    ).join("");
   }
 
   async function lookupRussianPlate(plate) {
     const config = await loadTestnetConfig();
-    const hash = await hashPlate("RU", plate);
+    const canonicalPlate = canonicalRussianPlate(plate);
+    const hash = await hashPlate("RU", canonicalPlate);
     const response = await fetch(TONCENTER_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -73,11 +69,16 @@
       throw new Error("Не удалось получить статус номера из смарт-контракта.");
     }
 
-    const rawStatus = result.stack[0][1];
-    const statusCode = BigInt(rawStatus);
+    const statusCode = BigInt(result.stack[0][1]);
     if (statusCode === 0n) return { status: "free" };
-    if (statusCode === 1n) return { status: "auction" };
     if (statusCode === 2n) return { status: "minted" };
+    if (statusCode === 1n) {
+      const auctions = await listAuctions();
+      const auction = auctions.find(item =>
+        canonicalRussianPlate(item.plate) === canonicalPlate
+      ) || null;
+      return { status: "auction", auction };
+    }
     return { status: "unknown" };
   }
 
@@ -199,6 +200,46 @@
     return auctions.sort((a, b) => a.endTime - b.endTime);
   }
 
+  async function waitForAuction(plate, timeoutMs = 90000) {
+    const deadline = Date.now() + timeoutMs;
+    let lastError = null;
+    while (Date.now() < deadline) {
+      try {
+        const lookup = await lookupRussianPlate(plate);
+        if (lookup.status === "auction" && lookup.auction) return lookup.auction;
+      } catch (error) {
+        lastError = error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 2500));
+    }
+    const error = new Error(
+      "Аукцион мог уже создаться, но подтверждение пока не появилось в реестре. Не запускайте его повторно — обновите поиск через несколько секунд."
+    );
+    error.cause = lastError;
+    error.auctionCreated = true;
+    throw error;
+  }
+
+  async function startRussianAuctionWithFirstBid(plate) {
+    await createRussianAuction(plate);
+    let auction;
+    try {
+      auction = await waitForAuction(plate);
+    } catch (error) {
+      error.auctionCreated = true;
+      throw error;
+    }
+
+    try {
+      await placeBid(auction.auctionId, "1");
+    } catch (error) {
+      error.auctionCreated = true;
+      throw error;
+    }
+
+    return { auctionId: auction.auctionId, endTime: auction.endTime };
+  }
+
   async function sendManagerMessage(body, attachedAmount) {
     const config = await loadTestnetConfig();
     const tonConnect = window.tagitalSpaceTonConnect;
@@ -249,6 +290,7 @@
   window.tagitalSpaceRegistry = {
     lookupRussianPlate,
     createRussianAuction,
+    startRussianAuctionWithFirstBid,
     listAuctions,
     placeBid,
     finishAuction
