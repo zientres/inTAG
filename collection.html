@@ -201,6 +201,31 @@
     .registration-regions-dialog img { display:block; width:100%; max-height:90vh; object-fit:contain; border-radius:12px; box-shadow:0 18px 70px rgba(0,0,0,.5); }
     .registration-regions-close { position:absolute; z-index:2; top:-16px; right:-16px; width:38px; height:38px; border:1px solid rgba(255,255,255,.28); border-radius:50%; color:#fff; background:#10243b; font-size:27px; line-height:1; cursor:pointer; box-shadow:0 4px 18px rgba(0,0,0,.35); }
     @media(max-width:760px) { .registration-region-help { left:auto; right:0; top:calc(100% + 8px); transform:none; max-width:min(220px,70vw); } .registration-regions-modal { padding:22px 12px; } .registration-regions-dialog { width:96vw; } .registration-regions-close { top:-13px; right:-5px; } }
+
+    .registry-result { width:100%; max-width:560px; margin:24px auto 0; }
+    .registry-result[hidden] { display:none; }
+    .registry-result-card { display:flex; flex-direction:column; align-items:center; gap:15px; width:100%; padding:24px 22px; border:1px solid rgba(120,186,255,.18); border-radius:16px; background:#091a2e; box-shadow:0 16px 42px rgba(0,0,0,.18); }
+    .registry-status { display:inline-flex; align-items:center; justify-content:center; min-height:30px; padding:6px 16px; border:1px solid transparent; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.02em; }
+    .registry-status--free { color:#70d9a5; border-color:rgba(80,210,145,.28); background:rgba(48,180,112,.12); }
+    .registry-status--auction { color:#c4a0ff; border-color:rgba(174,126,255,.32); background:rgba(139,88,220,.15); }
+    .registry-status--minted { color:#ff9292; border-color:rgba(255,112,112,.3); background:rgba(205,65,65,.13); }
+    .registry-status--unknown { color:#c2cede; border-color:rgba(168,184,204,.2); background:rgba(168,184,204,.08); }
+    .registry-result-plate { width:min(100%,440px); min-height:112px; padding:13px 18px; display:grid; grid-template-columns:minmax(0,1fr) 58px; align-items:center; gap:12px; border:1px solid #fff; border-radius:8px; color:#071426; background:linear-gradient(160deg,#fff,#e2e5e4); box-shadow:inset 0 0 0 3px rgba(35,49,61,.06),0 7px 20px rgba(0,0,0,.12); }
+    .registry-result-plate-main { min-width:0; text-align:center; font-size:clamp(30px,7vw,52px); line-height:1; font-weight:750; letter-spacing:.025em; white-space:nowrap; }
+    .registry-result-plate-region { min-height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:2px solid rgba(7,20,38,.55); font-size:25px; line-height:1.1; font-weight:650; }
+    .registry-result-plate-country { margin-top:4px; font-size:10px; letter-spacing:.08em; font-weight:700; }
+    .registry-timer { display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .registry-timer-label { color:#91a6bd; font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+    .registry-timer-value { color:#f3f6fb; font-size:30px; line-height:1.2; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:.08em; }
+    .registry-result-detail { color:#b8c8da; font-size:13px; line-height:1.6; text-align:center; }
+    .registry-result-note { max-width:440px; color:#91a6bd; font-size:12px; line-height:1.6; text-align:center; }
+    .registry-result-message { color:#c7d7e8; font-size:13px; line-height:1.6; text-align:center; }
+    .registry-action-button { width:min(100%,390px); min-height:48px; margin:0 auto; border:0; cursor:pointer; }
+    .registry-action-button:disabled { cursor:wait; opacity:.65; transform:none; }
+    .registry-bid-input { width:min(100%,390px); min-height:46px; padding:0 15px; border:1px solid rgba(120,186,255,.25); border-radius:8px; outline:none; color:#f3f6fb; background:#061426; font:inherit; font-size:14px; text-align:center; }
+    .registry-bid-input:focus { border-color:#78baff; box-shadow:0 0 0 3px rgba(120,186,255,.08); }
+    @media(max-width:480px) { .registry-result-card { padding:20px 14px; gap:13px; } .registry-result-plate { min-height:90px; grid-template-columns:minmax(0,1fr) 50px; padding:10px 12px; } .registry-result-plate-region { min-height:55px; font-size:21px; } .registry-timer-value { font-size:26px; } }
+
   </style>
 </head>
 <body>
@@ -354,7 +379,7 @@
           <p class="registration-hint" id="registration-hint" role="status" aria-live="polite" hidden>Используйте русские буквы: А В Е К М Н О Р С Т У Х</p>
           <button class="primary-button registration-search-button" id="registration-search-button" type="submit" hidden data-i18n="search">Поиск</button>
         </form>
-        <div id="registration-result" role="status" aria-live="polite" hidden style="margin-top:18px;padding:16px 18px;border:1px solid rgba(120,186,255,.18);border-radius:14px;background:rgba(9,26,46,.55);color:#dce9f8;font-size:14px;line-height:1.55"></div>
+        <div id="registration-result" class="registry-result" role="status" aria-live="polite" hidden></div>
         <div class="registration-regions-modal" id="registration-regions-modal" aria-hidden="true">
           <div class="registration-regions-backdrop" data-regions-close></div>
           <div class="registration-regions-dialog" role="dialog" aria-modal="true" aria-label="Коды регионов России" data-i18n-aria-label="regionCodesDialog">
@@ -467,6 +492,9 @@
       }
 
       input.addEventListener("input", () => {
+        clearResultTimer();
+        result.hidden = true;
+        result.replaceChildren();
         const parsed = parseInput(input.value);
         plate = parsed.value;
         invalidLetter = parsed.badLetter;
@@ -482,6 +510,200 @@
         }
       });
 
+      let resultTimer = null;
+      let lastLookup = null;
+      let lastSearchedPlate = "";
+
+      function clearResultTimer() {
+        if (resultTimer !== null) {
+          clearInterval(resultTimer);
+          resultTimer = null;
+        }
+      }
+
+      function localized(ru, en) {
+        return document.documentElement.lang === "en" ? en : ru;
+      }
+
+      function formatTon(value) {
+        const amount = BigInt(value || 0);
+        const whole = amount / 1000000000n;
+        const fraction = (amount % 1000000000n).toString().padStart(9, "0").replace(/0+$/, "");
+        return fraction ? whole.toString() + "." + fraction : whole.toString();
+      }
+
+      function addResultText(parent, className, text) {
+        const element = document.createElement("p");
+        element.className = className;
+        element.textContent = text;
+        parent.appendChild(element);
+        return element;
+      }
+
+      function renderLookup(searchedPlate, lookup, notice = "") {
+        clearResultTimer();
+        lastLookup = lookup;
+        lastSearchedPlate = searchedPlate;
+        result.replaceChildren();
+        result.hidden = false;
+
+        const card = document.createElement("div");
+        card.className = "registry-result-card";
+
+        const status = document.createElement("div");
+        const statusLabels = {
+          free: localized("Свободен", "Available"),
+          auction: localized("Аукцион", "Auction"),
+          minted: localized("Занят", "Occupied"),
+          unknown: localized("Статус не определён", "Unknown status")
+        };
+        status.className = "registry-status registry-status--" + (lookup.status || "unknown");
+        status.textContent = statusLabels[lookup.status] || statusLabels.unknown;
+        card.appendChild(status);
+
+        const plateView = document.createElement("div");
+        plateView.className = "registry-result-plate";
+        const plateMain = document.createElement("div");
+        plateMain.className = "registry-result-plate-main";
+        plateMain.textContent = searchedPlate.slice(0, 6);
+        const region = document.createElement("div");
+        region.className = "registry-result-plate-region";
+        const regionCode = document.createElement("span");
+        regionCode.textContent = searchedPlate.slice(6);
+        const country = document.createElement("span");
+        country.className = "registry-result-plate-country";
+        country.textContent = "RUS";
+        region.append(regionCode, country);
+        plateView.append(plateMain, region);
+        card.appendChild(plateView);
+
+        function addTimer(label, value, endTime = null) {
+          const timer = document.createElement("div");
+          timer.className = "registry-timer";
+          const timerLabel = document.createElement("span");
+          timerLabel.className = "registry-timer-label";
+          timerLabel.textContent = label;
+          const timerValue = document.createElement("span");
+          timerValue.className = "registry-timer-value";
+          timerValue.textContent = value;
+          timer.append(timerLabel, timerValue);
+          card.appendChild(timer);
+
+          if (endTime !== null) {
+            const update = () => {
+              const remaining = Math.max(0, Number(endTime) - Math.floor(Date.now() / 1000));
+              const hours = Math.floor(remaining / 3600);
+              const minutes = Math.floor((remaining % 3600) / 60);
+              const seconds = remaining % 60;
+              timerValue.textContent = [hours, minutes, seconds]
+                .map(part => String(part).padStart(2, "0"))
+                .join(":");
+              if (remaining === 0) clearResultTimer();
+            };
+            update();
+            resultTimer = window.setInterval(update, 1000);
+          }
+          return timerValue;
+        }
+
+        if (lookup.status === "free") {
+          addTimer(localized("Длительность аукциона", "Auction duration"), "01:30:00");
+          addResultText(card, "registry-result-detail",
+            localized("Первая ставка — 1 TON. После запуска аукцион продлится 90 минут.", "The opening bid is 1 TON. The auction runs for 90 minutes after it starts."));
+          const note = addResultText(card, "registry-result-note",
+            localized("Потребуются два подтверждения в Keeper: создание аукциона и первая ставка 1 TON.", "Keeper will ask for two approvals: auction creation and the 1 TON opening bid."));
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "primary-button registry-action-button";
+          button.textContent = localized("Поставить ставку и начать аукцион", "Place the opening bid and start auction");
+          button.addEventListener("click", async () => {
+            button.disabled = true;
+            button.textContent = localized("Ожидание подтверждения в Keeper…", "Waiting for Keeper approval…");
+            note.textContent = localized(
+              "Сначала подтвердите создание аукциона. Затем отдельно подтвердите первую ставку 1 TON.",
+              "First approve auction creation. Then approve the separate 1 TON opening bid."
+            );
+            try {
+              await window.tagitalSpaceRegistry.startRussianAuctionWithFirstBid(searchedPlate);
+              const updated = await window.tagitalSpaceRegistry.lookupRussianPlate(searchedPlate);
+              renderLookup(searchedPlate, updated, localized("Аукцион и первая ставка подтверждены.", "Auction and opening bid confirmed."));
+            } catch (error) {
+              const updated = await window.tagitalSpaceRegistry.lookupRussianPlate(searchedPlate).catch(() => null);
+              if (updated && updated.status === "auction") {
+                renderLookup(searchedPlate, updated, error.message || localized("Аукцион создан. Проверьте первую ставку.", "Auction created. Check the opening bid."));
+              } else {
+                button.disabled = false;
+                button.textContent = localized("Поставить ставку и начать аукцион", "Place the opening bid and start auction");
+                note.textContent = error.message || localized("Не удалось запустить аукцион.", "Could not start the auction.");
+              }
+            }
+          });
+          card.appendChild(button);
+        } else if (lookup.status === "auction") {
+          const auction = lookup.auction;
+          if (!auction) {
+            addResultText(card, "registry-result-detail",
+              localized("Аукцион найден в блокчейне. Загружаю его параметры — попробуйте обновить поиск.", "Auction found on-chain. Its details are still loading — please search again."));
+          } else if (auction.status === 0) {
+            const remaining = Math.max(0, Number(auction.endTime) - Math.floor(Date.now() / 1000));
+            addTimer(localized("До окончания аукциона", "Time remaining"), "00:00:00", auction.endTime);
+            const nextBid = auction.highestBid > 0n
+              ? auction.highestBid + auction.minimumBidStep
+              : auction.startingBid;
+            addResultText(card, "registry-result-detail",
+              auction.highestBid > 0n
+                ? localized("Текущая ставка: " + formatTon(auction.highestBid) + " TON · следующая — от " + formatTon(nextBid) + " TON",
+                    "Current bid: " + formatTon(auction.highestBid) + " TON · next bid from " + formatTon(nextBid) + " TON")
+                : localized("Ставок пока нет. Первая ставка — от " + formatTon(nextBid) + " TON.",
+                    "No bids yet. The opening bid starts at " + formatTon(nextBid) + " TON."));
+            if (remaining > 0) {
+              const bidInput = document.createElement("input");
+              bidInput.className = "registry-bid-input";
+              bidInput.type = "text";
+              bidInput.inputMode = "decimal";
+              bidInput.autocomplete = "off";
+              bidInput.value = formatTon(nextBid);
+              bidInput.setAttribute("aria-label", localized("Сумма ставки в TON", "Bid amount in TON"));
+              const bidButton = document.createElement("button");
+              bidButton.type = "button";
+              bidButton.className = "primary-button registry-action-button";
+              bidButton.textContent = localized("Поставить ставку", "Place bid");
+              bidButton.addEventListener("click", async () => {
+                bidButton.disabled = true;
+                bidButton.textContent = localized("Ожидание Keeper…", "Waiting for Keeper…");
+                try {
+                  await window.tagitalSpaceRegistry.placeBid(auction.auctionId, bidInput.value);
+                  const updated = await window.tagitalSpaceRegistry.lookupRussianPlate(searchedPlate);
+                  renderLookup(searchedPlate, updated, localized("Транзакция ставки отправлена. Если сумма не обновилась сразу, повторите поиск через несколько секунд.", "Bid transaction sent. If the amount has not updated yet, search again in a few seconds."));
+                } catch (error) {
+                  bidButton.disabled = false;
+                  bidButton.textContent = localized("Поставить ставку", "Place bid");
+                  addResultText(card, "registry-result-message", error.message || localized("Не удалось отправить ставку.", "Could not submit the bid."));
+                }
+              });
+              card.append(bidInput, bidButton);
+            } else {
+              addResultText(card, "registry-result-detail",
+                localized("Время торгов истекло. Ожидается завершение аукциона.", "Bidding time has ended. Auction settlement is pending."));
+            }
+          } else {
+            addResultText(card, "registry-result-detail",
+              auction.status === 1
+                ? localized("Аукцион завершён, ожидается подтверждение выпуска NFT.", "Auction ended; NFT mint confirmation is pending.")
+                : localized("Аукцион без ставок проходит процедуру закрытия.", "The no-bid auction is being closed."));
+          }
+        } else if (lookup.status === "minted") {
+          addResultText(card, "registry-result-detail",
+            localized("Этот номер уже выпущен как NFT и занят.", "This plate has already been minted as an NFT and is occupied."));
+        } else {
+          addResultText(card, "registry-result-detail",
+            localized("Не удалось определить состояние номера.", "Could not determine the plate status."));
+        }
+
+        if (notice) addResultText(card, "registry-result-message", notice);
+        result.appendChild(card);
+      }
+
       form.addEventListener("submit", async event => {
         event.preventDefault();
         if (plate.length < 7) return;
@@ -495,48 +717,21 @@
         plate = plate.slice(0, 6) + region;
         render();
 
-        const result = document.getElementById("registration-result");
         result.hidden = false;
-        result.textContent = "Проверяю номер в TON Testnet…";
+        result.replaceChildren();
+        addResultText(result, "registry-result-message", localized("Проверяю номер в TON Testnet…", "Checking the plate on TON Testnet…"));
         searchButton.disabled = true;
         try {
           if (!window.tagitalSpaceRegistry) {
             throw new Error("Клиент реестра не загрузился. Обновите страницу.");
           }
           const lookup = await window.tagitalSpaceRegistry.lookupRussianPlate(plate);
-          if (lookup.status === "free") {
-            result.textContent = "Номер свободен в реестре TagitalSpace Testnet.";
-            const createAuctionButton = document.createElement("button");
-            createAuctionButton.type = "button";
-            createAuctionButton.className = "primary-button registration-search-button";
-            createAuctionButton.style.display = "inline-flex";
-            createAuctionButton.style.marginTop = "14px";
-            createAuctionButton.textContent = document.documentElement.lang === "en" ? "Start auction" : "Начать аукцион";
-            createAuctionButton.addEventListener("click", async () => {
-              createAuctionButton.disabled = true;
-              createAuctionButton.textContent = document.documentElement.lang === "en" ? "Waiting for wallet…" : "Ожидание подтверждения в кошельке…";
-              try {
-                await window.tagitalSpaceRegistry.createRussianAuction(plate);
-                result.firstChild.textContent = document.documentElement.lang === "en"
-                  ? "Auction creation transaction sent to TON Testnet. It will appear after confirmation."
-                  : "Транзакция создания аукциона отправлена в TON Testnet. Аукцион появится после подтверждения.";
-                createAuctionButton.remove();
-              } catch (error) {
-                result.firstChild.textContent = error.message || "Не удалось отправить транзакцию создания аукциона.";
-                createAuctionButton.disabled = false;
-                createAuctionButton.textContent = document.documentElement.lang === "en" ? "Try again" : "Повторить";
-              }
-            });
-            result.appendChild(createAuctionButton);
-          } else if (lookup.status === "auction") {
-            result.textContent = "Для этого номера уже идёт аукцион. Откройте раздел «Аукционы».";
-          } else if (lookup.status === "minted") {
-            result.textContent = "Этот номер уже выпущен как NFT. Адрес владельца: " + (lookup.owner || "получен из реестра");
-          } else {
-            result.textContent = "Реестр вернул неизвестный статус номера.";
-          }
+          renderLookup(plate, lookup);
         } catch (error) {
-          result.textContent = error.message || "Не удалось проверить номер в TON Testnet.";
+          clearResultTimer();
+          result.replaceChildren();
+          addResultText(result, "registry-result-message", error.message || localized("Не удалось проверить номер в TON Testnet.", "Could not check the plate on TON Testnet."));
+          result.hidden = false;
         } finally {
           searchButton.disabled = false;
         }
