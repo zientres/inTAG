@@ -129,8 +129,26 @@ if (missingElements.length > 0) {
       collectionIntro: "Каждая страна представлена отдельной коллекцией со своим форматом номерных знаков",
       auctionsEyebrow: "АУКЦИОНЫ",
       auctionsTitle: "Выберите номер и запустите аукцион",
-      auctionsIntro: "Пользователь вводит желаемое сочетание символов. Система проверяет, свободен ли этот номер, и рассчитывает начальную ставку. Если номер доступен, его можно выставить на аукцион продолжительностью полтора часа.",
-      auctionsDetail: "Начальная ставка будет зависеть от самого сочетания символов: чем привлекательнее номер, тем выше его стартовая стоимость.",
+      auctionsIntro: "Пользователь вводит желаемое сочетание символов. Система проверяет, свободен ли номер в реестре TagitalSpace. Любой пользователь может запустить аукцион со своего кошелька: начальная ставка — 1 TON, минимальный шаг — 0.1 TON, продолжительность — 90 минут.",
+      auctionsDetail: "После запуска аукциона любой пользователь может предложить более высокую ставку. Победитель получает NFT с выбранным номерным знаком.",
+      refreshAuctions: "Обновить",
+      loadingAuctions: "Загружаю аукционы…",
+      noActiveAuctions: "Сейчас нет активных аукционов.",
+      auctionLoadError: "Не удалось загрузить аукционы.",
+      auctionStartingBid: "Начальная ставка",
+      auctionHighestBid: "Текущая ставка",
+      auctionNextBid: "Минимальная следующая ставка",
+      auctionEnds: "Окончание",
+      auctionBidPlaceholder: "Сумма в TON",
+      auctionBidButton: "Сделать ставку",
+      auctionFinishButton: "Завершить аукцион",
+      auctionStatusActive: "Торги идут",
+      auctionStatusMint: "Подтверждается выпуск NFT",
+      auctionStatusSkip: "Завершается без ставок",
+      auctionBidSent: "Запрос ставки отправлен в кошелёк.",
+      auctionFinishSent: "Запрос завершения отправлен в кошелёк.",
+      auctionBidError: "Не удалось отправить ставку.",
+      auctionFinishError: "Не удалось завершить аукцион.",
       auctionVisualCaption: "Победитель получает номерной знак после завершения торгов",
       marketEyebrow: "РЫНОК",
       marketTitle: "Вторичный рынок на Getgems",
@@ -163,8 +181,26 @@ if (missingElements.length > 0) {
       collectionIntro: "Each country is represented by a separate collection with its own license plate format",
       auctionsEyebrow: "AUCTIONS",
       auctionsTitle: "Choose a plate and start an auction",
-      auctionsIntro: "The user enters the desired combination of characters. The system checks whether the plate number is available and calculates the starting bid. If the number is available, it can be listed in an auction lasting one and a half hours.",
-      auctionsDetail: "The starting bid will depend on the character combination: the more attractive the number, the higher its starting price.",
+      auctionsIntro: "The user enters a desired plate combination. The registry checks whether it is available. Anyone can start an auction from their wallet: the starting bid is 1 TON, the minimum increment is 0.1 TON, and the auction lasts 90 minutes.",
+      auctionsDetail: "After an auction starts, anyone can place a higher bid. The winner receives an NFT of the selected license plate.",
+      refreshAuctions: "Refresh",
+      loadingAuctions: "Loading auctions…",
+      noActiveAuctions: "There are no active auctions right now.",
+      auctionLoadError: "Could not load auctions.",
+      auctionStartingBid: "Starting bid",
+      auctionHighestBid: "Current bid",
+      auctionNextBid: "Minimum next bid",
+      auctionEnds: "Ends",
+      auctionBidPlaceholder: "Amount in TON",
+      auctionBidButton: "Place bid",
+      auctionFinishButton: "Finish auction",
+      auctionStatusActive: "Bidding is open",
+      auctionStatusMint: "NFT mint confirmation pending",
+      auctionStatusSkip: "Closing without bids",
+      auctionBidSent: "Bid request sent to your wallet.",
+      auctionFinishSent: "Finish request sent to your wallet.",
+      auctionBidError: "Could not submit the bid.",
+      auctionFinishError: "Could not finish the auction.",
       auctionVisualCaption: "The winner receives the license plate NFT when the auction ends",
       marketEyebrow: "MARKET",
       marketTitle: "The secondary market on Getgems",
@@ -352,88 +388,4 @@ if (missingElements.length > 0) {
   } else if (walletButton) {
     console.error("TagitalSpace: библиотека TON Connect UI не загрузилась.");
   }
-})();
-
-/* Интерактивная коллекция России и тестовый аукцион */
-(() => {
-  function initRussianCollection() {
-    const catalog = document.getElementById("collections-catalog");
-    const collection = document.getElementById("russia-collection");
-    const backButton = document.getElementById("back-to-collections");
-    document.addEventListener("click", (event) => {
-      const card = event.target.closest("#open-russia-collection");
-      if (!card) return;
-      event.preventDefault();
-      catalog.hidden = true;
-      collection.hidden = false;
-      collection.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-
-    backButton?.addEventListener("click", () => {
-      collection.hidden = true;
-      catalog.hidden = false;
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-
-    let remainingSeconds = 90 * 60;
-    let auctionInterval = null;
-    function renderTimer(animate = false) {
-      const hours = Math.floor(remainingSeconds / 3600);
-      const minutes = Math.floor((remainingSeconds % 3600) / 60);
-      const seconds = remainingSeconds % 60;
-      const value = String(hours).padStart(2, "0") + String(minutes).padStart(2, "0") + String(seconds).padStart(2, "0");
-
-      digitElements.forEach((element, index) => {
-        const nextDigit = value[index];
-        let currentDigit = element.querySelector(".timer-digit-current");
-        if (!currentDigit) {
-          element.innerHTML = '<span class="timer-digit-current"></span>';
-          currentDigit = element.firstElementChild;
-          currentDigit.textContent = nextDigit;
-          return;
-        }
-        if (currentDigit.textContent === nextDigit) return;
-
-        if (!animate) {
-          element.classList.remove("is-rolling");
-          element.innerHTML = '<span class="timer-digit-current"></span>';
-          element.firstElementChild.textContent = nextDigit;
-          return;
-        }
-
-        element.classList.remove("is-rolling");
-        const oldDigit = element.querySelector(".timer-digit-current");
-        const newDigit = document.createElement("span");
-        newDigit.className = "timer-digit-next";
-        newDigit.textContent = nextDigit;
-        element.appendChild(newDigit);
-        void element.offsetWidth;
-        element.classList.add("is-rolling");
-        window.setTimeout(() => {
-          element.classList.remove("is-rolling");
-          element.innerHTML = '<span class="timer-digit-current"></span>';
-          element.firstElementChild.textContent = nextDigit;
-        }, 260);
-      });
-    }
-    function stopAuction() {
-      if (auctionInterval !== null) { clearInterval(auctionInterval); auctionInterval = null; }
-      if (stopButton) stopButton.disabled = true;
-    }
-    startButton?.addEventListener("click", () => {
-      if (auctionInterval !== null) return;
-      if (remainingSeconds <= 0) remainingSeconds = 90 * 60;
-      if (stopButton) stopButton.disabled = false;
-      renderTimer();
-      auctionInterval = setInterval(() => {
-        remainingSeconds = Math.max(0, remainingSeconds - 1);
-        renderTimer(true);
-        if (remainingSeconds === 0) stopAuction();
-      }, 1000);
-    });
-    stopButton?.addEventListener("click", stopAuction);
-    renderTimer();
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initRussianCollection, { once: true });
-  else initRussianCollection();
 })();
