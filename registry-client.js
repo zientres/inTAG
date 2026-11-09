@@ -182,7 +182,7 @@
       .endCell();
 
     const transaction = {
-      validUntil: now + 600,
+      validUntil: now + 300,
       messages: [{
         address: config.auction_manager,
         amount: AUCTION_CREATE_AMOUNT,
@@ -322,7 +322,7 @@
     }
     const now = Math.floor(Date.now() / 1000);
     const transaction = {
-      validUntil: now + 600,
+      validUntil: now + 300,
       messages: [{
         address: config.auction_manager,
         amount: attachedAmount.toString(),
