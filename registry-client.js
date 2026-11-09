@@ -115,7 +115,7 @@
       .endCell();
 
     const result = await tonConnect.sendTransaction({
-      validUntil: now + 600,
+      validUntil: now + 300,
       messages: [{
         address: config.auction_manager,
         amount: AUCTION_CREATE_AMOUNT,
@@ -250,7 +250,7 @@
     }
     const now = Math.floor(Date.now() / 1000);
     return tonConnect.sendTransaction({
-      validUntil: now + 600,
+      validUntil: now + 300,
       messages: [{
         address: config.auction_manager,
         amount: attachedAmount.toString(),
