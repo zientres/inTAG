@@ -7,7 +7,17 @@
 
   function loadTonCore() {
     if (!tonCorePromise) {
-      tonCorePromise = import("https://esm.sh/@ton/core@0.59.0");
+      console.info("[TagitalSpace TX] Загрузка @ton/core началась");
+      tonCorePromise = import("https://esm.sh/@ton/core@0.59.0")
+        .then(module => {
+          console.info("[TagitalSpace TX] @ton/core загружен");
+          return module;
+        })
+        .catch(error => {
+          console.error("[TagitalSpace TX] Не удалось загрузить @ton/core", error);
+          tonCorePromise = null;
+          throw error;
+        });
     }
     return tonCorePromise;
   }
@@ -97,7 +107,9 @@
       throw new Error("Номер имеет неверный формат.");
     }
 
+    console.info("[TagitalSpace TX] Подготовка создания аукциона", { plate: canonicalPlate });
     const { beginCell } = await loadTonCore();
+    console.info("[TagitalSpace TX] Библиотека готова, сборка транзакции");
     const random = new Uint32Array(2);
     crypto.getRandomValues(random);
     let queryId = (BigInt(random[0]) << 32n) | BigInt(random[1]);
@@ -114,6 +126,11 @@
       .storeUint(endTime, 32)
       .endCell();
 
+    console.info("[TagitalSpace TX] Вызов TON Connect sendTransaction: создание аукциона", {
+      wallet: tonConnect.wallet?.device?.appName,
+      chain: tonConnect.wallet?.account?.chain,
+      validUntil: now + 300
+    });
     const result = await tonConnect.sendTransaction({
       validUntil: now + 300,
       messages: [{
@@ -123,6 +140,7 @@
       }]
     });
 
+    console.info("[TagitalSpace TX] TON Connect вернул подтверждение создания аукциона");
     return { endTime, boc: result.boc };
   }
 
@@ -249,6 +267,11 @@
       throw new Error("Для участия в аукционе подключите кошелёк к TON Testnet.");
     }
     const now = Math.floor(Date.now() / 1000);
+    console.info("[TagitalSpace TX] Вызов TON Connect sendTransaction: ставка/завершение", {
+      wallet: tonConnect.wallet?.device?.appName,
+      chain: tonConnect.wallet?.account?.chain,
+      validUntil: now + 300
+    });
     return tonConnect.sendTransaction({
       validUntil: now + 300,
       messages: [{
