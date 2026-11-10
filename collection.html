@@ -615,6 +615,22 @@
           button.type = "button";
           button.className = "primary-button registry-action-button";
           button.textContent = localized("Поставить ставку и начать аукцион", "Place the opening bid and start auction");
+          button.disabled = true;
+          note.textContent = localized("Подготавливаю подключение к TON Testnet…", "Preparing TON Testnet connection…");
+          window.tagitalSpaceRegistry.ready.then(ready => {
+            if (ready && button.isConnected) {
+              button.disabled = false;
+              note.textContent = localized(
+                "Keeper запросит 0.05 TON для создания аукциона, затем 1.1 TON для первой ставки 1 TON (включая 0.1 TON операционного запаса контракта). Сетевые комиссии оплачиваются отдельно.",
+                "Keeper will request 0.05 TON to create the auction, then 1.1 TON for the 1 TON opening bid (including 0.1 TON of contract operating reserve). Network fees are separate."
+              );
+            } else if (button.isConnected) {
+              note.textContent = localized(
+                "Не удалось подготовить TON Connect. Обновите страницу и попробуйте снова.",
+                "Could not prepare TON Connect. Refresh the page and try again."
+              );
+            }
+          });
           button.addEventListener("click", async () => {
             button.disabled = true;
             button.textContent = localized("Ожидание подтверждения в Keeper…", "Waiting for Keeper approval…");
