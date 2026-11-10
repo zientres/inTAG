@@ -4,12 +4,16 @@
   const CONFIG_URL = new URL("contracts/testnet.config.json", document.baseURI);
   const TONCENTER_URL = "https://testnet.toncenter.com/api/v2/runGetMethod";
   let tonCorePromise = null;
+  let tonCoreModule = null;
+  let testnetConfigPromise = null;
+  let testnetConfigCache = null;
 
   function loadTonCore() {
     if (!tonCorePromise) {
       console.info("[TagitalSpace TX] Загрузка @ton/core началась");
       tonCorePromise = import("https://esm.sh/@ton/core@0.59.0")
         .then(module => {
+          tonCoreModule = module;
           console.info("[TagitalSpace TX] @ton/core загружен");
           return module;
         })
@@ -27,18 +31,44 @@
   const MINIMUM_BID_STEP = 100000000n;
   const AUCTION_DURATION_SECONDS = 90 * 60;
 
-  async function loadTestnetConfig() {
-    const response = await fetch(CONFIG_URL, { cache: "no-store" });
-    if (!response.ok) throw new Error("Не удалось загрузить конфигурацию Testnet.");
-    const config = await response.json();
-    if (config.network !== "testnet") {
-      throw new Error("Запрос заблокирован: разрешена только сеть TON Testnet.");
+  function loadTestnetConfig() {
+    if (testnetConfigCache) return Promise.resolve(testnetConfigCache);
+    if (!testnetConfigPromise) {
+      testnetConfigPromise = fetch(CONFIG_URL, { cache: "no-store" })
+        .then(response => {
+          if (!response.ok) throw new Error("Не удалось загрузить конфигурацию Testnet.");
+          return response.json();
+        })
+        .then(config => {
+          if (config.network !== "testnet") {
+            throw new Error("Запрос заблокирован: разрешена только сеть TON Testnet.");
+          }
+          if (!config.auction_manager) {
+            throw new Error("Auction Manager ещё не развёрнут в TON Testnet.");
+          }
+          testnetConfigCache = config;
+          return config;
+        })
+        .catch(error => {
+          testnetConfigPromise = null;
+          throw error;
+        });
     }
-    if (!config.auction_manager) {
-      throw new Error("Auction Manager ещё не развёрнут в TON Testnet.");
-    }
-    return config;
+    return testnetConfigPromise;
   }
+
+  // Загружаем все зависимости заранее, пока пользователь ещё не нажал кнопку транзакции.
+  const registryReady = Promise.all([loadTestnetConfig(), loadTonCore()])
+    .then(([config, core]) => {
+      testnetConfigCache = config;
+      tonCoreModule = core;
+      console.info("[TagitalSpace TX] Реестр и TON SDK готовы к отправке транзакций");
+      return true;
+    })
+    .catch(error => {
+      console.error("[TagitalSpace TX] Не удалось заранее подготовить отправку транзакций", error);
+      return false;
+    });
 
   function canonicalRussianPlate(plate) {
     return String(plate).replace(/\s+/g, "").toUpperCase();
@@ -92,8 +122,12 @@
     return { status: "unknown" };
   }
 
-  async function createRussianAuction(plate) {
-    const config = await loadTestnetConfig();
+  function createRussianAuction(plate) {
+    const config = testnetConfigCache;
+    const tonCore = tonCoreModule;
+    if (!config || !tonCore) {
+      throw new Error("Подготовка TON Connect ещё не завершена. Обновите страницу и повторите поиск.");
+    }
     const tonConnect = window.tagitalSpaceTonConnect;
     if (!tonConnect?.wallet) {
       throw new Error("Сначала подключите TON-кошелёк.");
@@ -108,8 +142,8 @@
     }
 
     console.info("[TagitalSpace TX] Подготовка создания аукциона", { plate: canonicalPlate });
-    const { beginCell } = await loadTonCore();
-    console.info("[TagitalSpace TX] Библиотека готова, сборка транзакции");
+    const { beginCell } = tonCore;
+    console.info("[TagitalSpace TX] Зависимости готовы, сборка транзакции");
     const random = new Uint32Array(2);
     crypto.getRandomValues(random);
     let queryId = (BigInt(random[0]) << 32n) | BigInt(random[1]);
@@ -131,17 +165,35 @@
       chain: tonConnect.wallet?.account?.chain,
       validUntil: now + 300
     });
-    const result = await tonConnect.sendTransaction({
-      validUntil: now + 300,
-      messages: [{
-        address: config.auction_manager,
-        amount: AUCTION_CREATE_AMOUNT,
-        payload: payload.toBoc().toString("base64")
-      }]
-    });
+    let sendPromise;
+    try {
+      // Вызов выполняется сразу из цепочки пользовательского клика, без предварительных await.
+      sendPromise = tonConnect.sendTransaction({
+        validUntil: now + 300,
+        network: "-3",
+        messages: [{
+          address: config.auction_manager,
+          amount: AUCTION_CREATE_AMOUNT,
+          payload: payload.toBoc().toString("base64")
+        }]
+      });
+    } catch (error) {
+      console.error("[TagitalSpace TX] TON Connect синхронно отклонил запрос создания аукциона", error);
+      throw error;
+    }
 
-    console.info("[TagitalSpace TX] TON Connect вернул подтверждение создания аукциона");
-    return { endTime, boc: result.boc };
+    return sendPromise.then(result => {
+      console.info("[TagitalSpace TX] TON Connect вернул подтверждение создания аукциона");
+      return { endTime, boc: result.boc };
+    }).catch(error => {
+      console.error("[TagitalSpace TX] Ошибка TON Connect при создании аукциона", {
+        name: error?.name,
+        message: error?.message,
+        code: error?.code,
+        cause: error?.cause
+      });
+      throw error;
+    });
   }
 
   async function runGetMethod(method, stack = []) {
@@ -259,8 +311,9 @@
     return { auctionId: auction.auctionId, endTime: auction.endTime };
   }
 
-  async function sendManagerMessage(body, attachedAmount) {
-    const config = await loadTestnetConfig();
+  function sendManagerMessage(body, attachedAmount) {
+    const config = testnetConfigCache;
+    if (!config) throw new Error("Конфигурация Testnet ещё не загружена. Обновите страницу.");
     const tonConnect = window.tagitalSpaceTonConnect;
     if (!tonConnect?.wallet) throw new Error("Сначала подключите TON-кошелёк.");
     if (tonConnect.wallet.account.chain !== "-3") {
@@ -272,17 +325,23 @@
       chain: tonConnect.wallet?.account?.chain,
       validUntil: now + 300
     });
-    return tonConnect.sendTransaction({
-      validUntil: now + 300,
-      messages: [{
-        address: config.auction_manager,
-        amount: attachedAmount.toString(),
-        payload: body.toBoc().toString("base64")
-      }]
-    });
+    try {
+      return tonConnect.sendTransaction({
+        validUntil: now + 300,
+        network: "-3",
+        messages: [{
+          address: config.auction_manager,
+          amount: attachedAmount.toString(),
+          payload: body.toBoc().toString("base64")
+        }]
+      });
+    } catch (error) {
+      console.error("[TagitalSpace TX] TON Connect синхронно отклонил запрос ставки/завершения", error);
+      throw error;
+    }
   }
 
-  async function placeBid(auctionId, amountTon) {
+  function placeBid(auctionId, amountTon) {
     const amount = String(amountTon).trim();
     if (!/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,9})?$/.test(amount)) {
       throw new Error("Введите сумму ставки в TON, максимум 9 знаков после запятой.");
@@ -291,7 +350,8 @@
     const bidAmount = BigInt(whole) * 1000000000n + BigInt((fraction + "000000000").slice(0, 9));
     if (bidAmount <= 0n) throw new Error("Ставка должна быть больше нуля.");
 
-    const { beginCell } = await loadTonCore();
+    if (!tonCoreModule) throw new Error("Библиотека TON ещё не загружена. Обновите страницу.");
+    const { beginCell } = tonCoreModule;
     const body = beginCell()
       .storeUint(0x54474102, 32)
       .storeUint(randomQueryId(), 64)
@@ -321,8 +381,9 @@
     throw error;
   }
 
-  async function finishAuction(auctionId) {
-    const { beginCell } = await loadTonCore();
+  function finishAuction(auctionId) {
+    if (!tonCoreModule) throw new Error("Библиотека TON ещё не загружена. Обновите страницу.");
+    const { beginCell } = tonCoreModule;
     const body = beginCell()
       .storeUint(0x54474103, 32)
       .storeUint(randomQueryId(), 64)
@@ -332,6 +393,7 @@
   }
 
   window.tagitalSpaceRegistry = {
+    ready: registryReady,
     lookupRussianPlate,
     createRussianAuction,
     startRussianAuctionWithFirstBid,
