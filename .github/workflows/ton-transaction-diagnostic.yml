@@ -1,0 +1,102 @@
+name: TON transaction diagnostic
+
+on:
+  push:
+    branches: [auction-manager]
+    paths:
+      - ".github/workflows/ton-transaction-diagnostic.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  emulate-create-auction:
+    name: Inspect Testnet state and emulate CreateAuctionV1
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Inspect sender and Auction Manager account states
+        env:
+          SENDER: "0:256908ebbd1cfc1829b6209d505c0eab3464b2c987c7eae34f4f44732a36ba56"
+          MANAGER: "kQD6NzXC1MeHqb8d4JienBNFM2nIEHdBumffmxKzHkg9HCot"
+        run: |
+          set -euo pipefail
+          for entry in "sender:$SENDER" "manager:$MANAGER"; do
+            label="${entry%%:*}"
+            address="${entry#*:}"
+            echo "===== $label account state ====="
+            curl --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 60 \
+              --silent --show-error --fail-with-body --get \
+              "https://testnet.toncenter.com/api/v3/accountStates" \
+              --data-urlencode "address=$address" \
+              --data-urlencode "include_boc=false" | jq .
+            sleep 1
+          done
+
+      - name: Check the exact plate status through the deployed contract
+        env:
+          MANAGER: "kQD6NzXC1MeHqb8d4JienBNFM2nIEHdBumffmxKzHkg9HCot"
+          PLATE_HASH: "5e182b7cdbf43bc2b3eb55907688fa8fa19dda294b814d978d926266a4e19f20"
+        run: |
+          set -euo pipefail
+          jq -n --arg address "$MANAGER" --arg hash "0x$PLATE_HASH" \
+            '{address:$address,method:"get_plate_status",stack:[["num",$hash]]}' > getter-request.json
+          curl --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 60 \
+            --silent --show-error --fail-with-body \
+            -H "Content-Type: application/json" \
+            --data-binary @getter-request.json \
+            "https://testnet.toncenter.com/api/v2/runGetMethod" | jq .
+          sleep 1
+
+      - name: Read recent Auction Manager transactions
+        env:
+          MANAGER: "kQD6NzXC1MeHqb8d4JienBNFM2nIEHdBumffmxKzHkg9HCot"
+        run: |
+          set -euo pipefail
+          curl --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 60 \
+            --silent --show-error --fail-with-body --get \
+            "https://testnet.toncenter.com/api/v3/transactions" \
+            --data-urlencode "account=$MANAGER" \
+            --data-urlencode "limit=20" \
+            --data-urlencode "sort=desc" | jq .
+
+      - name: Emulate the browser TON Connect request without broadcasting
+        env:
+          SENDER: "0:256908ebbd1cfc1829b6209d505c0eab3464b2c987c7eae34f4f44732a36ba56"
+          MANAGER: "kQD6NzXC1MeHqb8d4JienBNFM2nIEHdBumffmxKzHkg9HCot"
+          PAYLOAD: "te6cckEBAgEAKQABMlRHQQFoR2JuY9LL6UO5rKAEBfXhAGr2IxMBABbQkDMzM9CQ0JAzM1G3BEg="
+        run: |
+          set -euo pipefail
+          valid_until="$(date -u -d '+5 minutes' +%s)"
+          jq -n \
+            --arg from "$SENDER" \
+            --arg address "$MANAGER" \
+            --arg amount "50000000" \
+            --arg payload "$PAYLOAD" \
+            --argjson valid_until "$valid_until" \
+            '{
+              from: $from,
+              valid_until: $valid_until,
+              messages: [{
+                address: $address,
+                amount: $amount,
+                payload: $payload
+              }],
+              with_actions: true
+            }' > emulate-request.json
+
+          echo "Submitting a simulation only; this does not broadcast or sign a transaction."
+          http_status="$(curl --connect-timeout 20 --max-time 180 \
+            --silent --show-error \
+            -o emulate-response.json \
+            -w '%{http_code}' \
+            -H "Content-Type: application/json" \
+            --data-binary @emulate-request.json \
+            "https://testnet.toncenter.com/api/emulate/v1/emulateTonConnect")"
+          echo "Emulation HTTP status: $http_status"
+          jq . emulate-response.json
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "TON Center emulation endpoint returned HTTP $http_status"
+            exit 1
+          fi
