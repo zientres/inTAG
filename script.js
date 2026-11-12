@@ -358,7 +358,20 @@ if (missingElements.length > 0) {
         uiPreferences: { theme: "DARK" }
       };
 
-      walletButton.addEventListener("click", () => tonConnectUI.openModal());
+      walletButton.addEventListener("click", async () => {
+        if (tonConnectUI.wallet) {
+          walletButton.disabled = true;
+          try {
+            await tonConnectUI.disconnect();
+          } catch (error) {
+            console.error("TagitalSpace: не удалось отключить TON-кошелёк.", error);
+          } finally {
+            walletButton.disabled = false;
+          }
+          return;
+        }
+        tonConnectUI.openModal();
+      });
 
       tonConnectUI.onStatusChange((wallet) => {
         if (!wallet) {
@@ -373,7 +386,7 @@ if (missingElements.length > 0) {
           connectedWalletAddress = address.length > 13
             ? address.slice(0, 6) + "..." + address.slice(-4)
             : address;
-          walletButton.title = address;
+          walletButton.title = address + " — нажмите, чтобы отключить кошелёк";
         }
 
         const language = document.documentElement.lang || "ru";
