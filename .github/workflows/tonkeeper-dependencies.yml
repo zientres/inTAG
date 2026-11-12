@@ -1,0 +1,32 @@
+name: Tonkeeper sender-choice dependency check
+
+on:
+  push:
+    branches: [auction-manager]
+    paths:
+      - ".github/workflows/tonkeeper-dependencies.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check TonAPI dependencies used before Tonkeeper starts transaction emulation
+        env:
+          SENDER: "0:256908ebbd1cfc1829b6209d505c0eab3464b2c987c7eae34f4f44732a36ba56"
+        run: |
+          set -euo pipefail
+          base="https://testnet.tonapi.io/v2"
+          encoded="$(node -e 'process.stdout.write(encodeURIComponent(process.env.SENDER))')"
+          for path in "accounts/$encoded" "accounts/$encoded/publickey" "wallet/$encoded/seqno"; do
+            echo "===== GET /v2/$path ====="
+            curl --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 60 \
+              --silent --show-error --fail-with-body "$base/$path" | jq .
+          done
+          echo "===== GET /v2/accounts/$encoded/jettons ====="
+          curl --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 60 \
+            --silent --show-error --fail-with-body --get "$base/accounts/$encoded/jettons" \
+            --data-urlencode "currencies=USD" \
+            --data-urlencode "supported_extensions=custom_payload" | jq .
