@@ -61,51 +61,13 @@ jobs:
             --data-urlencode "limit=20" \
             --data-urlencode "sort=desc" | jq .
 
-      - name: Emulate the browser TON Connect request without broadcasting
+      - name: Emulate through the same TonAPI wallet endpoint used by Tonkeeper
         env:
           SENDER: "0:256908ebbd1cfc1829b6209d505c0eab3464b2c987c7eae34f4f44732a36ba56"
           MANAGER: "kQD6NzXC1MeHqb8d4JienBNFM2nIEHdBumffmxKzHkg9HCot"
           PAYLOAD: "te6cckEBAgEAKQABMlRHQQFoR2JuY9LL6UO5rKAEBfXhAGr2IxMBABbQkDMzM9CQ0JAzM1G3BEg="
         run: |
           set -euo pipefail
-          valid_until="$(date -u -d '+5 minutes' +%s)"
-          jq -n \
-            --arg from "$SENDER" \
-            --arg address "$MANAGER" \
-            --arg amount "50000000" \
-            --arg payload "$PAYLOAD" \
-            --argjson valid_until "$valid_until" \
-            '{
-              from: $from,
-              valid_until: $valid_until,
-              messages: [{
-                address: $address,
-                amount: $amount,
-                payload: $payload
-              }],
-              with_actions: true
-            }' > emulate-request.json
-
-          echo "Trying TON Center TonConnect emulation (simulation only)."
-          http_status="$(curl --connect-timeout 20 --max-time 180 \
-            --silent --show-error \
-            -o toncenter-emulation.json \
-            -w '%{http_code}' \
-            -H "Content-Type: application/json" \
-            --data-binary @emulate-request.json \
-            "https://testnet.toncenter.com/api/emulate/v1/emulateTonConnect")"
-          echo "TON Center emulation HTTP status: $http_status"
-          if [ "$http_status" -ge 200 ] && [ "$http_status" -lt 300 ]; then
-            jq . toncenter-emulation.json
-            exit 0
-          fi
-          cat toncenter-emulation.json
-          if [ "$http_status" -ne 429 ]; then
-            echo "TON Center emulation failed with a non-rate-limit error."
-            exit 1
-          fi
-
-          echo "TON Center rate-limited this runner; trying independent TonAPI emulation."
           npm install --no-save @ton/ton @ton/core @ton/crypto
           node <<'NODE'
           const { WalletContractV5R1 } = require("@ton/ton");
@@ -113,9 +75,10 @@ jobs:
             Address, Cell, beginCell, external, internal,
             SendMode, storeMessage
           } = require("@ton/core");
-          const { mnemonicNew, mnemonicToPrivateKey } = require("@ton/crypto");
+          const { sign } = require("@ton/crypto");
 
           const senderRaw = process.env.SENDER;
+          const sender = Address.parse(senderRaw);
           const manager = Address.parse(process.env.MANAGER);
           const payload = Cell.fromBase64(process.env.PAYLOAD);
           const api = "https://testnet.tonapi.io/v2";
@@ -140,52 +103,62 @@ jobs:
             }
 
             const wallet = WalletContractV5R1.create({
-              publicKey,
-              walletId: {
-                networkGlobalId: -3,
-                context: {
-                  walletVersion: "v5r1",
-                  workchain: 0,
-                  subwalletNumber: 0
-                }
-              }
+              workchain: 0,
+              walletId: { networkGlobalId: -3 },
+              publicKey
             });
-            const expectedSender = Address.parse(senderRaw);
-            console.log("Derived Wallet V5R1 address:", wallet.address.toRawString());
-            console.log("Actual sender address:", expectedSender.toRawString());
-            if (!wallet.address.equals(expectedSender)) {
-              throw new Error("Derived V5R1 address does not match the connected wallet; refusing to emulate a different wallet.");
+            console.log("Derived V5R1 address:", wallet.address.toRawString());
+            console.log("Connected wallet address:", sender.toRawString());
+            if (!wallet.address.equals(sender)) {
+              throw new Error("Derived V5R1 address does not match connected wallet.");
             }
 
-            const dummyKey = (await mnemonicToPrivateKey(await mnemonicNew())).secretKey;
-            const walletBody = wallet.createTransfer({
-              seqno: Number(seqnoData.seqno),
-              secretKey: dummyKey,
+            const seqno = Number(seqnoData.seqno);
+            const timeout = Math.floor(Date.now() / 1000) + 300;
+            const walletBody = await wallet.createTransfer({
+              seqno,
+              signer: async message => sign(message.hash(), Buffer.alloc(64)),
+              timeout,
               sendMode: SendMode.PAY_GAS_SEPARATELY + SendMode.IGNORE_ERRORS,
               messages: [internal({
                 to: manager,
                 value: 50000000n,
+                bounce: true,
                 body: payload
               })]
             });
             const externalMessage = beginCell()
               .store(storeMessage(external({
-                to: expectedSender,
+                to: wallet.address,
+                init: seqno === 0 ? wallet.init : undefined,
                 body: walletBody
               })))
               .endCell();
             const boc = externalMessage.toBoc().toString("base64");
+            console.log("Wallet version: V5R1; seqno:", seqno, "timeout:", timeout);
+            console.log("External BOC built using Tonkeeper's wallet-emulation signing method.");
+            console.log("Calling the same TonAPI endpoint used by Tonkeeper: POST /v2/wallet/emulate");
 
-            console.log("TonAPI emulation request prepared. No transaction will be signed or broadcast.");
-            const response = await fetch(`${api}/traces/emulate?ignore_signature_check=true`, {
+            const walletResponse = await fetch(`${api}/wallet/emulate`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ boc })
             });
-            const body = await response.text();
-            console.log("TonAPI emulation HTTP status:", response.status);
-            console.log(body);
-            if (!response.ok) process.exitCode = 1;
+            const walletBodyText = await walletResponse.text();
+            console.log("TonAPI wallet/emulate HTTP status:", walletResponse.status);
+            console.log(walletBodyText);
+            if (!walletResponse.ok) {
+              console.log("Trying detailed trace emulation to distinguish wallet endpoint failure from contract execution failure.");
+              const traceResponse = await fetch(`${api}/traces/emulate?ignore_signature_check=true`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ boc })
+              });
+              const traceText = await traceResponse.text();
+              console.log("TonAPI traces/emulate HTTP status:", traceResponse.status);
+              console.log(traceText);
+              if (!traceResponse.ok) process.exitCode = 1;
+            }
           }
 
           main().catch(error => {
