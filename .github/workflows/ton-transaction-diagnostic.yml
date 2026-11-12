@@ -86,17 +86,110 @@ jobs:
               with_actions: true
             }' > emulate-request.json
 
-          echo "Submitting a simulation only; this does not broadcast or sign a transaction."
+          echo "Trying TON Center TonConnect emulation (simulation only)."
           http_status="$(curl --connect-timeout 20 --max-time 180 \
             --silent --show-error \
-            -o emulate-response.json \
+            -o toncenter-emulation.json \
             -w '%{http_code}' \
             -H "Content-Type: application/json" \
             --data-binary @emulate-request.json \
             "https://testnet.toncenter.com/api/emulate/v1/emulateTonConnect")"
-          echo "Emulation HTTP status: $http_status"
-          jq . emulate-response.json
-          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
-            echo "TON Center emulation endpoint returned HTTP $http_status"
+          echo "TON Center emulation HTTP status: $http_status"
+          if [ "$http_status" -ge 200 ] && [ "$http_status" -lt 300 ]; then
+            jq . toncenter-emulation.json
+            exit 0
+          fi
+          cat toncenter-emulation.json
+          if [ "$http_status" -ne 429 ]; then
+            echo "TON Center emulation failed with a non-rate-limit error."
             exit 1
           fi
+
+          echo "TON Center rate-limited this runner; trying independent TonAPI emulation."
+          npm install --no-save @ton/ton @ton/core @ton/crypto
+          node <<'NODE'
+          const { WalletContractV5R1 } = require("@ton/ton");
+          const {
+            Address, Cell, beginCell, external, internal,
+            SendMode, storeMessage
+          } = require("@ton/core");
+          const { mnemonicNew, mnemonicToPrivateKey } = require("@ton/crypto");
+
+          const senderRaw = process.env.SENDER;
+          const manager = Address.parse(process.env.MANAGER);
+          const payload = Cell.fromBase64(process.env.PAYLOAD);
+          const api = "https://testnet.tonapi.io/v2";
+
+          async function getJson(url) {
+            const response = await fetch(url);
+            const body = await response.text();
+            if (!response.ok) {
+              throw new Error(`GET ${url} failed: HTTP ${response.status}: ${body}`);
+            }
+            return JSON.parse(body);
+          }
+
+          async function main() {
+            const [keyData, seqnoData] = await Promise.all([
+              getJson(`${api}/accounts/${encodeURIComponent(senderRaw)}/publickey`),
+              getJson(`${api}/wallet/${encodeURIComponent(senderRaw)}/seqno`)
+            ]);
+            const publicKey = Buffer.from(keyData.public_key, "hex");
+            if (publicKey.length !== 32) {
+              throw new Error(`Unexpected public key length: ${publicKey.length}`);
+            }
+
+            const wallet = WalletContractV5R1.create({
+              publicKey,
+              walletId: {
+                networkGlobalId: -3,
+                context: {
+                  walletVersion: "v5r1",
+                  workchain: 0,
+                  subwalletNumber: 0
+                }
+              }
+            });
+            const expectedSender = Address.parse(senderRaw);
+            console.log("Derived Wallet V5R1 address:", wallet.address.toRawString());
+            console.log("Actual sender address:", expectedSender.toRawString());
+            if (!wallet.address.equals(expectedSender)) {
+              throw new Error("Derived V5R1 address does not match the connected wallet; refusing to emulate a different wallet.");
+            }
+
+            const dummyKey = (await mnemonicToPrivateKey(await mnemonicNew())).secretKey;
+            const walletBody = wallet.createTransfer({
+              seqno: Number(seqnoData.seqno),
+              secretKey: dummyKey,
+              sendMode: SendMode.PAY_GAS_SEPARATELY + SendMode.IGNORE_ERRORS,
+              messages: [internal({
+                to: manager,
+                value: 50000000n,
+                body: payload
+              })]
+            });
+            const externalMessage = beginCell()
+              .store(storeMessage(external({
+                to: expectedSender,
+                body: walletBody
+              })))
+              .endCell();
+            const boc = externalMessage.toBoc().toString("base64");
+
+            console.log("TonAPI emulation request prepared. No transaction will be signed or broadcast.");
+            const response = await fetch(`${api}/traces/emulate?ignore_signature_check=true`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ boc })
+            });
+            const body = await response.text();
+            console.log("TonAPI emulation HTTP status:", response.status);
+            console.log(body);
+            if (!response.ok) process.exitCode = 1;
+          }
+
+          main().catch(error => {
+            console.error(error);
+            process.exitCode = 1;
+          });
+          NODE
