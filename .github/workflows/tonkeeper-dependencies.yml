@@ -13,6 +13,14 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - name: Check the Battery config request that Tonkeeper awaits before sender selection
+        run: |
+          set -euo pipefail
+          echo "===== GET https://battery.tonkeeper.com/config ====="
+          curl --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 60 \
+            --silent --show-error --fail-with-body \
+            "https://battery.tonkeeper.com/config" | jq .
+
       - name: Check TonAPI dependencies used before Tonkeeper starts transaction emulation
         env:
           SENDER: "0:256908ebbd1cfc1829b6209d505c0eab3464b2c987c7eae34f4f44732a36ba56"
