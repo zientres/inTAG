@@ -2,7 +2,7 @@ name: NFT contracts
 
 on:
   push:
-    branches: [main]
+    branches: [main, auction-manager]
     paths:
       - "Acton.toml"
       - "contracts/nft-v1.1/**"
