@@ -26,6 +26,7 @@
     return tonCorePromise;
   }
   const AUCTION_MANAGER_CREATE_OPCODE = 0x54474101;
+  const AUCTION_MANAGER_CREATE_WITH_FIRST_BID_OPCODE = 0x5447410D;
   const AUCTION_CREATE_AMOUNT = "50000000";
   const STARTING_BID = 1000000000n;
   const MINIMUM_BID_STEP = 100000000n;
@@ -290,24 +291,60 @@
     throw error;
   }
 
-  async function startRussianAuctionWithFirstBid(plate) {
-    await createRussianAuction(plate);
-    let auction;
-    try {
-      auction = await waitForAuction(plate);
-    } catch (error) {
-      error.auctionCreated = true;
-      throw error;
+  function parseTonAmount(amountTon) {
+    const amount = String(amountTon).trim().replace(",", ".");
+    if (!/^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,9})?$/.test(amount)) {
+      throw new Error("Введите сумму ставки в TON, максимум 9 знаков после запятой.");
     }
+    const [whole, fraction = ""] = amount.split(".");
+    const value = BigInt(whole) * 1000000000n + BigInt((fraction + "000000000").slice(0, 9));
+    if (value <= 0n) throw new Error("Ставка должна быть больше нуля.");
+    return value;
+  }
 
-    try {
-      await placeBid(auction.auctionId, "1");
-      await waitForBid(auction.auctionId, STARTING_BID);
-    } catch (error) {
-      error.auctionCreated = true;
-      throw error;
+  async function startRussianAuctionWithFirstBid(plate, amountTon) {
+    const config = testnetConfigCache;
+    const tonCore = tonCoreModule;
+    if (!config || !tonCore) throw new Error("Подготовка TON Connect ещё не завершена. Обновите страницу и повторите поиск.");
+    const tonConnect = window.tagitalSpaceTonConnect;
+    if (!tonConnect?.wallet) throw new Error("Сначала подключите TON-кошелёк.");
+    if (tonConnect.wallet.account.chain !== "-3") throw new Error("Для создания аукциона подключите кошелёк к TON Testnet.");
+
+    const canonicalPlate = canonicalRussianPlate(plate);
+    if (!/^[АВЕКМНОРСТУХ][0-9]{3}[АВЕКМНОРСТУХ]{2}[0-9]{2,3}$/.test(canonicalPlate)) throw new Error("Номер имеет неверный формат.");
+    const bidAmount = parseTonAmount(amountTon);
+    const { beginCell } = tonCore;
+    const random = new Uint32Array(2);
+    crypto.getRandomValues(random);
+    let queryId = (BigInt(random[0]) << 32n) | BigInt(random[1]);
+    if (queryId === 0n) queryId = 1n;
+
+    const now = Math.floor(Date.now() / 1000);
+    const endTime = now + AUCTION_DURATION_SECONDS;
+    const payload = beginCell()
+      .storeUint(AUCTION_MANAGER_CREATE_WITH_FIRST_BID_OPCODE, 32)
+      .storeUint(queryId, 64)
+      .storeStringRefTail(canonicalPlate)
+      .storeCoins(bidAmount)
+      .storeCoins(MINIMUM_BID_STEP)
+      .storeUint(endTime, 32)
+      .endCell();
+
+    // Одна транзакция: ставка + небольшой запас на обработку сообщения контрактом.
+    const sendPromise = tonConnect.sendTransaction({
+      validUntil: now + 300,
+      network: "-3",
+      messages: [{
+        address: config.auction_manager,
+        amount: (bidAmount + 100000000n).toString(),
+        payload: payload.toBoc().toString("base64")
+      }]
+    });
+    await sendPromise;
+    const auction = await waitForAuction(canonicalPlate);
+    if (auction.highestBid !== bidAmount) {
+      throw new Error("Аукцион создан, но первая ставка ещё не подтверждена. Обновите поиск через несколько секунд.");
     }
-
     return { auctionId: auction.auctionId, endTime: auction.endTime };
   }
 
