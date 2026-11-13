@@ -608,9 +608,16 @@
         if (lookup.status === "free") {
           addTimer(localized("Длительность аукциона", "Auction duration"), "01:30:00");
           addResultText(card, "registry-result-detail",
-            localized("Первая ставка — 1 TON. После запуска аукцион продлится 90 минут.", "The opening bid is 1 TON. The auction runs for 90 minutes after it starts."));
+            localized("Укажите первую ставку. Она будет отправлена вместе с созданием аукциона одной транзакцией.", "Enter the opening bid. It will be sent in the same transaction as auction creation."));
+          const bidInput = document.createElement("input");
+          bidInput.className = "registry-bid-input";
+          bidInput.type = "text";
+          bidInput.inputMode = "decimal";
+          bidInput.autocomplete = "off";
+          bidInput.value = "1";
+          bidInput.setAttribute("aria-label", localized("Первая ставка в TON", "Opening bid in TON"));
           const note = addResultText(card, "registry-result-note",
-            localized("Keeper запросит 0.05 TON для создания аукциона, затем 1.1 TON для первой ставки 1 TON (включая 0.1 TON операционного запаса контракта). Сетевые комиссии оплачиваются отдельно.", "Keeper will request 0.05 TON to create the auction, then 1.1 TON for the 1 TON opening bid (including 0.1 TON of contract operating reserve). Network fees are separate."));
+            localized("В кошельке появится одна транзакция на сумму ставки + 0.1 TON операционного запаса. Сетевая комиссия оплачивается отдельно.", "Your wallet will show one transaction for the bid amount + 0.1 TON contract operating reserve. Network fees are separate."));
           const button = document.createElement("button");
           button.type = "button";
           button.className = "primary-button registry-action-button";
@@ -621,8 +628,8 @@
             if (ready && button.isConnected) {
               button.disabled = false;
               note.textContent = localized(
-                "Keeper запросит 0.05 TON для создания аукциона, затем 1.1 TON для первой ставки 1 TON (включая 0.1 TON операционного запаса контракта). Сетевые комиссии оплачиваются отдельно.",
-                "Keeper will request 0.05 TON to create the auction, then 1.1 TON for the 1 TON opening bid (including 0.1 TON of contract operating reserve). Network fees are separate."
+                "Подтвердите одну транзакцию: создание аукциона и первая ставка " + bidInput.value + " TON. Дополнительно прикладывается 0.1 TON запаса контракта.",
+                "Approve one transaction: auction creation and an opening bid of " + bidInput.value + " TON, plus 0.1 TON contract reserve."
               );
             } else if (button.isConnected) {
               note.textContent = localized(
@@ -639,13 +646,13 @@
               "First approve auction creation. Then approve the separate 1 TON opening bid."
             );
             try {
-              await window.tagitalSpaceRegistry.startRussianAuctionWithFirstBid(searchedPlate);
+              await window.tagitalSpaceRegistry.startRussianAuctionWithFirstBid(searchedPlate, bidInput.value);
               const updated = await window.tagitalSpaceRegistry.lookupRussianPlate(searchedPlate);
               renderLookup(searchedPlate, updated, localized("Аукцион и первая ставка подтверждены.", "Auction and opening bid confirmed."));
             } catch (error) {
               const updated = await window.tagitalSpaceRegistry.lookupRussianPlate(searchedPlate).catch(() => null);
               if (updated && updated.status === "auction") {
-                renderLookup(searchedPlate, updated, error.message || localized("Аукцион создан. Проверьте первую ставку.", "Auction created. Check the opening bid."));
+                renderLookup(searchedPlate, updated, error.message || localized("Аукцион мог создаться. Проверьте его статус повторным поиском.", "The auction may have been created. Search again to verify its status."));
               } else {
                 button.disabled = false;
                 button.textContent = localized("Поставить ставку и начать аукцион", "Place the opening bid and start auction");
@@ -653,7 +660,7 @@
               }
             }
           });
-          card.appendChild(button);
+          card.append(bidInput, button);
         } else if (lookup.status === "auction") {
           const auction = lookup.auction;
           if (!auction) {
