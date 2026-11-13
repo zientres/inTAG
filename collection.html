@@ -642,8 +642,8 @@
             button.disabled = true;
             button.textContent = localized("Ожидание подтверждения в Keeper…", "Waiting for Keeper approval…");
             note.textContent = localized(
-              "Сначала подтвердите создание аукциона. Затем отдельно подтвердите первую ставку 1 TON.",
-              "First approve auction creation. Then approve the separate 1 TON opening bid."
+              "Подтвердите одну транзакцию: создание аукциона и первая ставка " + bidInput.value + " TON.",
+              "Approve one transaction: auction creation and an opening bid of " + bidInput.value + " TON."
             );
             try {
               await window.tagitalSpaceRegistry.startRussianAuctionWithFirstBid(searchedPlate, bidInput.value);
