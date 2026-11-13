@@ -14,6 +14,7 @@ contract AuctionManager {
 
 type AllowedMessageToAuctionManager =
     | CreateAuctionV1
+    | CreateAuctionWithFirstBidV1
     | PlaceBidV1
     | FinishAuctionV1
     | RetryMintNoticeV1
@@ -238,6 +239,53 @@ fun onInternalMessage(in: InMessage) {
             extra.plateToAuctionId.set(plateKey, auctionId);
             storage.extra = extra.toCell();
             storage.nextItemIndex += 1;
+            storage.payoutConfigLocked = true;
+            storage.save();
+        }
+
+        CreateAuctionWithFirstBidV1 => {
+            var storage = lazy AuctionManagerStorage.load();
+            assert (message.queryId != 0) throw AuctionManagerErrors.InvalidQueryId;
+            var extra = storage.extra.load();
+            assert (extra.securityFundAddress != null) throw AuctionManagerErrors.InvalidPayoutConfiguration;
+            assert (
+                message.startingBid > 0 && message.minimumBidStep > 0
+            ) throw AuctionManagerErrors.InvalidAuctionParameters;
+            assert (
+                in.valueCoins >= message.startingBid + AUCTION_V1_MIN_BID_OVERHEAD
+            ) throw AuctionManagerErrors.InsufficientAttachedValue;
+            assert (
+                message.endTime > blockchain.now() &&
+                message.endTime <= blockchain.now() + AUCTION_V1_MAX_DURATION_SECONDS
+            ) throw AuctionManagerErrors.InvalidAuctionParameters;
+            val plateLength = message.plate.calculateLength();
+            assert (
+                plateLength > 0 && plateLength <= AUCTION_V1_MAX_PLATE_BYTES &&
+                isValidRussianPlate(message.plate)
+            ) throw AuctionManagerErrors.InvalidAuctionParameters;
+
+            val canonicalPlate = StringBuilder.create().append("RU|").append(message.plate).build();
+            val plateKey = canonicalPlate.hash();
+            val plateLookup = extra.plateToAuctionId.get(plateKey);
+            assert (!plateLookup.isFound) throw AuctionManagerErrors.AuctionAlreadyExists;
+
+            val auctionId = storage.nextItemIndex;
+            val auction: AuctionV1 = {
+                itemIndex: auctionId,
+                plate: message.plate,
+                startingBid: message.startingBid,
+                minimumBidStep: message.minimumBidStep,
+                endTime: message.endTime,
+                highestBid: message.startingBid,
+                highestBidder: in.senderAddress,
+                status: AUCTION_V1_ACTIVE,
+                mintQueryId: 0,
+            };
+            storage.auctions.set(auctionId, auction);
+            extra.plateToAuctionId.set(plateKey, auctionId);
+            storage.extra = extra.toCell();
+            storage.nextItemIndex += 1;
+            storage.lockedFunds = (storage.lockedFunds + message.startingBid) as coins;
             storage.payoutConfigLocked = true;
             storage.save();
         }
