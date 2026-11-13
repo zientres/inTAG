@@ -65,3 +65,11 @@ struct (0x5447410A) RetryMintNoticeV1 {
     queryId: uint64
     auctionId: uint64
 }
+
+struct (0x5447410D) CreateAuctionWithFirstBidV1 {
+    queryId: uint64
+    plate: string
+    startingBid: coins
+    minimumBidStep: coins
+    endTime: uint32
+}
